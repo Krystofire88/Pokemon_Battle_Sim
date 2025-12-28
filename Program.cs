@@ -186,12 +186,12 @@ public class Pokemon
         this.AccMod = 0;
         this.EvaMod = 0;
         string[] natures = {
-    "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
-    "Bold", "Docile", "Relaxed", "Impish", "Lax",
-    "Timid", "Hasty", "Serious", "Jolly", "Naive",
-    "Modest", "Mild", "Quiet", "Bashful", "Rash",
-    "Calm", "Gentle", "Sassy", "Careful", "Quirky"
-      };
+        "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+        "Bold", "Docile", "Relaxed", "Impish", "Lax",
+        "Timid", "Hasty", "Serious", "Jolly", "Naive",
+        "Modest", "Mild", "Quiet", "Bashful", "Rash",
+        "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        };
 
         string n = natures[rnd.Next(0, 25)];
         this.nature = n;
@@ -750,10 +750,6 @@ public static class Program
             19 => "Stellar",
             _ => "error"
         };
-    }
-    public static int DecodeItem(string effect, int number)
-    {
-        return 1;
     }
     public static int DecodeEffect(string effect, int number)
     {
@@ -1697,11 +1693,11 @@ public static class Program
             dmaxlvl = Convert.ToInt32(input.Substring(input.IndexOf("Dynamax Level: ") + 15, 2));
         }
         string[] natures = {
-    "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
-    "Bold", "Docile", "Relaxed", "Impish", "Lax",
-    "Timid", "Hasty", "Serious", "Jolly", "Naive",
-    "Modest", "Mild", "Quiet", "Bashful", "Rash",
-    "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+        "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+        "Bold", "Docile", "Relaxed", "Impish", "Lax",
+        "Timid", "Hasty", "Serious", "Jolly", "Naive",
+        "Modest", "Mild", "Quiet", "Bashful", "Rash",
+        "Calm", "Gentle", "Sassy", "Careful", "Quirky"
             };
 
         foreach (string ntr in natures)
@@ -1863,7 +1859,7 @@ public static class Program
             Console.WriteLine(s.name);
         }
 
-            Item LifeOrb = new Item("Life Orb", "01&01&30", false);
+        Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
         Item Galladite = new Item("Galladite", "03&07&00", true);
 
@@ -1874,7 +1870,7 @@ public static class Program
             Galladite
         };
         Pokemon GalladeM = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
-GalladeM.MegaEvolve(AllPokemon);
+        GalladeM.MegaEvolve(AllPokemon);
         Console.WriteLine(GalladeM.species.name);
         Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", LifeOrb, false, 1, 7);
         Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 0, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
@@ -2097,7 +2093,7 @@ GalladeM.MegaEvolve(AllPokemon);
                 };
                 foreach (Species s in AllPokemon.Take(9))
                 {
-                g++;
+                    g++;
                     if ((!invalidMon.Contains(g)) && g < 1058)
                     {
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
@@ -2184,6 +2180,5 @@ GalladeM.MegaEvolve(AllPokemon);
                 Console.WriteLine("no pokemon found :O");
             }
         }
-       
     }
 }

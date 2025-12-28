@@ -5,6 +5,8 @@ using Pkmn2;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Security.Cryptography.X509Certificates;
+using System.Reflection.Metadata;
 
 namespace Pkmn2;
 public class Trainer
@@ -33,6 +35,13 @@ public class Trainer
             numPoke--;
         }
     }
+    public void HealTeam()
+    {
+        foreach (Pokemon p in team)
+        {
+            p.Heal();
+        }
+    }
     public bool CanSwitch()
     {
         int i = 0;
@@ -50,6 +59,59 @@ public class Trainer
             }
         }
         return can;
+    }
+    public Pokemon ShouldSwitch(Pokemon active, Pokemon opp, int ai)
+    {
+        int switchTo = 0;
+        if(0.25 >= active.hp / active.maxHP)
+        {
+           return active;
+        }
+        double highestScore = 0;
+        for (int i = 0; i < team.Count(); i++)
+        {
+            if (team[i].hp > 0 && team[i] != active)
+            {
+                double typing = Program.MatchUp(team[i].species.type1, opp.species.type1) * Program.MatchUp(team[i].species.type2, opp.species.type1) * Program.MatchUp(team[i].species.type1, opp.species.type2) * Program.MatchUp(team[i].species.type2, opp.species.type2);
+
+                if (ai != 4)
+                {
+                    if (highestScore < Program.FindBestMove(team[i], opp) * typing)
+                    { 
+                    highestScore = Program.FindBestMove(team[i], opp) * typing;
+                        switchTo = i;
+                    }
+
+                }
+                else
+                {
+                    if (highestScore < typing)
+                    {
+                        highestScore = typing;
+                        switchTo = i;
+                    }
+                }
+            }
+        }
+        double currentPossible = Program.FindBestMove(active, opp) * Program.MatchUp(active.species.type1, opp.species.type1) * Program.MatchUp(active.species.type2, opp.species.type1) * Program.MatchUp(active.species.type1, opp.species.type2) * Program.MatchUp(active.species.type2, opp.species.type2);
+        if (highestScore < currentPossible * 2)
+        {
+            return active;
+        }
+        return team[switchTo];
+    }
+    public bool AbleToBattle()
+    {
+        bool able = false;
+        foreach (Pokemon p in team)
+        {
+            if (p.hp > 0)
+            {
+                able = true;
+                break;
+            }
+        }
+        return able;
     }
 }
 public class Species
@@ -96,7 +158,7 @@ public class Pokemon
     public string name { get; set; }
     bool gender;
     public int level { get; }
-    int maxHP;
+    public int maxHP { get; private set; }
     public int hp;
     int ability;
     public int status { get; set; }
@@ -104,14 +166,16 @@ public class Pokemon
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
     string nature;
     Item heldItem;
-    bool gmax;
-    int dmaxLevel;
-    int tera;
-    int gMAxtimer = 0;
+    public bool gmax { get; }
+    int dMaxLevel;
+    public bool isDmax { get; set; } = false;
+    public int tera { get; }
+    public bool terastallized { get; set; } = false;
+    int dMaxTimer = 0;
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
-    public Pokemon(Species species, string name, bool gender, int level, int ability, int status, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dmaxLevel, int tera)
+    public Pokemon(Species species, string name, bool gender, int level, int ability, int status, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
     {
         this.species = species;
         this.name = name;
@@ -141,7 +205,7 @@ public class Pokemon
         this.nature = nature;
         this.heldItem = heldItem;
         this.gmax = gmax;
-        this.dmaxLevel = dmaxLevel;
+        this.dMaxLevel = dMaxLevel;
         this.tera = tera;
         this.maxHP = CalcHp();
         this.hp = maxHP;
@@ -186,12 +250,12 @@ public class Pokemon
         this.AccMod = 0;
         this.EvaMod = 0;
         string[] natures = {
-        "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
-        "Bold", "Docile", "Relaxed", "Impish", "Lax",
-        "Timid", "Hasty", "Serious", "Jolly", "Naive",
-        "Modest", "Mild", "Quiet", "Bashful", "Rash",
-        "Calm", "Gentle", "Sassy", "Careful", "Quirky"
-        };
+    "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+    "Bold", "Docile", "Relaxed", "Impish", "Lax",
+    "Timid", "Hasty", "Serious", "Jolly", "Naive",
+    "Modest", "Mild", "Quiet", "Bashful", "Rash",
+    "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+      };
 
         string n = natures[rnd.Next(0, 25)];
         this.nature = n;
@@ -202,7 +266,7 @@ public class Pokemon
             gMax = true;
         }
         this.gmax = gMax;
-        this.dmaxLevel = 10;
+        this.dMaxLevel = 10;
         int typ = species.type1;
         if (species.type2 != 0)
         {
@@ -263,6 +327,13 @@ public class Pokemon
         hp = maxHP;
         status = 0;
         ClearMods();
+        foreach (Move m in moveSet)
+        {
+            if (m != null)
+            {
+                m.PP = m.moveB.maxPP;
+            }
+        }
     }
     public void PokeInfo()
     {
@@ -507,6 +578,43 @@ public class Pokemon
         int hp = Convert.ToInt32(Math.Floor(((2 * species.Hp + HpIV + Math.Floor((double)HpEV / 4)) * level) / 100) + level + 10);
         return hp;
     }
+    public Move PickMove(Pokemon opp, int ai)
+    {
+        Random rnd = new Random();
+        int move = 0;
+        if (ai == 1)
+        {
+            move = rnd.Next(0, moveNum);
+        }
+        else if (ai == 4)
+        {
+            double highestScore = 0;
+            for (int i = 0; i < moveNum; i++)
+            {
+                double typing = Program.MatchUp(moveSet[i].moveB.type, opp.species.type1) * Program.MatchUp(moveSet[i].moveB.type, opp.species.type2);
+                
+                if (highestScore < typing * Program.FindBestMove(this, opp))
+                {
+                    highestScore = typing * Program.FindBestMove(this, opp);
+                    move = i;
+                }
+            }
+        }
+        else
+        {
+            double highestScore = 0;
+            for (int i = 0; i < moveNum; i++)
+            {
+                double typing = Program.MatchUp(moveSet[i].moveB.type, opp.species.type1) * Program.MatchUp(moveSet[i].moveB.type, opp.species.type2);
+                if (highestScore < typing)
+                {
+                    highestScore = typing;
+                    move = i;
+                }
+            }
+        }
+            return moveSet[move];
+    }
     public bool CheckStone()
     {
         if (heldItem == null || species == null) return false;
@@ -649,6 +757,23 @@ public class Pokemon
             return null;
         }
 
+    }
+    public void Dmax()
+    {
+        string json = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+        if (isDmax == false)
+        {
+            dMaxTimer = 3;
+            double dmaxHpCoef = 1.50 + dMaxLevel * 0.05;
+            isDmax = true;
+            maxHP = (int)Math.Ceiling(maxHP * dmaxHpCoef);
+            hp = (int)Math.Ceiling(hp * dmaxHpCoef);
+        }
+    }
+    public void Terastallize()
+    {
+        terastallized = true;
     }
 }
 public class MoveB
@@ -897,6 +1022,15 @@ public static class Program
 
         return eff;
     }
+    public static int FindBestMove(Pokemon atk, Pokemon opp)
+    {
+        int HighestEffect = 0;
+        foreach (Move move in atk.moveSet)
+        {
+            Damage(atk, opp, move, DecodeEffect(move.moveB.effect, 2), atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23);
+        }
+        return HighestEffect;
+    }
     public static bool CheckAcc(Move move, Pokemon pokemonA, Pokemon pokemonD)
     {
         if (move.moveB.acc == 101) return true;
@@ -1014,23 +1148,40 @@ public static class Program
     }
     public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, double status, int rcrit)
     {
+        int pkAtype1 = pokemonA.species.type1;
+        int pkAtype2 = pokemonA.species.type2;
+        int pkDtype1 = pokemonD.species.type1;
+        int pkDtype2 = pokemonD.species.type2;
+
+        if (pokemonA.terastallized)
+        {
+            pkAtype1 = pokemonA.tera;
+            pkAtype2 = 0;
+        }
+        if (pokemonD.terastallized)
+        {
+            pkDtype1 = pokemonD.tera;
+            pkDtype2 = 0;
+        }
+
         double stab = 1;
-        if (pokemonA.species.type1 == move.moveB.type || pokemonA.species.type2 == move.moveB.type)
+        if (pkAtype1 == move.moveB.type || pkAtype2 == move.moveB.type)
         {
             stab = 1.5;
         }
 
-        double eff1 = MatchUp(move.moveB.type, pokemonD.species.type1);
-        double eff2 = MatchUp(move.moveB.type, pokemonD.species.type2);
+        double eff1 = MatchUp(move.moveB.type, pkDtype1);
+        double eff2 = MatchUp(move.moveB.type, pkDtype2);
 
         Random rnd = new Random();
         double crit = 1;
         if (rcrit != 23) rcrit = 7;
-        if (rnd.Next(0, 23) == 0)
+        if (rnd.Next(0, rcrit) == 0)
         {
-            crit = 1.5;
+           crit = 1.5;
            Console.Write("Critical hit!");
         }
+
         double item = 1.00;
         double ran = rnd.Next(85, 101) / 100.0;
 
@@ -1254,95 +1405,236 @@ public static class Program
         }
         else return 0;
     }
-    public static void Battle(Trainer team1, Trainer team2, bool trainer, int ai)
+    public static void PokeBattle(Pokemon pokemon1, Pokemon pokemon2, int ai)
+    {
+        Pokemon currentPokemon1 = pokemon1;
+        Pokemon currentPokemon2 = pokemon2;
+        Random rnd = new Random();
+        while (currentPokemon1.hp > 0 && currentPokemon2.hp > 0)
+        {
+            Move move1 = null;
+            Move move2 = null;
+
+            move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+            move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+
+            int priority1 = 0;
+            int priority2 = 0;
+            if (move1 != null) priority1 = TurnFirst(move1);
+            if (move2 != null) priority2 = TurnFirst(move2);
+            double spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
+            double spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
+            if (priority1 > priority2 && move1 != null)
+            {
+                ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                if (move2 != null && currentPokemon2.hp > 0)
+                {
+                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                }
+            }
+            else if (priority1 < priority2 && move2 != null)
+            {
+                ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                if (move1 != null && currentPokemon1.hp > 0)
+                {
+                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                }
+            }
+            else
+            {
+                if (spe1 > spe2 && move1 != null)
+                {
+                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    if (move2 != null && currentPokemon2.hp > 0)
+                    {
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    }
+                }
+                else if (spe1 < spe2 && move2 != null)
+                {
+                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    if (move1 != null && currentPokemon1.hp > 0)
+                    {
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    }
+                }
+                else
+                {
+                    int tie = rnd.Next(0, 2);
+                    if (tie == 0 && move1 != null)
+                    {
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        if (move2 != null && currentPokemon2.hp > 0)
+                        {
+                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        }
+                    }
+                    else if (tie == 1 && move2 != null)
+                    {
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        if (move1 != null && currentPokemon1.hp > 0)
+                        {
+                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        }
+                    }
+                }
+            }
+        }
+        if (currentPokemon1.hp > 0)
+        {
+            Console.WriteLine($"{currentPokemon1.name} wins the battle!");
+            currentPokemon1.wins++;
+        }
+        else
+        {
+            Console.WriteLine($"{currentPokemon2.name} wins the battle!");
+            currentPokemon2.wins++;
+        }
+        currentPokemon1.Heal();
+        currentPokemon2.Heal();
+    }
+    public static void TrainerBattle(Trainer team1, Trainer team2, int ai)
     {
         Pokemon currentPokemon1 = team1.team[0];
-        Pokemon currentPokemon2 = team2.team[0];
+        Pokemon currentPokemon2 = team2.team[0];  
         Random rnd = new Random();
-        if (trainer && (team1.CanSwitch() || team2.CanSwitch()) && !(ai == 1))
+        while (team1.AbleToBattle() && team2.AbleToBattle())
         {
-            
+            Move move1 = null;
+            Move move2 = null;
+            if (currentPokemon1.hp <= 0) currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
+            else if ((team1.CanSwitch() && !(ai == 1)))
+            {
+                currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
+            }
+            else
+            {
+                PreTurnTrainerCheck(currentPokemon1, team1, ai);
+                move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+            }
+            if (currentPokemon2.hp <= 0) currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
+            else if ((team2.CanSwitch() && !(ai == 1)))
+            {
+                currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
+            }
+            else
+            {
+                PreTurnTrainerCheck(currentPokemon2, team2, ai);
+                move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+            }
+            int priority1 = 0;
+            int priority2 = 0;
+            if (move1 != null) priority1 = TurnFirst(move1);
+            if (move2 != null) priority2 = TurnFirst(move2);
+            double spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
+            double spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
+            if (priority1 > priority2 && move1 != null)
+            {
+                ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                if (move2 != null && currentPokemon2.hp > 0)
+                { 
+                ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                }
+            }
+            else if (priority1 < priority2 && move2 != null)
+            {
+                ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                if (move1 != null && currentPokemon1.hp > 0)
+                {
+                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                }
+            }
+            else
+            {
+                if (spe1 > spe2 && move1 != null)
+                {
+                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    if (move2 != null && currentPokemon2.hp > 0)
+                    {
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    }
+                }
+                else if (spe1 < spe2 && move2 != null)
+                {
+                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    if (move1 != null && currentPokemon1.hp > 0)
+                    {
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    }
+                }
+                else
+                {
+                    int tie = rnd.Next(0, 2);
+                    if (tie == 0 && move1 != null)
+                    {
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        if (move2 != null && currentPokemon2.hp > 0)
+                        {
+                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        }
+                    }
+                    else if (tie == 1 && move2 != null)
+                    {
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        if (move1 != null && currentPokemon1.hp > 0)
+                        {
+                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        }
+                    }
+                }
+            }
         }
-        if (trainer && ((currentPokemon1.species.mega && currentPokemon1.CheckStone()) || (currentPokemon2.species.mega && currentPokemon2.CheckStone())))
-        { 
+        if (team1.AbleToBattle())
+        {
+            Console.WriteLine($"{team1.name} wins the battle!");
+            team1.wins++;
         }
-        //Pokemon pokemonF = null;
-        //Pokemon pokemonS = null;
-        //int priority1;
-        //int priority2;
-        //while (true)
-        //{
-        //    int movepk1 = rnd.Next(0, pokemon1.moveNum);
-        //    int movepk2 = rnd.Next(0, pokemon2.moveNum);
-        //    priority1 = TurnFirst(pokemon1.moveSet[movepk1]);
-        //    priority2 = TurnFirst(pokemon2.moveSet[movepk2]);
-        //    if (priority1 > priority2)
-        //    {
-        //        pokemonF = pokemon1;
-        //        pokemonS = pokemon2;
-        //    }
-        //    else if (priority1 < priority2)
-        //    {
-        //        pokemonF = pokemon2;
-        //        pokemonS = pokemon1;
-        //        (movepk1, movepk2) = (movepk2, movepk1);
-        //    }
-        //    else
-        //    {
-        //        if (pokemon1.CalcSpeStat() * pokemon1.GetMod(pokemon1.SpeMod) > pokemon2.CalcSpeStat() * pokemon2.GetMod(pokemon2.SpeMod))
-        //        {
-        //            pokemonF = pokemon1;
-        //            pokemonS = pokemon2;
-        //        }
-        //        else if (pokemon1.CalcSpeStat() * pokemon1.GetMod(pokemon1.SpeMod) == pokemon2.CalcSpeStat() * pokemon2.GetMod(pokemon2.SpeMod))
-        //        {
-        //            if (rnd.Next(0, 2) == 0)
-        //            {
-        //                pokemonF = pokemon1;
-        //                pokemonS = pokemon2;
-        //            }
-        //            else
-        //            {
-        //                pokemonF = pokemon2;
-        //                pokemonS = pokemon1;
-        //                (movepk1, movepk2) = (movepk2, movepk1);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            pokemonF = pokemon2;
-        //            pokemonS = pokemon1;
-        //            (movepk1, movepk2) = (movepk2, movepk1);
-        //        }
-        //    }
-        //   Console.WriteLine($"{pokemonF.name} used {pokemonF.moveSet[movepk1].moveB.name}");
-        //    Move(pokemonF, pokemonS, pokemonF.moveSet[movepk1]);
-        //   Console.WriteLine(pokemonS.hp);
-
-        //    if (pokemonS.hp <= 0)
-        //    {
-        //       Console.WriteLine($"{pokemonS.name} fainted");
-        //        pokemon2.wins++;
-        //        break;
-        //    }
-
-        //   Console.WriteLine($"{pokemonS.name} used {pokemonS.moveSet[movepk2].moveB.name}");
-        //    Move(pokemonS, pokemonF, pokemonS.moveSet[movepk2]);
-        //    Console.WriteLine(pokemonF.hp);
-
-        //    if (pokemonF.hp <= 0 && pokemon2.hp > 0)
-        //    {
-        //        Console.WriteLine($"{pokemonF.name} fainted");
-        //        pokemon1.wins++;
-        //        break;
-        //    }
-        //}
-        //heal = true;
-        //if (heal == true)
-        //{
-        //    pokemon1.Heal();
-        //    pokemon2.Heal();
-        //}
+        else
+        {
+            Console.WriteLine($"{team2.name} wins the battle!");
+            team2.wins++;
+        }
+        team1.HealTeam();
+        team2.HealTeam();
+    }
+    public static void ExecuteMove(Pokemon atk, Pokemon def, Move move)
+    {
+        Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
+        Move(atk, def, move);
+        Console.WriteLine(def.hp);
+        if (def.hp <= 0)
+        {
+            Console.WriteLine($"{def.name} fainted");
+        }
+    }
+    public static void PreTurnTrainerCheck(Pokemon pk, Trainer tr, int ai)
+    {
+        Random rnd = new Random();
+        string json = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+        if ((pk.species.mega && pk.CheckStone() && pk == tr.team[5]))
+        {
+            pk.MegaEvolve(AllPokemon);
+        }
+        if (pk == tr.team[5])
+        {
+            if (pk.gmax && pk.species.gmax)
+            {
+                pk.Dmax();
+            }
+            else if (!pk.gmax && pk.species.gmax)
+            {
+                int check = rnd.Next(0, 100);
+                if (check < 50)
+                {
+                    pk.Dmax();
+                }
+                else
+                {
+                    pk.Terastallize();
+                }
+            }
+        }
     }
     public static void RunAllPokemonBattles(List<Pokemon> pokemons, int battlesPerPair, int ai)
     {
@@ -1356,11 +1648,7 @@ public static class Program
                 {
                     Console.WriteLine($"Battle {k + 1} between {pokemons[i].name} and {pokemons[j].name}");
                     Console.WriteLine($"{prcnt}");
-                    Trainer attacker = new Trainer("Attacker");
-                    attacker.AddPokemon(pokemons[i]);
-                    Trainer foe = new Trainer("Foe");
-                    foe.AddPokemon(pokemons[j]);
-                    Battle(attacker, foe, false, ai);
+                    PokeBattle(pokemons[i], pokemons[j], ai);
                     Console.Clear(); 
                 }
             }
@@ -1376,7 +1664,7 @@ public static class Program
                 {
                     Console.WriteLine($"Trainer {trainers[i].name} vs Trainer {trainers[j].name} ({k + 1})");
 
-                    Battle(trainers[i], trainers[j], true, ai);
+                    TrainerBattle(trainers[i], trainers[j], ai);
                 }
             }
         }
@@ -1693,11 +1981,11 @@ public static class Program
             dmaxlvl = Convert.ToInt32(input.Substring(input.IndexOf("Dynamax Level: ") + 15, 2));
         }
         string[] natures = {
-        "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
-        "Bold", "Docile", "Relaxed", "Impish", "Lax",
-        "Timid", "Hasty", "Serious", "Jolly", "Naive",
-        "Modest", "Mild", "Quiet", "Bashful", "Rash",
-        "Calm", "Gentle", "Sassy", "Careful", "Quirky"
+    "Hardy", "Lonely", "Brave", "Adamant", "Naughty",
+    "Bold", "Docile", "Relaxed", "Impish", "Lax",
+    "Timid", "Hasty", "Serious", "Jolly", "Naive",
+    "Modest", "Mild", "Quiet", "Bashful", "Rash",
+    "Calm", "Gentle", "Sassy", "Careful", "Quirky"
             };
 
         foreach (string ntr in natures)
@@ -1844,20 +2132,10 @@ public static class Program
     public static void Main()
     {
         Random rnd = new Random();
-        Pokemon pokemon1 = null;
-        Pokemon pokemon2 = null;
-
 
         string json = File.ReadAllText("AllPokemon.json");
         List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
 
-    
-
-
-        foreach (Species s in AllPokemon.Skip(AllPokemon.Count - 75))
-        {
-            Console.WriteLine(s.name);
-        }
 
         Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
@@ -1869,12 +2147,10 @@ public static class Program
             ExpertBelt,
             Galladite
         };
-        Pokemon GalladeM = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
-        GalladeM.MegaEvolve(AllPokemon);
-        Console.WriteLine(GalladeM.species.name);
+
         Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", LifeOrb, false, 1, 7);
         Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 0, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
-        Pokemon pecharunt = new Pokemon(AllPokemon[1025], "Pecharunt", true, 69, 1, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", LifeOrb, false, 1, 7);
+
 
         MoveB sacredSword = new MoveB("Sacred Sword", 7, 1, 101, 15, "01&90");
         MoveB swordsDance = new MoveB("Swords Dance", 1, 3, 101, 40, "01&21");
@@ -2093,7 +2369,7 @@ public static class Program
                 };
                 foreach (Species s in AllPokemon.Take(9))
                 {
-                    g++;
+                g++;
                     if ((!invalidMon.Contains(g)) && g < 1058)
                     {
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
@@ -2180,5 +2456,6 @@ public static class Program
                 Console.WriteLine("no pokemon found :O");
             }
         }
+    
     }
 }

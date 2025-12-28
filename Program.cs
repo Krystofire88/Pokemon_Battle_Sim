@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
+using System.Net;
 
 namespace Pkmn2;
 public class Trainer
@@ -63,7 +64,7 @@ public class Trainer
     public Pokemon ShouldSwitch(Pokemon active, Pokemon opp, int ai)
     {
         int switchTo = 0;
-        if(0.25 >= active.hp / active.maxHP)
+        if(0.25 >= (double)(active.hp / active.maxHP))
         {
            return active;
         }
@@ -171,7 +172,7 @@ public class Pokemon
     public bool isDmax { get; set; } = false;
     public int tera { get; }
     public bool terastallized { get; set; } = false;
-    int dMaxTimer = 0;
+    public int dMaxTimer { get; set; } = 0;
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
@@ -334,6 +335,9 @@ public class Pokemon
                 m.PP = m.moveB.maxPP;
             }
         }
+        UnMegaEvolve();
+        UnDmax();
+        UnTerastallize();
     }
     public void PokeInfo()
     {
@@ -643,15 +647,16 @@ public class Pokemon
 
         return false;
     }
-    public void MegaEvo(bool meg, List<Species> AllPokemon)
+    public void MegaEvo()
     {
-        if (meg == true)
-        {
+        string json = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+
             if (species.mega == true)
             {
                 if (CheckStone())
                 {
-                    MegaEvolve(AllPokemon);
+                    MegaEvolve();
                 }
                 else
                 {
@@ -664,13 +669,12 @@ public class Pokemon
                 Console.WriteLine("Mega Evolution failed: This species cannot Mega Evolve.");
                 return;
             }
-        }
-
     }
-    public void MegaEvolve(List<Species> AllPokemon)
+    public void MegaEvolve()
     {
-        
-        foreach(Species s in AllPokemon.Skip(AllPokemon.Count - 75)) 
+        string json = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+        foreach (Species s in AllPokemon.Skip(AllPokemon.Count - 75)) 
         {
             if (species.name == s.name.Replace("-Mega", ""))
             {
@@ -678,6 +682,19 @@ public class Pokemon
                 break;
             }
 
+        }
+    }
+    public void UnMegaEvolve()
+    {
+        string json = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+        foreach (Species s in AllPokemon)
+        { 
+            if(species.name.Replace("-Mega", "") == s.name)
+            {
+                species = s;
+                break;
+            }
         }
     }
     public string FetchZmoveName(int typeId)
@@ -720,42 +737,8 @@ public class Pokemon
 
         return 0;
     }
-    public Move ZMove(bool use, int slot)
+    public void ZMove(int slot)
     {
-        if (use == true)
-        {
-            if (heldItem != null && heldItem.name.EndsWith("ium Z"))
-            {
-                if (moveNum > 0)
-                {
-                    Move zmove = moveSet[slot];
-                    string ef = "01&";
-                    ef = ef + Convert.ToString(ConvertToZMovePower(Program.DecodeEffect(zmove.moveB.effect, 1)));
-
-                    MoveB Zmove = new MoveB(FetchZmoveName(zmove.moveB.type), zmove.moveB.type, zmove.moveB.split, 101, zmove.PP, ef);
-                    Move Zmv = new Move(Zmove);
-
-
-                    Console.WriteLine($"{name} used {zmove.moveB.name} as a Z-Move!");
-                    return Zmv;
-
-                }
-                else
-                {
-                    Console.WriteLine($"{name} has no moves to use as a Z-Move.");
-                    return null;
-                }
-            }
-            else
-            {
-                Console.WriteLine($"{name} cannot use a Z-Move without a valid Z-Crystal.");
-                return null;
-            }
-        }
-        else
-        {
-            return null;
-        }
 
     }
     public void Dmax()
@@ -771,9 +754,21 @@ public class Pokemon
             hp = (int)Math.Ceiling(hp * dmaxHpCoef);
         }
     }
+    public void UnDmax()
+    {
+        dMaxTimer = 0;
+        double dmaxHpCoef = 1.50 + dMaxLevel * 0.05;
+        isDmax = false;
+        maxHP = (int)Math.Floor(maxHP / dmaxHpCoef);
+        hp = (int)Math.Floor(hp / dmaxHpCoef);
+    }
     public void Terastallize()
     {
         terastallized = true;
+    }
+    public void UnTerastallize()
+    {
+        terastallized = false;
     }
 }
 public class MoveB
@@ -802,11 +797,6 @@ public class Move
     {
         this.moveB = moveB;
         this.PP = moveB.maxPP;
-    }
-    public Move(MoveB moveB, int PP)
-    {
-        this.moveB = moveB;
-        this.PP = PP;
     }
 }
 public class Item
@@ -847,33 +837,6 @@ public static class Program
             "steel" => 17,
             "fairy" => 18,
             _ => -1
-        };
-    }
-    public static string GetType(int type)
-    {
-        return type switch
-        {
-            0 => "",
-            1 => "Normal",
-            2 => "Fire",
-            3 => "Water",
-            4 => "Electric",
-            5 => "Grass",
-            6 => "Ice",
-            7 => "Fighting",
-            8 => "Poison",
-            9 => "Ground",
-            10 => "Flying",
-            11 => "Psychic",
-            12 => "Bug",
-            13 => "Rock",
-            14 => "Ghost",
-            15 => "Dragon",
-            16 => "Dark",
-            17 => "Steel",
-            18 => "Fairy",
-            19 => "Stellar",
-            _ => "error"
         };
     }
     public static int DecodeEffect(string effect, int number)
@@ -1025,9 +988,12 @@ public static class Program
     public static int FindBestMove(Pokemon atk, Pokemon opp)
     {
         int HighestEffect = 0;
-        foreach (Move move in atk.moveSet)
+        for (int i = 0; i < atk.moveNum; i++)
         {
-            Damage(atk, opp, move, DecodeEffect(move.moveB.effect, 2), atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23);
+            if (HighestEffect < Damage(atk, opp, atk.moveSet[i], DecodeEffect(atk.moveSet[i].moveB.effect, 2), atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23))
+            { 
+            HighestEffect = Damage(atk, opp, atk.moveSet[i], DecodeEffect(atk.moveSet[i].moveB.effect, 2), atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23);
+            }
         }
         return HighestEffect;
     }
@@ -1055,7 +1021,6 @@ public static class Program
                 if (DecodeEffect(move.moveB.effect, 1) == 1) pokemon = pokemonA;
                 else if (DecodeEffect(move.moveB.effect, 1) == 2) pokemon = pokemonD;
                 InflictStatus(pokemon, move);
-                pokemon.Modifiers();
             }
             else
             {
@@ -1084,19 +1049,44 @@ public static class Program
                             status = true;
                             if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
                             else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-
-
                         }
                         power = DecodeEffect(move.moveB.effect, 2);
                         break;
                     case 02:
-                        if (pokemonA.status == 1) burn = 0.50;
-                        atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+                        if (move.moveB.split == 1)
+                        {
+                            if (pokemonA.status == 1) burn = 0.50;
+                            atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+                        }
+                        else
+                        {
+                            atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));                     
+                        }
+                        if (DecodeEffect(move.moveB.effect, 3) != 0)
+                        {
+                            status = true;
+                            if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+                            else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+                        }
                         def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
                         power = DecodeEffect(move.moveB.effect, 2);
                         break;
                     case 03:
-                        atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+                        if (move.moveB.split == 1)
+                        {
+                            if (pokemonA.status == 1) burn = 0.50;
+                            atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+                        }
+                        else
+                        {
+                            atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+                        }
+                        if (DecodeEffect(move.moveB.effect, 3) != 0)
+                        {
+                            status = true;
+                            if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+                            else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+                        }
                         def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
                         power = DecodeEffect(move.moveB.effect, 2);
                         break;
@@ -1112,10 +1102,16 @@ public static class Program
                             atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
                             def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
                         }
+                        if (DecodeEffect(move.moveB.effect, 3) != 0)
+                        {
+                            status = true;
+                            if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+                            else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+                        }
                         power = DecodeEffect(move.moveB.effect, 2);
                         rcrit = 7;
                         break;
-                    case 41:
+                    case 05:
                         if (move.moveB.split == 1)
                         {
                             if (pokemonA.status == 1) burn = 0.50;
@@ -1165,9 +1161,15 @@ public static class Program
         }
 
         double stab = 1;
+
         if (pkAtype1 == move.moveB.type || pkAtype2 == move.moveB.type)
         {
             stab = 1.5;
+
+            if(pokemonA.terastallized && (pokemonA.tera == pokemonA.species.type1 || pokemonA.tera == pokemonA.species.type2))
+            {
+                stab = 2.0;
+            }
         }
 
         double eff1 = MatchUp(move.moveB.type, pkDtype1);
@@ -1179,7 +1181,7 @@ public static class Program
         if (rnd.Next(0, rcrit) == 0)
         {
            crit = 1.5;
-           Console.Write("Critical hit!");
+        // Console.Write("Critical hit!");
         }
 
         double item = 1.00;
@@ -1188,11 +1190,11 @@ public static class Program
         int dmg = Convert.ToInt32(Math.Round(((((((((2 * pokemonA.level) / 5) + 2) * power * ((double)atk / def)) / 50) * crit) + 2) * stab * eff1 * eff2 * ran * status * item), 0));// too complicated check https:bulbapedia.bulbagarden.net / wiki / Damage
         if (pokemonD.hp < dmg)
         {
-           Console.WriteLine($" It did {pokemonD.hp} damage!");
+        //   Console.WriteLine($" It did {pokemonD.hp} damage!");
         }
         else
         {
-           Console.WriteLine($" It did {dmg} damage!");
+        //   Console.WriteLine($" It did {dmg} damage!");
         }
 
         return dmg;
@@ -1309,7 +1311,7 @@ public static class Program
                         {
                             pk.AtkMod += 2 * abs;
                             if (pk.AtkMod > 6) pk.AtkMod = 6;
-                            else if (pk.AtkMod < -6) pk.AtkMod = 6;
+                            else if (pk.AtkMod < -6) pk.AtkMod = -6;
                         }
                         else
                         {
@@ -1321,7 +1323,7 @@ public static class Program
                         {
                             pk.DefMod += 2 * abs;
                             if (pk.DefMod > 6) pk.DefMod = 6;
-                            else if (pk.DefMod < -6) pk.DefMod = 6;
+                            else if (pk.DefMod < -6) pk.DefMod = -6;
                         }
                         else
                         {
@@ -1333,7 +1335,7 @@ public static class Program
                         {
                             pk.SpaMod += 2 * abs;
                             if (pk.SpaMod > 6) pk.SpaMod = 6;
-                            else if (pk.SpaMod < -6) pk.SpaMod = 6;
+                            else if (pk.SpaMod < -6) pk.SpaMod = -6;
                         }
                         else
                         {
@@ -1345,7 +1347,7 @@ public static class Program
                         {
                             pk.SpdMod += 2 * abs;
                             if (pk.SpdMod > 6) pk.SpdMod = 6;
-                            else if (pk.SpdMod < -6) pk.SpdMod = 6;
+                            else if (pk.SpdMod < -6) pk.SpdMod = -6;
                         }
                         else
                         {
@@ -1357,7 +1359,7 @@ public static class Program
                         {
                             pk.AccMod += 2 * abs;
                             if (pk.AccMod > 6) pk.AccMod = 6;
-                            else if (pk.AccMod < -6) pk.AccMod = 6;
+                            else if (pk.AccMod < -6) pk.AccMod = -6;
                         }
                         else
                         {
@@ -1369,7 +1371,7 @@ public static class Program
                         {
                             pk.EvaMod += 2 * abs;
                             if (pk.EvaMod > 6) pk.EvaMod = 6;
-                            else if (pk.EvaMod < -6) pk.EvaMod = 6;
+                            else if (pk.EvaMod < -6) pk.EvaMod = -6;
                         }
                         else
                         {
@@ -1381,7 +1383,7 @@ public static class Program
                         {
                             pk.SpeMod += 2 * abs;
                             if (pk.SpeMod > 6) pk.SpeMod = 6;
-                            else if (pk.SpeMod < -6) pk.SpeMod = 6;
+                            else if (pk.SpeMod < -6) pk.SpeMod = -6;
                         }
                         else
                         {
@@ -1410,6 +1412,8 @@ public static class Program
         Pokemon currentPokemon1 = pokemon1;
         Pokemon currentPokemon2 = pokemon2;
         Random rnd = new Random();
+        currentPokemon1.dMaxTimer = 0;
+        currentPokemon2.dMaxTimer = 0;
         while (currentPokemon1.hp > 0 && currentPokemon2.hp > 0)
         {
             Move move1 = null;
@@ -1479,6 +1483,7 @@ public static class Program
                     }
                 }
             }
+
         }
         if (currentPokemon1.hp > 0)
         {
@@ -1498,6 +1503,8 @@ public static class Program
         Pokemon currentPokemon1 = team1.team[0];
         Pokemon currentPokemon2 = team2.team[0];  
         Random rnd = new Random();
+        bool gimmick1 = false;
+        bool gimmick2 = false;
         while (team1.AbleToBattle() && team2.AbleToBattle())
         {
             Move move1 = null;
@@ -1509,7 +1516,14 @@ public static class Program
             }
             else
             {
-                PreTurnTrainerCheck(currentPokemon1, team1, ai);
+                if (gimmick1 == false)
+                {
+                    PreTurnTrainerCheck(currentPokemon1, team1, ai);
+                    if (currentPokemon1.terastallized || currentPokemon1.isDmax || currentPokemon1.species.name.Contains("-Mega"))
+                    {
+                        gimmick1 = true;
+                    }
+                }
                 move1 = currentPokemon1.PickMove(currentPokemon2, ai);
             }
             if (currentPokemon2.hp <= 0) currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
@@ -1519,7 +1533,14 @@ public static class Program
             }
             else
             {
-                PreTurnTrainerCheck(currentPokemon2, team2, ai);
+                if (gimmick2 == false)
+                { 
+                    PreTurnTrainerCheck(currentPokemon2, team2, ai);
+                    if (currentPokemon2.terastallized || currentPokemon2.isDmax || currentPokemon2.species.name.Contains("-Mega"))
+                    {
+                        gimmick2 = true;
+                    }
+                }
                 move2 = currentPokemon2.PickMove(currentPokemon1, ai);
             }
             int priority1 = 0;
@@ -1583,6 +1604,18 @@ public static class Program
                     }
                 }
             }
+
+            currentPokemon1.dMaxTimer--;
+            currentPokemon2.dMaxTimer--;
+
+            if (currentPokemon1.dMaxTimer == 0)
+            {
+                currentPokemon1.UnDmax();
+            }
+            if (currentPokemon1.dMaxTimer == 0)
+            {
+                currentPokemon2.UnDmax();
+            }
         }
         if (team1.AbleToBattle())
         {
@@ -1599,12 +1632,16 @@ public static class Program
     }
     public static void ExecuteMove(Pokemon atk, Pokemon def, Move move)
     {
-        Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
+   //     Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
         Move(atk, def, move);
-        Console.WriteLine(def.hp);
+    //    Console.WriteLine(def.hp);
         if (def.hp <= 0)
         {
-            Console.WriteLine($"{def.name} fainted");
+            //       Console.WriteLine($"{def.name} fainted");
+            def.UnDmax();
+            def.UnMegaEvolve();
+            def.UnTerastallize();
+            def.dMaxTimer = 0;
         }
     }
     public static void PreTurnTrainerCheck(Pokemon pk, Trainer tr, int ai)
@@ -1614,7 +1651,7 @@ public static class Program
         List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
         if ((pk.species.mega && pk.CheckStone() && pk == tr.team[5]))
         {
-            pk.MegaEvolve(AllPokemon);
+            pk.MegaEvolve();
         }
         if (pk == tr.team[5])
         {
@@ -2135,8 +2172,16 @@ public static class Program
 
         string json = File.ReadAllText("AllPokemon.json");
         List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
-
-
+        int h = -1;
+        foreach(Species sp in AllPokemon)
+        {
+            if (sp.name == "Venosaur-Mega")
+            {
+                break;
+            }
+            h++;
+        }
+        Console.WriteLine(h);
         Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
         Item Galladite = new Item("Galladite", "03&07&00", true);
@@ -2148,9 +2193,12 @@ public static class Program
             Galladite
         };
 
-        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", LifeOrb, false, 1, 7);
+        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
         Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 0, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
-
+        Gallade.MegaEvo();
+        Console.WriteLine(Gallade.species.name);
+        Gallade.UnMegaEvolve();
+        Console.WriteLine(Gallade.species.name);
 
         MoveB sacredSword = new MoveB("Sacred Sword", 7, 1, 101, 15, "01&90");
         MoveB swordsDance = new MoveB("Swords Dance", 1, 3, 101, 40, "01&21");
@@ -2309,23 +2357,23 @@ public static class Program
             {
                 List<Pokemon> PokemonList = new List<Pokemon>();
                 int g = 0;
-                List<int>  invalidMon = new List<int>
+                List<int> invalidMon = new List<int>
                 {
                     0,1106,1151,1152
                 };
                 foreach (Species s in AllPokemon)
                 {
                     g++;
-                    if ((!invalidMon.Contains(g)) && g < 1058)
+                    if ((!invalidMon.Contains(g)) && g < 1158)
                     {
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
-                        if(s.Atk > s.Spa)
+                        if (s.Atk > s.Spa)
                         {
                             MoveB a = new MoveB("Physical", 0, 1, 100, 100, "01&60");
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                         }
-                        else if(s.Atk < s.Spa)
+                        else if (s.Atk < s.Spa)
                         {
                             MoveB b = new MoveB("Special", 0, 2, 100, 100, "01&60");
                             Move b1 = new Move(b);
@@ -2339,7 +2387,7 @@ public static class Program
                             MoveB b = new MoveB("Special", 0, 2, 100, 100, "01&60");
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
-                        }                           
+                        }
                         PokemonList.Add(temp);
                     }
                 }
@@ -2353,10 +2401,12 @@ public static class Program
                 Console.WriteLine("[4] Perfect(near human)");
                 int aiLevel = Convert.ToInt32(Console.ReadLine());
                 RunAllPokemonBattles(PokemonList, battlesPerPair, aiLevel);
+                Console.Beep(1000, 1000);
                 foreach (Pokemon p in PokemonList.OrderByDescending(p => p.wins))
                 {
                     Console.WriteLine($"{p.name} has achived {p.wins} wins!");
                 }
+
 
             }
             else if (presetName == "Ball")
@@ -2369,7 +2419,7 @@ public static class Program
                 };
                 foreach (Species s in AllPokemon.Take(9))
                 {
-                g++;
+                    g++;
                     if ((!invalidMon.Contains(g)) && g < 1058)
                     {
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
@@ -2412,6 +2462,10 @@ public static class Program
                     Console.WriteLine($"{p.name} has achived {p.wins} wins!");
                 }
 
+            }
+            else if (presetName == "Lion")
+            {
+                
             }
 
         }
@@ -2456,6 +2510,6 @@ public static class Program
                 Console.WriteLine("no pokemon found :O");
             }
         }
-    
+       
     }
 }

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Flamethrower",
+    "type": 2,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": "Burn",
+        "effectStat": "None",
+        "effectChance": 10,
+        "effectPower": 0,
+	"recoil": false,
+	"multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Iron Head",
+    "type": 8,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": "None",
+        "effectStat": "None",
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Air Slash",
+    "type": 3,
+    "power": 75,
+    "split": 1,
+    "acc": 95,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": "None",
+        "effectStat": "None",
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Earthquake",
+    "type": 5,
+    "power": 100,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Dragon Claw",
+    "type": 16,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Energy Ball",
+    "type": 12,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": "None",
+        "effectStat": "Spa",
+        "effectChance": 10,
+        "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  }
+]

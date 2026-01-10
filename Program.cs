@@ -202,7 +202,7 @@ public class Pokemon
     public int hp;
     int ability;
     public Status statusVol { get; set; } = Status.None;
-    public List<Status> statusNov { get; set; }
+    public List<Status> statusNov { get; set; } = new List<Status>();
     public int HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV;
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
     string nature;
@@ -993,12 +993,16 @@ public class MoveEffect
     public Stat effectStat { get; }
     public int effectChance { get; }
     public int effectPower { get; }
-    public MoveEffect(Status effectStatus, Stat effectStat, int effectChance, int effectPower)
+    public bool recoil { get; }
+    public int multiHit { get; }
+    public MoveEffect(Status effectStatus, Stat effectStat, int effectChance, int effectPower, bool recoil, int multiHit)
     {
         this.effectStatus = effectStatus;
         this.effectStat = effectStat;
         this.effectChance = effectChance;
         this.effectPower = effectPower;
+        this.recoil = recoil;
+        this.multiHit = multiHit;
     }
 }
 public class Move
@@ -1010,7 +1014,6 @@ public class Move
         this.moveB = moveB;
         this.PP = moveB.maxPP;
     }
-
 }
 public class Item
 {
@@ -1183,9 +1186,9 @@ public static class Program
         int HighestEffect = 0;
         for (int i = 0; i < atk.moveNum; i++)
         {
-            if (HighestEffect < Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23, true))
+            if (HighestEffect < Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 25, true))
             {
-                HighestEffect = Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 1.0, 23, true);
+                HighestEffect = Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 25, true);
             }
         }
         return HighestEffect;
@@ -1205,9 +1208,53 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move)
     {
+        if(move.PP <= 0)
+        {
+            Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
+            MoveB struggle = new MoveB("Struggle", 0, 50, 1, 100, 101, 0, true, false, new List<MoveEffect>());
+            pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
+            if (pokemonD.hp < 0) pokemonD.hp = 0;
+            Console.WriteLine($"{pokemonA.species.name} used Struggle!");
+            pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 4.0));
+            Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+            return;
+        }
         move.PP--;
         if (CheckAcc(move, pokemonA, pokemonD) == true)
         {
+            double attack = 0.0;
+            double defense = 0.0;
+            int rcrit = 25;
+            if (move.moveB.split == 1)
+            {
+                attack = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+                defense = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+            }
+            else if (move.moveB.split == 2)
+            {
+                attack = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+                defense = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
+            }
+            int numHits = 1;
+            if (move.moveB.effectList != null && move.moveB.effectList.Count > 0) numHits = move.moveB.effectList[0].multiHit;
+            for (int i = 0; i < numHits; i++)
+            { 
+                pokemonD.hp -= Damage(pokemonA, pokemonD, move, move.moveB.power, attack, defense, rcrit, false);
+                if (pokemonD.hp < 0) pokemonD.hp = 0;
+                foreach (MoveEffect effect in move.moveB.effectList)
+                {
+                    if (effect.recoil)
+                    {
+                        int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
+                        pokemonA.hp -= recoilDamage;
+                        Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+                    }
+                    else
+                    { 
+                    InflictStatus(pokemonD, effect);
+                    }
+                }
+            }
             //{
             //    if (move.moveB.split == 3)
             //    {
@@ -1335,7 +1382,7 @@ public static class Program
             Console.WriteLine("haha you missed");
         }
     }
-    public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, double status, int rcrit, bool test)
+    public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, int rcrit, bool test)
     {
         int pkAtype1 = pokemonA.species.type1;
         int pkAtype2 = pokemonA.species.type2;
@@ -1364,13 +1411,19 @@ public static class Program
                 stab = 2.0;
             }
         }
+        
+        double status = 1.00;
+        if (pokemonA.statusVol == Status.Burn && move.moveB.split == 1)
+        {
+            status = 0.50;
+        }
 
         double eff1 = MatchUp(move.moveB.type, pkDtype1);
         double eff2 = MatchUp(move.moveB.type, pkDtype2);
 
         Random rnd = new Random();
         double crit = 1;
-        if (rcrit != 23) rcrit = 7;
+        if (rcrit != 25) rcrit = 7;
         if (rnd.Next(0, rcrit) == 0 && !test)
         {
             crit = 1.5;
@@ -1402,21 +1455,21 @@ public static class Program
             if (check <= effect.effectChance)
             {
                 if (effect.effectStat != Stat.None)
-                { 
-                    switch(effect.effectStat)
-                    { 
+                {
+                    switch (effect.effectStat)
+                    {
                         case Stat.Atk:
-                        if (pk.AtkMod < 6 && pk.AtkMod > -6)
-                        {
-                            pk.AtkMod += effect.effectPower;
-                            if (pk.AtkMod > 6) pk.AtkMod = 6;
-                            else if (pk.AtkMod < -6) pk.AtkMod = -6;
-                        }
-                        else
-                        {
-                            Console.WriteLine("It cant go higher");
-                        }
-                        break;
+                            if (pk.AtkMod < 6 && pk.AtkMod > -6)
+                            {
+                                pk.AtkMod += effect.effectPower;
+                                if (pk.AtkMod > 6) pk.AtkMod = 6;
+                                else if (pk.AtkMod < -6) pk.AtkMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
                         case Stat.Def:
                             if (pk.DefMod < 6 && pk.DefMod > -6)
                             {
@@ -1493,16 +1546,16 @@ public static class Program
                             break;
                     }
                 }
-            }
-            if (effect.effectStatus != Status.None)
-            {
-                if (pk.statusVol == Status.None)
+                if (effect.effectStatus != Status.None)
                 {
-                    pk.statusVol = effect.effectStatus;
-                }
-                else if (!pk.statusNov.Contains(effect.effectStatus))
-                {
-                    pk.statusNov.Add(effect.effectStatus);
+                    if (pk.statusVol == Status.None)
+                    {
+                        pk.statusVol = effect.effectStatus;
+                    }
+                    else if (!pk.statusNov.Contains(effect.effectStatus))
+                    {
+                        pk.statusNov.Add(effect.effectStatus);
+                    }
                 }
             }
         }
@@ -1535,7 +1588,6 @@ public static class Program
                 if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
                 spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
             }
-
 
             int priority1 = 0;
             int priority2 = 0;
@@ -1596,7 +1648,6 @@ public static class Program
                     }
                 }
             }
-
         }
         if (currentPokemon1.hp > 0)
         {
@@ -1885,21 +1936,21 @@ public static class Program
         switch (pk.statusVol)
         {
             case Status.Poison:
-                int dmg = Convert.ToInt32(Math.Round(pk.CalcHp() / 8.0, 0));
+                int dmg = Convert.ToInt32(Math.Round(pk.maxHP / 8.0, 0));
                 pk.hp -= dmg;
                 Console.WriteLine($"{pk.name} is hurt by poison and lost {dmg} HP!");
                 if (pk.hp < 0) pk.hp = 0;
                 break;
             case Status.Toxic:
                 if (pk.toxicCounter == 0) pk.toxicCounter = 1;
-                int toxicDmg = Convert.ToInt32(Math.Round((pk.CalcHp() / 16.0) * pk.toxicCounter, 0));
+                int toxicDmg = Convert.ToInt32(Math.Round((pk.maxHP / 16.0) * pk.toxicCounter, 0));
                 pk.hp -= toxicDmg;
                 Console.WriteLine($"{pk.name} is hurt by toxic poison and lost {toxicDmg} HP!");
                 pk.toxicCounter++;
                 if (pk.hp < 0) pk.hp = 0;
                 break;
             case Status.Burn:
-                int burnDmg = Convert.ToInt32(Math.Round(pk.CalcHp() / 16.0, 0));
+                int burnDmg = Convert.ToInt32(Math.Round(pk.maxHP / 16.0, 0));
                 pk.hp -= burnDmg;
                 Console.WriteLine($"{pk.name} is hurt by its burn and lost {burnDmg} HP!");
                 if (pk.hp < 0) pk.hp = 0;
@@ -2399,6 +2450,37 @@ public static class Program
         }
         return pokemon;
     }
+    public static Species FetchMon(string pk)
+    {
+        string jsonP = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(jsonP);
+        foreach (Species s in AllPokemon)
+        {
+            if (s != null && s.name == pk)
+            {
+                return s;            
+            }
+        }
+        return null;
+    }
+    public static MoveB FetchMove(string mv)
+    {
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() },
+            PropertyNameCaseInsensitive = true
+        };
+        string jsonM = File.ReadAllText("AllMoves.json");
+        List<MoveB> AllMoves = JsonSerializer.Deserialize<List<MoveB>>(jsonM, options);
+        foreach (MoveB m in AllMoves)
+        {
+            if (m != null && m.name == mv)
+            {
+                return m;
+            }
+        }
+        return null;
+    }
     public static void Main()
     {
         Random rnd = new Random();
@@ -2715,25 +2797,25 @@ public static class Program
                 Trainer trainer2 = new Trainer("Leon", true);
 
                 Pokemon pk = new Pokemon(AllPokemon[407], 50);
-                pk.AddMove(new Move(AllMoves[28]));
+                pk.AddMove(new Move(FetchMove("Energy Ball")));
                 trainer1.AddPokemon(pk);
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[445], 50);
-                pk.AddMove(new Move(AllMoves[47]));
-                pk.AddMove(new Move(AllMoves[35]));
+                pk.AddMove(new Move(FetchMove("Earthquake")));
+                pk.AddMove(new Move(FetchMove("Dragon Claw")));
                 pk.heldItem = new Item("Garchompite", "01&01&30", true);
                 trainer1.AddPokemon(pk);
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[681], 50);
-                pk.AddMove(new Move(AllMoves[52]));
+                pk.AddMove(new Move(FetchMove("Iron Head")));
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[6], 50);
-                pk.AddMove(new Move(AllMoves[22]));
-                pk.AddMove(new Move(AllMoves[38]));
+                pk.AddMove(new Move(FetchMove("Flamethrower")));
+                pk.AddMove(new Move(FetchMove("Air Slash")));
                 pk.gmax = true;
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();

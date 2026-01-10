@@ -1580,16 +1580,29 @@ public static class Program
         {
             Move move1 = null;
             Move move2 = null;
-
-            move1 = currentPokemon1.PickMove(currentPokemon2, ai);
-            move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+            double spe1 = 0;
+double spe2 = 0;
+            
+if (currentPokemon1.DoIMove())
+                {
+                    move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                    double para = 1;
+                    if (currentPokemon1.status == Status.Paralysis) para = 0.5;
+                    spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
+                }
+             if (currentPokemon2.DoIMove())
+                {
+                    move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                    double para = 1;
+                    if (currentPokemon2.status == Status.Paralysis) para = 0.5;
+                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;         
+                }
+         
 
             int priority1 = 0;
             int priority2 = 0;
             if (move1 != null) priority1 = move1.moveB.priority;
             if (move2 != null) priority2 = move2.moveB.priority;
-            double spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
-            double spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
             if (priority1 > priority2 && move1 != null)
             {
                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -2907,4 +2920,5 @@ public static class Program
         }
 
     }
+
 }

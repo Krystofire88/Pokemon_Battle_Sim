@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
 
+<<<<<<< HEAD
 public enum Status
 {
     None = 0,
@@ -20,6 +21,8 @@ public enum Status
     Confusion = 7,
     Infatuation = 8     
 }
+=======
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
 public class Trainer
 {
     public string name { get; }
@@ -190,7 +193,11 @@ public class Pokemon
     public int maxHP { get; private set; }
     public int hp;
     int ability;
+<<<<<<< HEAD
     public Status status { get; set; }
+=======
+    public int status { get; set; }
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
     public int HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV;
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
     string nature;
@@ -202,12 +209,19 @@ public class Pokemon
     public bool terastallized { get; set; } = false;
     public int dMaxTimer { get; set; } = 0;
     public int sleepTimer { get; set; } = 0;
+<<<<<<< HEAD
     public int confusionTimer { get; set; } = 0;
     public int toxicCounter { get; set; } = 0;
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
     public Pokemon(Species species, string name, bool gender, int level, int ability, Status status, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
+=======
+    public Move[] moveSet = new Move[4];
+    public int moveNum { get; private set; } = 0;
+    public int wins { get; set; }
+    public Pokemon(Species species, string name, bool gender, int level, int ability, int status, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
     {
         this.species = species;
         this.name = name;
@@ -619,7 +633,11 @@ public class Pokemon
         {
             for (int i = 0; i < moveNum; i++)
             {
+<<<<<<< HEAD
                // currentMoveSet[i].FetchMaxMove();
+=======
+                currentMoveSet[i].FetchMaxMove();
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
             }
         }
         if (moveNum == 1) return currentMoveSet[0];
@@ -658,6 +676,7 @@ public class Pokemon
         }
         return moveSet[move];
     }
+<<<<<<< HEAD
     public bool DoIMove()
     {
         if(status == Status.Sleep)
@@ -749,6 +768,8 @@ public class Pokemon
 
         }
     }
+=======
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
     public bool CheckStone()
     {
         if (heldItem == null || species == null) return false;
@@ -954,10 +975,17 @@ public class MoveB
     public int split { get; }
     public int acc { get; }
     public int maxPP { get; }
+<<<<<<< HEAD
     public int priority { get; } = 0;
     public bool contact { get; }
     public bool protect { get; }
     public List<MoveEffect> effectList { get; private set; }
+=======
+    public int priority { get; set; } = 0;
+    public bool contact { get; }
+    public bool protect { get; }
+    public List<int> effectList { get; private set; }
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
     public MoveB(string name, int type, int power, int split, int acc, int maxPP, int priority, bool contact, bool protect)
     {
         this.name = name;
@@ -971,6 +999,7 @@ public class MoveB
         this.protect = protect;
     }
 }
+<<<<<<< HEAD
 public class MoveEffect
 {
     public int effectId { get; }
@@ -983,6 +1012,8 @@ public class MoveEffect
         this.effectPower = effectPower;
     }
 }
+=======
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
 public class Move
 {
     public MoveB moveB { get; set; }
@@ -992,6 +1023,69 @@ public class Move
         this.moveB = moveB;
         this.PP = moveB.maxPP;
     }
+<<<<<<< HEAD
+=======
+    public void FetchMaxMove()
+    {
+        moveB = new MoveB(FetchMaxMoveName(moveB.type), moveB.type, this.FetchMaxMovePow(), moveB.split, 101, moveB.maxPP, moveB.priority, true, false);
+    }
+    public string FetchMaxMoveName(int type)
+    {
+        return type switch
+        {
+            0 => "",
+            1 => "Max Strike",
+            2 => "Max Flare",
+            3 => "Max Geyser",
+            4 => "Max Lightning",
+            5 => "Max Overgrowth",
+            6 => "Max Hailstorm",
+            7 => "Max Knuckle",
+            8 => "Max Ooze",
+            9 => "Max Quake",
+            10 => "Max Airstream",
+            11 => "Max Mindstorm",
+            12 => "Max Flutterby",
+            13 => "Max Rockfall",
+            14 => "Max Phantasm",
+            15 => "Max Wyrmwind",
+            16 => "Max Darkness",
+            17 => "Max Steelspike",
+            18 => "Max Starfall",
+            _ => ""
+        };
+    }
+    public int FetchMaxMovePow()
+    {
+        if (moveB.split == 3) return 00;
+        if (moveB.type == 7 || moveB.type == 8)
+        {
+            return moveB.power switch
+            {
+                <= 0 => 00,
+                <= 40 => 70,
+                <= 50 => 75,
+                <= 60 => 80,
+                <= 70 => 85,
+                <= 100 => 90,
+                _ => 95
+            };
+        }
+        else
+        { 
+            return moveB.power switch
+            {
+                <= 0 => 00,
+                <= 40 => 90,
+                <= 50 => 100,
+                <= 60 => 110,
+                <= 70 => 120,
+                <= 100 => 130,
+                _ => 140
+            };
+        }
+    }
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
 
 }
 public class Item
@@ -1690,6 +1784,7 @@ public static class Program
                         gimmick1 = true;
                     }
                 }
+<<<<<<< HEAD
                 if (currentPokemon1.DoIMove())
                 {
                     move1 = currentPokemon1.PickMove(currentPokemon2, ai);
@@ -1701,6 +1796,14 @@ public static class Program
             if (currentPokemon2.hp <= 0)
             {
                 currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai); 
+=======
+                move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
+            }
+            if (currentPokemon2.hp <= 0)
+            {
+                currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
                 Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
                 if (gimmick2 == false)
                 {
@@ -1710,6 +1813,7 @@ public static class Program
                         gimmick2 = true;
                     }
                 }
+<<<<<<< HEAD
                 if (currentPokemon2.DoIMove())
                 {
                     move2 = currentPokemon2.PickMove(currentPokemon1, ai);
@@ -1717,6 +1821,10 @@ public static class Program
                     if (currentPokemon2.status == Status.Paralysis) para = 0.5;
                     spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;         
                 }
+=======
+                move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
             }
 
             if (currentPokemon1.hp > 0)
@@ -1824,6 +1932,7 @@ public static class Program
                 }
             }
 
+<<<<<<< HEAD
             PostTurnPokemonCheck(currentPokemon1);
             PostTurnPokemonCheck(currentPokemon2);
 
@@ -1835,6 +1944,16 @@ public static class Program
                 currentPokemon1.UnDmax();
             }
             if (currentPokemon2.dMaxTimer == 0 && currentPokemon2.isDmax)
+=======
+            currentPokemon1.dMaxTimer--;
+            currentPokemon2.dMaxTimer--;
+
+            if (currentPokemon1.dMaxTimer == 0)
+            {
+                currentPokemon1.UnDmax();
+            }
+            if (currentPokemon2.dMaxTimer == 0)
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
             {
                 currentPokemon2.UnDmax();
             }
@@ -1913,6 +2032,7 @@ public static class Program
             }
         }
     }
+<<<<<<< HEAD
     public static void PreTurnPokemonCheck(Pokemon pk, int ai)
     { 
         if (pk == null) return;
@@ -1950,6 +2070,8 @@ public static class Program
                 break;
         }
     }
+=======
+>>>>>>> 8dee71207f32fce4881ab84f8363f7896b31c687
     public static void RunAllPokemonBattles(List<Pokemon> pokemons, int battlesPerPair, int ai)
     {
         double prcnt = 0.0;

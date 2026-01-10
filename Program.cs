@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
@@ -18,7 +19,18 @@ public enum Status
     Toxic = 5,
     Sleep = 6,
     Confusion = 7,
-    Infatuation = 8     
+    Infatuation = 8
+}
+public enum Stat
+{
+    None = 0,
+    Atk = 1,
+    Def = 2,
+    Spa = 3,
+    Spd = 4,
+    Spe = 5,
+    Acc = 6,
+    Eva = 7
 }
 public class Trainer
 {
@@ -83,7 +95,6 @@ public class Trainer
                 return team[team.Count() - 1];
             }
         }
-
         for (int i = 0; i < availablePk; i++)
         {
             if (team[i].hp > 0 && team[i] != active)
@@ -190,12 +201,13 @@ public class Pokemon
     public int maxHP { get; private set; }
     public int hp;
     int ability;
-    public Status status { get; set; }
+    public Status statusVol { get; set; } = Status.None;
+    public List<Status> statusNov { get; set; }
     public int HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV;
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
     string nature;
     public Item heldItem { get; set; }
-    public bool gmax { get; set;  }
+    public bool gmax { get; set; }
     int dMaxLevel;
     public bool isDmax { get; set; } = false;
     public int tera { get; }
@@ -207,14 +219,13 @@ public class Pokemon
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
-    public Pokemon(Species species, string name, bool gender, int level, int ability, Status status, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
+    public Pokemon(Species species, string name, bool gender, int level, int ability, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
     {
         this.species = species;
         this.name = name;
         this.gender = gender;
         this.level = level;
         this.ability = ability;
-        this.status = status;
         this.HpIV = HpIV;
         this.HpEV = HpEV;
         this.AtkIV = AtkIV;
@@ -261,7 +272,6 @@ public class Pokemon
         }
         this.ability = ability;
         this.level = level;
-        this.status = 0;
         this.HpIV = rnd.Next(0, 32);
         this.HpEV = 0;
         this.AtkIV = rnd.Next(0, 32);
@@ -357,7 +367,8 @@ public class Pokemon
     public void Heal()
     {
         hp = maxHP;
-        status = 0;
+        statusVol = 0;
+        statusNov.Clear();
         ClearMods();
         foreach (Move m in moveSet)
         {
@@ -619,7 +630,7 @@ public class Pokemon
         {
             for (int i = 0; i < moveNum; i++)
             {
-               // currentMoveSet[i].FetchMaxMove();
+                // currentMoveSet[i].FetchMaxMove();
             }
         }
         if (moveNum == 1) return currentMoveSet[0];
@@ -660,7 +671,8 @@ public class Pokemon
     }
     public bool DoIMove()
     {
-        if(status == Status.Sleep)
+        Random rnd = new Random();
+        if (statusVol == Status.Sleep)
         {
             if (sleepTimer > 0)
             {
@@ -670,18 +682,17 @@ public class Pokemon
             }
             else
             {
-                status = Status.None;
+                statusVol = Status.None;
                 Console.WriteLine($"{species.name} woke up!");
                 return true;
             }
         }
-        else if (status == Status.Freeze)
+        else if (statusVol == Status.Freeze)
         {
-            Random rnd = new Random();
             int thaw = rnd.Next(0, 5);
             if (thaw == 0)
             {
-                status = Status.None;
+                statusVol = Status.None;
                 Console.WriteLine($"{species.name} thawed out!");
                 return true;
             }
@@ -691,62 +702,66 @@ public class Pokemon
                 return false;
             }
         }
+        else if (statusVol == Status.Paralysis)
+        {
+                int chance = rnd.Next(0, 4);
+                if (chance == 0)
+                {
+                    Console.WriteLine($"{species.name} is paralyzed and can't move!");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+        }
         else
         {
-            Random rnd = new Random();
-            switch (status)
+            foreach (Status statusN in statusNov)
             {
-                case Status.Paralysis:
-                    int chance = rnd.Next(0, 4);
-                    if (chance == 0)
-                    {
-                        Console.WriteLine($"{species.name} is paralyzed and can't move!");
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                switch (statusN)
+                {
                     case Status.Confusion:
-                    if (confusionTimer > 0)
-                    {
-                        confusionTimer--;
-                        int check = rnd.Next(0, 3);
-                        if (check == 0)
+                        if (confusionTimer > 0)
                         {
-                            Console.WriteLine($"{species.name} is confused and hurt itself in its confusion!");
-                            int damage = Convert.ToInt32(Math.Floor((double)(((((2 * level) / 5) + 2) * 40 * CalcAtkStat()) / CalcDefStat()) / 50) + 2);
-                            hp -= damage;
-                            if (hp < 0) hp = 0;
+                            confusionTimer--;
+                            int check = rnd.Next(0, 3);
+                            if (check == 0)
+                            {
+                                Console.WriteLine($"{species.name} is confused and hurt itself in its confusion!");
+                                int damage = Convert.ToInt32(Math.Floor((double)(((((2 * level) / 5) + 2) * 40 * CalcAtkStat()) / CalcDefStat()) / 50) + 2);
+                                hp -= damage;
+                                if (hp < 0) hp = 0;
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            statusNov.Remove(Status.Confusion);
+                            Console.WriteLine($"{species.name} snapped out of its confusion!");
+                            return true;
+                        }
+                    case
+                    Status.Infatuation:
+                        int infatuation = rnd.Next(0, 2);
+                        if (infatuation == 0)
+                        {
+                            Console.WriteLine($"{species.name} is immobilized by love!");
                             return false;
                         }
                         else
                         {
                             return true;
                         }
-                    }
-                    else
-                    {
-                        status = Status.None;
-                        Console.WriteLine($"{species.name} snapped out of its confusion!");
+                    default:
                         return true;
-                    }
-                case
-                    Status.Infatuation:
-                    int infatuation = rnd.Next(0, 2);
-                    if (infatuation == 0)
-                    {
-                        Console.WriteLine($"{species.name} is immobilized by love!");
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                default:
-                    return true;
+                }
             }
-
+            return true;
         }
     }
     public bool CheckStone()
@@ -807,7 +822,7 @@ public class Pokemon
         {
             if (species.name == s.name.Replace("-Mega", ""))
             {
-                Console.Write($"{species.name} mega evolved into Mega {species.name}");
+                Console.WriteLine($"{species.name} mega evolved into Mega {species.name}");
                 species = s;
                 break;
             }
@@ -958,7 +973,7 @@ public class MoveB
     public bool contact { get; }
     public bool protect { get; }
     public List<MoveEffect> effectList { get; private set; }
-    public MoveB(string name, int type, int power, int split, int acc, int maxPP, int priority, bool contact, bool protect)
+    public MoveB(string name, int type, int power, int split, int acc, int maxPP, int priority, bool contact, bool protect, List<MoveEffect> effectList)
     {
         this.name = name;
         this.type = type;
@@ -969,16 +984,19 @@ public class MoveB
         this.priority = priority;
         this.contact = contact;
         this.protect = protect;
+        this.effectList = effectList;
     }
 }
 public class MoveEffect
 {
-    public int effectId { get; }
+    public Status effectStatus { get; }
+    public Stat effectStat { get; }
     public int effectChance { get; }
     public int effectPower { get; }
-    public MoveEffect(int effectId, int effectChance, int effectPower)
+    public MoveEffect(Status effectStatus, Stat effectStat, int effectChance, int effectPower)
     {
-        this.effectId = effectId;
+        this.effectStatus = effectStatus;
+        this.effectStat = effectStat;
         this.effectChance = effectChance;
         this.effectPower = effectPower;
     }
@@ -1189,128 +1207,128 @@ public static class Program
     {
         move.PP--;
         if (CheckAcc(move, pokemonA, pokemonD) == true)
-        { 
-        //{
-        //    if (move.moveB.split == 3)
-        //    {
-        //        if (DecodeEffect(move.moveB.effect, 1) == 1) pokemon = pokemonA;
-        //        else if (DecodeEffect(move.moveB.effect, 1) == 2) pokemon = pokemonD;
-        //        InflictStatus(pokemon, move);
-        //    }
-        //    else
-        //    {
-        //        int power = 0;
-        //        double atk = 1.00;
-        //        double def = 1.00;
-        //        double burn = 1.00;
-        //        bool status = false;
-        //        int rcrit = 23;
-        //        switch (DecodeEffect(move.moveB.effect, 1))
-        //        {
-        //            case 01:
-        //                if (move.moveB.split == 1)
-        //                {
-        //                    if (pokemonA.status == 1) burn = 0.50;
-        //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-        //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-        //                }
-        //                else
-        //                {
-        //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-        //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-        //                }
-        //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-        //                {
-        //                    status = true;
-        //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-        //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-        //                }
-        //                power = DecodeEffect(move.moveB.effect, 2);
-        //                break;
-        //            case 02:
-        //                if (move.moveB.split == 1)
-        //                {
-        //                    if (pokemonA.status == 1) burn = 0.50;
-        //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-        //                }
-        //                else
-        //                {
-        //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-        //                }
-        //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-        //                {
-        //                    status = true;
-        //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-        //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-        //                }
-        //                def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-        //                power = DecodeEffect(move.moveB.effect, 2);
-        //                break;
-        //            case 03:
-        //                if (move.moveB.split == 1)
-        //                {
-        //                    if (pokemonA.status == 1) burn = 0.50;
-        //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-        //                }
-        //                else
-        //                {
-        //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-        //                }
-        //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-        //                {
-        //                    status = true;
-        //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-        //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-        //                }
-        //                def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-        //                power = DecodeEffect(move.moveB.effect, 2);
-        //                break;
-        //            case 04:
-        //                if (move.moveB.split == 1)
-        //                {
-        //                    if (pokemonA.status == 1) burn = 0.50;
-        //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-        //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-        //                }
-        //                else
-        //                {
-        //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-        //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-        //                }
-        //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-        //                {
-        //                    status = true;
-        //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-        //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-        //                }
-        //                power = DecodeEffect(move.moveB.effect, 2);
-        //                rcrit = 7;
-        //                break;
-        //            case 05:
-        //                if (move.moveB.split == 1)
-        //                {
-        //                    if (pokemonA.status == 1) burn = 0.50;
-        //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-        //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-        //                }
-        //                else
-        //                {
-        //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-        //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-        //                }
-        //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-        //                {
-        //                    status = true;
-        //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-        //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-        //                }
-        //                power = DecodeEffect(move.moveB.effect, 2);
-        //                break;
-        //        }
-        //        pokemonD.hp -= Damage(pokemonA, pokemonD, move, power, atk, def, burn, rcrit, false);
-        //        if (pokemonD.hp < 0) pokemonD.hp = 0;
-        //        if (status == true) InflictStatus(pokemon, move);
-        //    }
+        {
+            //{
+            //    if (move.moveB.split == 3)
+            //    {
+            //        if (DecodeEffect(move.moveB.effect, 1) == 1) pokemon = pokemonA;
+            //        else if (DecodeEffect(move.moveB.effect, 1) == 2) pokemon = pokemonD;
+            //        InflictStatus(pokemon, move);
+            //    }
+            //    else
+            //    {
+            //        int power = 0;
+            //        double atk = 1.00;
+            //        double def = 1.00;
+            //        double burn = 1.00;
+            //        bool status = false;
+            //        int rcrit = 23;
+            //        switch (DecodeEffect(move.moveB.effect, 1))
+            //        {
+            //            case 01:
+            //                if (move.moveB.split == 1)
+            //                {
+            //                    if (pokemonA.status == 1) burn = 0.50;
+            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+            //                }
+            //                else
+            //                {
+            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
+            //                }
+            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
+            //                {
+            //                    status = true;
+            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+            //                }
+            //                power = DecodeEffect(move.moveB.effect, 2);
+            //                break;
+            //            case 02:
+            //                if (move.moveB.split == 1)
+            //                {
+            //                    if (pokemonA.status == 1) burn = 0.50;
+            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+            //                }
+            //                else
+            //                {
+            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+            //                }
+            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
+            //                {
+            //                    status = true;
+            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+            //                }
+            //                def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
+            //                power = DecodeEffect(move.moveB.effect, 2);
+            //                break;
+            //            case 03:
+            //                if (move.moveB.split == 1)
+            //                {
+            //                    if (pokemonA.status == 1) burn = 0.50;
+            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+            //                }
+            //                else
+            //                {
+            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+            //                }
+            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
+            //                {
+            //                    status = true;
+            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+            //                }
+            //                def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+            //                power = DecodeEffect(move.moveB.effect, 2);
+            //                break;
+            //            case 04:
+            //                if (move.moveB.split == 1)
+            //                {
+            //                    if (pokemonA.status == 1) burn = 0.50;
+            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+            //                }
+            //                else
+            //                {
+            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
+            //                }
+            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
+            //                {
+            //                    status = true;
+            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+            //                }
+            //                power = DecodeEffect(move.moveB.effect, 2);
+            //                rcrit = 7;
+            //                break;
+            //            case 05:
+            //                if (move.moveB.split == 1)
+            //                {
+            //                    if (pokemonA.status == 1) burn = 0.50;
+            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
+            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+            //                }
+            //                else
+            //                {
+            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
+            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
+            //                }
+            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
+            //                {
+            //                    status = true;
+            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
+            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
+            //                }
+            //                power = DecodeEffect(move.moveB.effect, 2);
+            //                break;
+            //        }
+            //        pokemonD.hp -= Damage(pokemonA, pokemonD, move, power, atk, def, burn, rcrit, false);
+            //        if (pokemonD.hp < 0) pokemonD.hp = 0;
+            //        if (status == true) InflictStatus(pokemon, move);
+            //    }
         }
         else
         {
@@ -1374,200 +1392,120 @@ public static class Program
 
         return dmg;
     }
-    public static void InflictStatus(Pokemon pk, Move move)
+    public static void InflictStatus(Pokemon pk, MoveEffect effect)
     {
-        //Random rnd = new Random();
-        //int check = rnd.Next(0, 100);
-        //int abs = 1;
-        //int a = 5;
-        //if (move.moveB.split == 3) a -= 3;
-        //if (check <= DecodeEffect(move.moveB.effect, 4) || move.moveB.split == 3)
-        //{
-        //    for (int i = a; i < a + 7; i++)
-        //    {
-        //        int effect = Math.Abs(DecodeEffect(move.moveB.effect, i));
-        //        if (DecodeEffect(move.moveB.effect, i) < 0)
-        //        {
-        //            abs = -1;
-        //        }
-        //        switch (effect)
-        //        {
-        //            case 01:
-        //            // burn
-        //            case 02:
-        //            //freeze
-        //            case 03:
-        //            //paralysis
-        //            case 04:
-        //            //poison
-        //            case 05:
-        //            //toxic
-        //            case 06:
-        //            //sleep
-        //            case 07:
-        //            //confusion
-        //            case 08:
-        //            //infatuation
-        //            case 09:
-        //                pk.status = DecodeEffect(move.moveB.effect, i);
-        //                break;
-        //            case 11:
-        //                if (pk.AtkMod < 6 && pk.AtkMod > -6)
-        //                {
-        //                    pk.AtkMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 12:
-        //                if (pk.DefMod < 6 && pk.DefMod > -6)
-        //                {
-        //                    pk.DefMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 13:
-        //                if (pk.SpaMod < 6 && pk.SpaMod > -6)
-        //                {
-        //                    pk.SpaMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 14:
-        //                if (pk.SpdMod < 6 && pk.SpdMod > -6)
-        //                {
-        //                    pk.SpdMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 15:
-        //                if (pk.AccMod < 6 && pk.AccMod > -6)
-        //                {
-        //                    pk.AccMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 16:
-        //                if (pk.EvaMod < 6 && pk.EvaMod > -6)
-        //                {
-        //                    pk.EvaMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 17:
-        //                if (pk.SpeMod < 6 && pk.SpeMod > -6)
-        //                {
-        //                    pk.SpeMod += 1 * abs;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 21:
-        //                if (pk.AtkMod < 6 && pk.AtkMod > -6)
-        //                {
-        //                    pk.AtkMod += 2 * abs;
-        //                    if (pk.AtkMod > 6) pk.AtkMod = 6;
-        //                    else if (pk.AtkMod < -6) pk.AtkMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 22:
-        //                if (pk.DefMod < 6 && pk.DefMod > -6)
-        //                {
-        //                    pk.DefMod += 2 * abs;
-        //                    if (pk.DefMod > 6) pk.DefMod = 6;
-        //                    else if (pk.DefMod < -6) pk.DefMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 23:
-        //                if (pk.SpaMod < 6 && pk.SpaMod > -6)
-        //                {
-        //                    pk.SpaMod += 2 * abs;
-        //                    if (pk.SpaMod > 6) pk.SpaMod = 6;
-        //                    else if (pk.SpaMod < -6) pk.SpaMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 24:
-        //                if (pk.SpdMod < 6 && pk.SpdMod > -6)
-        //                {
-        //                    pk.SpdMod += 2 * abs;
-        //                    if (pk.SpdMod > 6) pk.SpdMod = 6;
-        //                    else if (pk.SpdMod < -6) pk.SpdMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 25:
-        //                if (pk.AccMod < 6 && pk.AccMod > -6)
-        //                {
-        //                    pk.AccMod += 2 * abs;
-        //                    if (pk.AccMod > 6) pk.AccMod = 6;
-        //                    else if (pk.AccMod < -6) pk.AccMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 26:
-        //                if (pk.EvaMod < 6 && pk.EvaMod > -6)
-        //                {
-        //                    pk.EvaMod += 2 * abs;
-        //                    if (pk.EvaMod > 6) pk.EvaMod = 6;
-        //                    else if (pk.EvaMod < -6) pk.EvaMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //            case 27:
-        //                if (pk.SpeMod < 6 && pk.SpeMod > -6)
-        //                {
-        //                    pk.SpeMod += 2 * abs;
-        //                    if (pk.SpeMod > 6) pk.SpeMod = 6;
-        //                    else if (pk.SpeMod < -6) pk.SpeMod = -6;
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("It cant go higher");
-        //                }
-        //                break;
-        //        }
-        //    }
-        //}
+        if (effect.effectChance < 101)
+        { 
+            Random rnd = new Random();
+            int check = rnd.Next(1, 101);
+
+            if (check <= effect.effectChance)
+            {
+                if (effect.effectStat != Stat.None)
+                { 
+                    switch(effect.effectStat)
+                    { 
+                        case Stat.Atk:
+                        if (pk.AtkMod < 6 && pk.AtkMod > -6)
+                        {
+                            pk.AtkMod += effect.effectPower;
+                            if (pk.AtkMod > 6) pk.AtkMod = 6;
+                            else if (pk.AtkMod < -6) pk.AtkMod = -6;
+                        }
+                        else
+                        {
+                            Console.WriteLine("It cant go higher");
+                        }
+                        break;
+                        case Stat.Def:
+                            if (pk.DefMod < 6 && pk.DefMod > -6)
+                            {
+                                pk.DefMod += effect.effectPower;
+                                if (pk.DefMod > 6) pk.DefMod = 6;
+                                else if (pk.DefMod < -6) pk.DefMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        case Stat.Spa:
+                            if (pk.SpaMod < 6 && pk.SpaMod > -6)
+                            {
+                                pk.SpaMod += effect.effectPower;
+                                if (pk.SpaMod > 6) pk.SpaMod = 6;
+                                else if (pk.SpaMod < -6) pk.SpaMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        case Stat.Spd:
+                            if (pk.SpdMod < 6 && pk.SpdMod > -6)
+                            {
+                                pk.SpdMod += effect.effectPower;
+                                if (pk.SpdMod > 6) pk.SpdMod = 6;
+                                else if (pk.SpdMod < -6) pk.SpdMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        case Stat.Acc:
+                            if (pk.AccMod < 6 && pk.AccMod > -6)
+                            {
+                                pk.AccMod += effect.effectPower;
+                                if (pk.AccMod > 6) pk.AccMod = 6;
+                                else if (pk.AccMod < -6) pk.AccMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        case Stat.Eva:
+                            if (pk.EvaMod < 6 && pk.EvaMod > -6)
+                            {
+                                pk.EvaMod += effect.effectPower;
+                                if (pk.EvaMod > 6) pk.EvaMod = 6;
+                                else if (pk.EvaMod < -6) pk.EvaMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        case Stat.Spe:
+                            if (pk.SpeMod < 6 && pk.SpeMod > -6)
+                            {
+                                pk.SpeMod += effect.effectPower;
+                                if (pk.SpeMod > 6) pk.SpeMod = 6;
+                                else if (pk.SpeMod < -6) pk.SpeMod = -6;
+                            }
+                            else
+                            {
+                                Console.WriteLine("It cant go higher");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            if (effect.effectStatus != Status.None)
+            {
+                if (pk.statusVol == Status.None)
+                {
+                    pk.statusVol = effect.effectStatus;
+                }
+                else if (!pk.statusNov.Contains(effect.effectStatus))
+                {
+                    pk.statusNov.Add(effect.effectStatus);
+                }
+            }
+        }
     }
     public static void PokeBattle(Pokemon pokemon1, Pokemon pokemon2, int ai)
     {
@@ -1580,16 +1518,29 @@ public static class Program
         {
             Move move1 = null;
             Move move2 = null;
+            double spe1 = 0;
+            double spe2 = 0;
 
-            move1 = currentPokemon1.PickMove(currentPokemon2, ai);
-            move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+            if (currentPokemon1.DoIMove())
+            {
+                move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                double para = 1;
+                if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
+                spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
+            }
+            if (currentPokemon2.DoIMove())
+            {
+                move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                double para = 1;
+                if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+                spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
+            }
+
 
             int priority1 = 0;
             int priority2 = 0;
             if (move1 != null) priority1 = move1.moveB.priority;
             if (move2 != null) priority2 = move2.moveB.priority;
-            double spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
-            double spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
             if (priority1 > priority2 && move1 != null)
             {
                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1694,13 +1645,13 @@ public static class Program
                 {
                     move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                     double para = 1;
-                    if (currentPokemon1.status == Status.Paralysis) para = 0.5;
+                    if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
                     spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
                 }
             }
             if (currentPokemon2.hp <= 0)
             {
-                currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai); 
+                currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
                 Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
                 if (gimmick2 == false)
                 {
@@ -1714,8 +1665,8 @@ public static class Program
                 {
                     move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                     double para = 1;
-                    if (currentPokemon2.status == Status.Paralysis) para = 0.5;
-                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;         
+                    if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
                 }
             }
 
@@ -1737,8 +1688,13 @@ public static class Program
                             gimmick1 = true;
                         }
                     }
-                    move1 = currentPokemon1.PickMove(currentPokemon2, ai);
-                    spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod);
+                    if (currentPokemon1.DoIMove())
+                    {
+                        move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                        double para = 1;
+                        if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
+                        spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
+                    }
                 }
             }
             if (currentPokemon2.hp > 0)
@@ -1759,8 +1715,13 @@ public static class Program
                             gimmick2 = true;
                         }
                     }
-                    move2 = currentPokemon2.PickMove(currentPokemon1, ai);
-                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod);
+                    if (currentPokemon2.DoIMove())
+                    {
+                        move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                        double para = 1;
+                        if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+                        spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
+                    }
                 }
             }
 
@@ -1914,19 +1875,14 @@ public static class Program
         }
     }
     public static void PreTurnPokemonCheck(Pokemon pk, int ai)
-    { 
-        if (pk == null) return;
-        if (pk.hp <= 0) return;
-        switch (pk.status)
-        {
+    {
 
-        }
     }
     public static void PostTurnPokemonCheck(Pokemon pk)
     {
         if (pk == null) return;
         if (pk.hp <= 0) return;
-        switch (pk.status)
+        switch (pk.statusVol)
         {
             case Status.Poison:
                 int dmg = Convert.ToInt32(Math.Round(pk.CalcHp() / 8.0, 0));
@@ -2149,7 +2105,7 @@ public static class Program
 
                 Console.WriteLine($"Input the tera type of Pokemon {i + 1}: ");
                 string tera = Console.ReadLine().ToLower();
-                Pokemon pokemon = new Pokemon(speciesInput, name, gender, lvl, ability, 0, IVs[0], EVs[0], IVs[1], EVs[1], IVs[2], EVs[2], IVs[3], EVs[3], IVs[4], EVs[4], IVs[5], EVs[5], nature, itemInput, gmax, 10, GetTypeId(tera));
+                Pokemon pokemon = new Pokemon(speciesInput, name, gender, lvl, ability, IVs[0], EVs[0], IVs[1], EVs[1], IVs[2], EVs[2], IVs[3], EVs[3], IVs[4], EVs[4], IVs[5], EVs[5], nature, itemInput, gmax, 10, GetTypeId(tera));
                 Console.WriteLine("Input atleast one move then type NO when finished");
                 for (int j = 0; j < 4; j++)
                 {
@@ -2425,7 +2381,7 @@ public static class Program
             }
         }
 
-        Pokemon pokemon = new Pokemon(species, name, gender, lvl, ability, 0, HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV, nature, item, gmax, dmaxlvl, tera);
+        Pokemon pokemon = new Pokemon(species, name, gender, lvl, ability, HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV, nature, item, gmax, dmaxlvl, tera);
         int h = 0;
         List<MoveB> tempAllMoves = AllMoves;
         foreach (MoveB move in tempAllMoves)
@@ -2447,8 +2403,17 @@ public static class Program
     {
         Random rnd = new Random();
 
-        string json = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
+        string jsonP = File.ReadAllText("AllPokemon.json");
+        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(jsonP);
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }, 
+            PropertyNameCaseInsensitive = true
+        };
+
+        string jsonM = File.ReadAllText("AllMoves.json");
+        List<MoveB> AllMoves = JsonSerializer.Deserialize<List<MoveB>>(jsonM, options);
 
         Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
@@ -2461,84 +2426,12 @@ public static class Program
             Galladite
         };
 
-        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 0, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
-        Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 0, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
+        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
+        Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
         Gallade.MegaEvo();
         Console.WriteLine(Gallade.species.name);
         Gallade.UnMegaEvolve();
         Console.WriteLine(Gallade.species.name);
-
-        List<MoveB> AllMoves = new List<MoveB>
-{
-    new MoveB("Sacred Sword", 7, 90, 1, 101, 15, 0, true, false),
-    new MoveB("Swords Dance", 1, 21, 3, 101, 40, 0, false, false),
-    new MoveB("Psycho Cut", 11, 70, 1, 101, 20, 0, true, false),
-    new MoveB("Night Slash", 16, 70, 1, 100, 20, 0, true, false),
-    new MoveB("Psychic", 11, 90, 2, 100, 20, 0, false, true),
-    new MoveB("Psyshock", 11, 80, 2, 100, 20, 0, false, true),
-    new MoveB("Sand Attack", 9, 15, 3, 100, 40, 0, false, false),
-    new MoveB("Hydro Pump", 3, 110, 2, 70, 5, 0, false, true),
-
-    new MoveB("Bite", 16, 60, 1, 100, 25, 0, true, false),
-    new MoveB("Round", 1, 60, 2, 100, 15, 0, false, true),
-    new MoveB("Leer", 1, 12, 3, 100, 30, 0, false, false),
-    new MoveB("Incinerate", 2, 72, 2, 100, 15, 0, false, true),
-    new MoveB("Wicked Torque", 16, 80, 1, 100, 10, 0, true, false),
-    new MoveB("Snarl", 16, 55, 2, 95, 15, 0, false, true),
-    new MoveB("Swift", 1, 60, 2, 101, 20, 0, false, true),
-    new MoveB("Metal Sound", 17, 24, 3, 85, 40, 0, false, false),
-    new MoveB("Acrobatics", 10, 110, 1, 100, 24, 0, true, false),
-    new MoveB("Close Comabt", 7, 100, 1, 100, 5, 0, true, false),
-    new MoveB("Brick Break", 7, 75, 1, 75, 24, 0, true, false),
-
-    new MoveB("NormalP", 1, 60, 1, 100, 20, 0, true, false),
-    new MoveB("NormalS", 1, 60, 2, 100, 20, 0, false, true),
-    new MoveB("FireP", 2, 60, 1, 100, 20, 0, true, false),
-    new MoveB("FireS", 2, 60, 2, 100, 20, 0, false, true),
-    new MoveB("WaterP", 3, 60, 1, 100, 20, 0, true, false),
-    new MoveB("WaterS", 3, 60, 2, 100, 20, 0, false, true),
-    new MoveB("ElectricP", 4, 60, 1, 100, 20, 0, true, false),
-    new MoveB("ElectricS", 4, 60, 2, 100, 20, 0, false, true),
-    new MoveB("GrassP", 5, 60, 1, 100, 20, 0, true, false),
-    new MoveB("GrassS", 5, 60, 2, 100, 20, 0, false, true),
-    new MoveB("IceP", 6, 60, 1, 100, 20, 0, true, false),
-    new MoveB("IceS", 6, 60, 2, 100, 20, 0, false, true),
-    new MoveB("FightingP", 7, 60, 1, 100, 20, 0, true, false),
-    new MoveB("FightingS", 7, 60, 2, 100, 20, 0, false, true),
-    new MoveB("PoisonP", 8, 60, 1, 100, 20, 0, true, false),
-    new MoveB("PoisonS", 8, 60, 2, 100, 20, 0, false, true),
-    new MoveB("GroundP", 9, 60, 1, 100, 20, 0, true, false),
-    new MoveB("GroundS", 9, 60, 2, 100, 20, 0, false, true),
-    new MoveB("FlyingP", 10, 60, 1, 100, 20, 0, true, false),
-    new MoveB("FlyingS", 10, 60, 2, 100, 20, 0, false, true),
-    new MoveB("PsychicP", 11, 60, 1, 100, 20, 0, true, false),
-    new MoveB("PsychicS", 11, 60, 2, 100, 20, 0, false, true),
-    new MoveB("BugP", 12, 60, 1, 100, 20, 0, true, false),
-    new MoveB("BugS", 12, 60, 2, 100, 20, 0, false, true),
-    new MoveB("RockP", 13, 60, 1, 100, 20, 0, true, false),
-    new MoveB("RockS", 13, 60, 2, 100, 20, 0, false, true),
-    new MoveB("GhostP", 14, 60, 1, 100, 20, 0, true, false),
-    new MoveB("GhostS", 14, 60, 2, 100, 20, 0, false, true),
-    new MoveB("DragonP", 15, 60, 1, 100, 20, 0, true, false),
-    new MoveB("DragonS", 15, 60, 2, 100, 20, 0, false, true),
-    new MoveB("DarkP", 16, 60, 1, 100, 20, 0, true, false),
-    new MoveB("DarkS", 16, 60, 2, 100, 20, 0, false, true),
-    new MoveB("SteelP", 17, 60, 1, 100, 20, 0, true, false),
-    new MoveB("SteelS", 17, 60, 2, 100, 20, 0, false, true),
-    new MoveB("FairyP", 18, 60, 1, 100, 20, 0, true, false),
-    new MoveB("FairyS", 18, 60, 2, 100, 20, 0, false, true),
-};
-
-
-        Move SacredSword = new Move(AllMoves[0]);
-        Move SwordsDance = new Move(AllMoves[1]);
-        Move PsychoCut = new Move(AllMoves[2]);
-        Move NightSlash = new Move(AllMoves[3]);
-
-        Move Psychic = new Move(AllMoves[4]);
-        Move Psyshock = new Move(AllMoves[5]);
-        Move SandAttack = new Move(AllMoves[6]);
-        Move HydroPump = new Move(AllMoves[7]);
 
         Console.WriteLine("Trainer or pokemon");
         Console.WriteLine("[1] Pokemon");
@@ -2676,45 +2569,45 @@ public static class Program
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
                         if (s.Atk > s.Spa)
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
                         }
                         else if (s.Atk < s.Spa)
                         {
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
                         }
                         else
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
@@ -2742,7 +2635,7 @@ public static class Program
             {
                 Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 109, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Pokemon Lion = new Pokemon(species, 50);
-                MoveB physical = new MoveB("Physical", 1, 100, 1, 100, 100, 0, true, false);
+                MoveB physical = new MoveB("Physical", 1, 100, 1, 100, 100, 0, true, false, null);
                 Move physMove = new Move(physical);
                 Lion.AddMove(physMove);
                 List<Pokemon> PokemonList = new List<Pokemon>();
@@ -2759,45 +2652,45 @@ public static class Program
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
                         if (s.Atk > s.Spa)
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
                         }
                         else if (s.Atk < s.Spa)
                         {
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
                         }
                         else
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false);
+                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false);
+                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
@@ -2905,6 +2798,5 @@ public static class Program
                 Console.WriteLine("no pokemon found :O");
             }
         }
-
     }
 }

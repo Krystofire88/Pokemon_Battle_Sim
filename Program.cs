@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
 
+
 public enum Status
 {
     None = 0,
@@ -793,9 +794,6 @@ public class Pokemon
     }
     public void MegaEvo()
     {
-        string json = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
-
         if (species.mega == true)
         {
             if (CheckStone())
@@ -816,9 +814,7 @@ public class Pokemon
     }
     public void MegaEvolve()
     {
-        string json = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
-        foreach (Species s in AllPokemon.Skip(AllPokemon.Count - 75))
+        foreach (Species s in Program.AllPokemon.Skip(Program.AllPokemon.Count - 75))
         {
             if (species.name == s.name.Replace("-Mega", ""))
             {
@@ -850,20 +846,18 @@ public class Pokemon
     {
         if (!species.name.Contains("-Mega") && !species.name.Contains("-Mega-Y") && !species.name.Contains("-Mega-X")) return;
 
-        string json = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
         Species sp = this.species;
         if (species.name == "Charizard-Mega-X" || species.name == "Charizard-Mega-Y")
         {
-            species = AllPokemon.Find(sp => sp.name == "Charizard");
+            species = Program.AllPokemon.Find(sp => sp.name == "Charizard");
         }
         else if (species.name == "Mewtwo-Mega-X" || species.name == "Mewtwo-Mega-Y")
         {
-            species = AllPokemon.Find(sp => sp.name == "Mewtwo");
+            species = Program.AllPokemon.Find(sp => sp.name == "Mewtwo");
         }
         else
         {
-            foreach (Species s in AllPokemon)
+            foreach (Species s in Program.AllPokemon)
             {
                 if (species.name.Replace("-Mega", "") == s.name)
                 {
@@ -920,8 +914,6 @@ public class Pokemon
     }
     public void Dmax()
     {
-        string json = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(json);
         if (isDmax == false)
         {
             dMaxTimer = 3;
@@ -1010,7 +1002,7 @@ public class Move
     public MoveB moveB { get; set; }
     public int PP { get; set; }
     public Move(MoveB moveB)
-    {
+    { 
         this.moveB = moveB;
         this.PP = moveB.maxPP;
     }
@@ -1029,6 +1021,13 @@ public class Item
 }
 public static class Program
 {
+    static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Converters = { new JsonStringEnumConverter() },
+        PropertyNameCaseInsensitive = true
+    };
+    public static List<Species> AllPokemon { get;  } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText("AllPokemon.json"));
+    public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText("AllMoves.json"), JsonOptions);
     public static int GetTypeId(string typeName)
     {
         return typeName.ToLower() switch
@@ -1238,20 +1237,23 @@ public static class Program
             int numHits = 1;
             if (move.moveB.effectList != null && move.moveB.effectList.Count > 0) numHits = move.moveB.effectList[0].multiHit;
             for (int i = 0; i < numHits; i++)
-            { 
+            {
                 pokemonD.hp -= Damage(pokemonA, pokemonD, move, move.moveB.power, attack, defense, rcrit, false);
                 if (pokemonD.hp < 0) pokemonD.hp = 0;
-                foreach (MoveEffect effect in move.moveB.effectList)
-                {
-                    if (effect.recoil)
+                if (move.moveB.effectList != null)
+                { 
+                    foreach (MoveEffect effect in move.moveB.effectList)
                     {
-                        int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
-                        pokemonA.hp -= recoilDamage;
-                        Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
-                    }
-                    else
-                    { 
-                    InflictStatus(pokemonD, effect);
+                        if (effect.recoil)
+                        {
+                            int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
+                            pokemonA.hp -= recoilDamage;
+                            Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+                        }
+                        else
+                        {
+                            InflictStatus(pokemonD, effect);
+                        }
                     }
                 }
             }
@@ -2452,8 +2454,6 @@ public static class Program
     }
     public static Species FetchMon(string pk)
     {
-        string jsonP = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(jsonP);
         foreach (Species s in AllPokemon)
         {
             if (s != null && s.name == pk)
@@ -2465,13 +2465,6 @@ public static class Program
     }
     public static MoveB FetchMove(string mv)
     {
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new JsonStringEnumConverter() },
-            PropertyNameCaseInsensitive = true
-        };
-        string jsonM = File.ReadAllText("AllMoves.json");
-        List<MoveB> AllMoves = JsonSerializer.Deserialize<List<MoveB>>(jsonM, options);
         foreach (MoveB m in AllMoves)
         {
             if (m != null && m.name == mv)
@@ -2484,18 +2477,6 @@ public static class Program
     public static void Main()
     {
         Random rnd = new Random();
-
-        string jsonP = File.ReadAllText("AllPokemon.json");
-        List<Species> AllPokemon = JsonSerializer.Deserialize<List<Species>>(jsonP);
-
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new JsonStringEnumConverter() }, 
-            PropertyNameCaseInsensitive = true
-        };
-
-        string jsonM = File.ReadAllText("AllMoves.json");
-        List<MoveB> AllMoves = JsonSerializer.Deserialize<List<MoveB>>(jsonM, options);
 
         Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
@@ -2715,9 +2696,10 @@ public static class Program
             }
             else if (presetName == "Lion")
             {
-                Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 109, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+               // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+                Species species = new Species("Lion", 1, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Pokemon Lion = new Pokemon(species, 50);
-                MoveB physical = new MoveB("Physical", 1, 100, 1, 100, 100, 0, true, false, null);
+                MoveB physical = new MoveB("Physical", 0, 60, 1, 100, 100, 0, true, false, null);
                 Move physMove = new Move(physical);
                 Lion.AddMove(physMove);
                 List<Pokemon> PokemonList = new List<Pokemon>();
@@ -2778,6 +2760,7 @@ public static class Program
                             }
                         }
                         PokemonList.Add(temp);
+
                     }
                 }
 
@@ -2787,6 +2770,37 @@ public static class Program
                 Console.WriteLine("[3] Smart(Gym/E4/Champion)");
                 Console.WriteLine("[4] Perfect(near human)");
                 int aiLevel = Convert.ToInt32(Console.ReadLine());
+
+                for (int i = 0; i < 1000000000; i++)
+                {
+                    PokeBattle(PokemonList[0], Lion, aiLevel);
+
+                    if (Lion.hp > 0)
+                    {
+                        Lion.Heal();
+                        i--;
+                        try
+                        {
+                            PokemonList.RemoveAt(0);
+                        }
+                        catch
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Lion.Heal();
+                    }
+                    if (PokemonList.Count() != 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"{1000000000 - i} Lions are remaining. Current pokemon battler: {PokemonList[0].name}");
+                    }
+                    else break;
+                }
+                if(PokemonList.Count() == 0) Console.WriteLine("Lion won");
+                else Console.WriteLine("Pokemon won");
 
                 Console.WriteLine("Lion in progress");
             }

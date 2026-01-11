@@ -1,29 +1,56 @@
 [
   {
-    "name": "Flamethrower",
-    "type": 2,
-    "power": 90,
+    "name": "Pound",
+    "type": 1,
+    "power": 40,
     "split": 1,
     "acc": 100,
-    "maxPP": 15,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Karate Chop",
+    "type": 7,
+    "power": 50,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Mega Punch",
+    "type": 1,
+    "power": 80,
+    "split": 1,
+    "acc": 85,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Pay Day",
+    "type": 1,
+    "power": 40,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
     "priority": 0,
     "contact": false,
     "protect": false,
-    "effectList": [
-      {
-        "effectStatus": "Burn",
-        "effectStat": "None",
-        "effectChance": 10,
-        "effectPower": 0,
-	"recoil": false,
-	"multiHit": 1
-      }
-    ]
+    "effectList": []
   },
   {
-    "name": "Iron Head",
-    "type": 8,
-    "power": 80,
+    "name": "Fire Punch",
+    "type": 2,
+    "power": 75,
     "split": 1,
     "acc": 100,
     "maxPP": 15,
@@ -32,9 +59,9 @@
     "protect": false,
     "effectList": [
       {
-        "effectStatus": "None",
-        "effectStat": "None",
-        "effectChance": 30,
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 10,
         "effectPower": 0,
         "recoil": false,
         "multiHit": 1
@@ -42,19 +69,202 @@
     ]
   },
   {
-    "name": "Air Slash",
-    "type": 3,
+    "name": "Ice Punch",
+    "type": 6,
     "power": 75,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 2,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thunder Punch",
+    "type": 4,
+    "power": 75,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Scratch",
+    "type": 1,
+    "power": 40,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Vise Grip",
+    "type": 1,
+    "power": 55,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Guillotine",
+    "type": 1,
+    "power": -1,
+    "split": 1,
+    "acc": 30,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Swords Dance",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Cut",
+    "type": 1,
+    "power": 50,
+    "split": 1,
+    "acc": 95,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Gust",
+    "type": 10,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Wing Attack",
+    "type": 10,
+    "power": 60,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Whirlwind",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": -6,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Fly",
+    "type": 10,
+    "power": 90,
     "split": 1,
     "acc": 95,
     "maxPP": 15,
     "priority": 0,
-    "contact": false,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Slam",
+    "type": 1,
+    "power": 80,
+    "split": 1,
+    "acc": 75,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Vine Whip",
+    "type": 5,
+    "power": 45,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Stomp",
+    "type": 1,
+    "power": 65,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
     "protect": false,
     "effectList": [
       {
-        "effectStatus": "None",
-        "effectStat": "None",
+        "effectStatus": 9,
+        "effectStat": 0,
         "effectChance": 30,
         "effectPower": 0,
         "recoil": false,
@@ -63,45 +273,333 @@
     ]
   },
   {
-    "name": "Earthquake",
-    "type": 5,
-    "power": 100,
+    "name": "Double Kick",
+    "type": 7,
+    "power": 30,
     "split": 1,
     "acc": 100,
-    "maxPP": 10,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 2
+      }
+    ]
+  },
+  {
+    "name": "Mega Kick",
+    "type": 1,
+    "power": 120,
+    "split": 1,
+    "acc": 75,
+    "maxPP": 5,
     "priority": 0,
     "contact": true,
     "protect": false,
     "effectList": []
   },
   {
-    "name": "Dragon Claw",
-    "type": 16,
-    "power": 80,
+    "name": "Sand Attack",
+    "type": 9,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 6,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Headbutt",
+    "type": 1,
+    "power": 70,
     "split": 1,
     "acc": 100,
     "maxPP": 15,
     "priority": 0,
     "contact": true,
     "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 9,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Horn Attack",
+    "type": 1,
+    "power": 65,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
     "effectList": []
   },
   {
-    "name": "Energy Ball",
-    "type": 12,
-    "power": 90,
+    "name": "Horn Drill",
+    "type": 1,
+    "power": -1,
+    "split": 1,
+    "acc": 30,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Tackle",
+    "type": 1,
+    "power": 40,
     "split": 1,
     "acc": 100,
-    "maxPP": 10,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Body Slam",
+    "type": 1,
+    "power": 85,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Take Down",
+    "type": 1,
+    "power": 90,
+    "split": 1,
+    "acc": 85,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 4,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Double-Edge",
+    "type": 1,
+    "power": 120,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 3,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Tail Whip",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 30,
     "priority": 0,
     "contact": false,
     "protect": false,
     "effectList": [
       {
-        "effectStatus": "None",
-        "effectStat": "Spa",
-        "effectChance": 10,
-        "effectPower": -2,
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Poison Sting",
+    "type": 8,
+    "power": 15,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Leer",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Bite",
+    "type": 16,
+    "power": 60,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 9,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Growl",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Roar",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": -6,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Sing",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 55,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 6,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Supersonic",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 55,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
         "recoil": false,
         "multiHit": 1
       }

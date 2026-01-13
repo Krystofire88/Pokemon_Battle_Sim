@@ -228,8 +228,10 @@ public class Pokemon
     public int confusionTimer { get; set; } = 0;
     public int toxicCounter { get; set; } = 0;
     public int critRatio { get; set; } = 24;
-    public bool ChargingMove { get; set; } = false;
-    public bool Invurnable { get; set; } = false;
+    public bool chargingMove { get; set; } = false;
+    public bool reCharge { get; set; } = false;
+    public bool invurnable { get; set; } = false;
+    public Move lastMove { get; set; } = null;
 
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
@@ -396,6 +398,11 @@ public class Pokemon
         UnMegaEvolve();
         UnDmax();
         UnTerastallize();
+        dMaxTimer = 0;
+        lastMove = null;
+        invurnable = false;
+        chargingMove = false;
+        reCharge = false;
     }
     public void PokeInfo()
     {
@@ -688,7 +695,7 @@ public class Pokemon
     public bool DoIMove()
     {
         Random rnd = new Random();
-        if (ChargingMove)
+        if (reCharge)
         {
             return false;
         }
@@ -1285,7 +1292,7 @@ public static class Program
                 return;
         }
 
-        if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.ChargingMove)
+        if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.chargingMove)
         {
             double attack = 0.0;
             double defense = 0.0;
@@ -1318,20 +1325,28 @@ public static class Program
                 if (pokemonD.hp < 0) pokemonD.hp = 0;
                 return;
             }
-            List<string> twoTurn = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock", "Hyper Beam", "Giga Impact" };
-            if(twoTurn.Contains(move.moveB.name) && !pokemonA.ChargingMove)
+            List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock" };
+            List<string> invurnable = new List<string> { "Fly", "Dig", "Dive", "Bounce" };
+            if (charge.Contains(move.moveB.name) && !pokemonA.chargingMove)
             {
-                pokemonA.ChargingMove = true;
+                pokemonA.chargingMove = true;
                 Console.WriteLine($"{pokemonA.species.name} is charging up for {move.moveB.name}!");
+                if (invurnable.Contains(move.moveB.name))
+                {
+                    pokemonA.invurnable = true;
+                }
+                pokemonA.lastMove = move;
                 return;
             }
-            else
+            else if (charge.Contains(move.moveB.name) && pokemonA.chargingMove)
             {
-                if (pokemonA.ChargingMove)
-                {
-                    pokemonA.ChargingMove = false;
-                }
+                    pokemonA.chargingMove = false;
+                    if (invurnable.Contains(move.moveB.name))
+                    {
+                        pokemonA.invurnable = false;
+                    }
             }
+            pokemonA.lastMove = move;
             int numHits = 1;
             if (move.moveB.effectList != null && move.moveB.effectList.Count > 0) numHits = move.moveB.effectList[0].multiHit;
             for (int i = 0; i < numHits; i++)
@@ -1797,6 +1812,7 @@ public static class Program
             {
                 currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
                 Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
+                currentPokemon1.lastMove = null;
                 if (gimmick1 == false)
                 {
                     PreTurnTrainerCheck(currentPokemon1, team1, ai);
@@ -1807,7 +1823,10 @@ public static class Program
                 }
                 if (currentPokemon1.DoIMove())
                 {
-                    move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                    if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
+                        move1 = currentPokemon1.lastMove;
+                    else
+                        move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                     double para = 1;
                     if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
                     spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
@@ -1817,6 +1836,7 @@ public static class Program
             {
                 currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
                 Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
+                currentPokemon2.lastMove = null;
                 if (gimmick2 == false)
                 {
                     PreTurnTrainerCheck(currentPokemon2, team2, ai);
@@ -1827,7 +1847,10 @@ public static class Program
                 }
                 if (currentPokemon2.DoIMove())
                 {
-                    move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                    if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
+                        move2 = currentPokemon2.lastMove;
+                    else
+                        move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                     double para = 1;
                     if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
                     spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
@@ -1841,6 +1864,7 @@ public static class Program
                 if (preSwitch1 != currentPokemon1)
                 {
                     Console.WriteLine($"{team1.name} switched to {currentPokemon1.name}");
+                    currentPokemon1.lastMove = null;
                 }
                 else
                 {
@@ -1854,7 +1878,10 @@ public static class Program
                     }
                     if (currentPokemon1.DoIMove())
                     {
-                        move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                        if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
+                            move1 = currentPokemon1.lastMove;
+                        else
+                            move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                         double para = 1;
                         if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
                         spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
@@ -1868,6 +1895,7 @@ public static class Program
                 if (preSwitch2 != currentPokemon2)
                 {
                     Console.WriteLine($"{team2.name} switched to {currentPokemon2.name}");
+                    currentPokemon2.lastMove = null;
                 }
                 else
                 {
@@ -1881,7 +1909,10 @@ public static class Program
                     }
                     if (currentPokemon2.DoIMove())
                     {
-                        move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                        if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
+                            move2 = currentPokemon2.lastMove;
+                        else
+                            move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                         double para = 1;
                         if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
                         spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
@@ -1889,6 +1920,8 @@ public static class Program
                 }
             }
 
+            if(currentPokemon1.lastMove != null) Console.WriteLine($"last move: {currentPokemon1.lastMove.moveB.name}");
+            else Console.WriteLine("last move: none");
             int priority1 = 0;
             int priority2 = 0;
             if (move1 != null) priority1 = move1.moveB.priority;
@@ -1990,6 +2023,15 @@ public static class Program
             def.UnTerastallize();
             def.dMaxTimer = 0;
         }
+        if (atk.hp <= 0)
+        {
+            Console.WriteLine($"{atk.name} fainted");
+            atk.UnDmax();
+            atk.UnMegaEvolve();
+            atk.UnTerastallize();
+            atk.dMaxTimer = 0;
+        }
+
     }
     public static void PreTurnTrainerCheck(Pokemon pk, Trainer tr, int ai)
     {
@@ -2934,13 +2976,13 @@ public static class Program
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[681], 50);
-                pk.AddMove(new Move(FetchMove("Iron Head")));
+                pk.AddMove(new Move(FetchMove("Fly")));
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[6], 50);
-                pk.AddMove(new Move(FetchMove("Flamethrower")));
-                pk.AddMove(new Move(FetchMove("Air Slash")));
+                pk.AddMove(new Move(FetchMove("Fly")));
+                pk.AddMove(new Move(FetchMove("Fly")));
                 pk.gmax = true;
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();

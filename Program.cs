@@ -8,8 +8,6 @@ using System.Text.Json.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
-
-
 public enum Status
 {
     None = 0,
@@ -20,7 +18,8 @@ public enum Status
     Toxic = 5,
     Sleep = 6,
     Confusion = 7,
-    Infatuation = 8
+    Infatuation = 8,
+    Flinch = 9
 }
 public enum Stat
 {
@@ -32,6 +31,16 @@ public enum Stat
     Spe = 5,
     Acc = 6,
     Eva = 7
+}
+public enum Weather
+{
+    None = 0,
+    Sun = 1,
+    Rain = 2,
+    Sandstorm = 3,
+    Hail = 4,
+    HarshSun = 5,
+    HeavyRain = 6
 }
 public class Trainer
 {
@@ -47,6 +56,7 @@ public class Trainer
     }
     public void AddPokemon(Pokemon pokemon)
     {
+        if (pokemon.moveNum == 0) return;
         if (numPoke < 6)
         {
             team.Add(pokemon);
@@ -217,6 +227,10 @@ public class Pokemon
     public int sleepTimer { get; set; } = 0;
     public int confusionTimer { get; set; } = 0;
     public int toxicCounter { get; set; } = 0;
+    public int critRatio { get; set; } = 24;
+    public bool ChargingMove { get; set; } = false;
+    public bool Invurnable { get; set; } = false;
+
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
@@ -322,6 +336,7 @@ public class Pokemon
     }
     public void AddMove(Move move)
     {
+        if (move == null) return;
         if (moveNum < 4)
         {
             moveSet[moveNum] = move;
@@ -673,7 +688,11 @@ public class Pokemon
     public bool DoIMove()
     {
         Random rnd = new Random();
-        if (statusVol == Status.Sleep)
+        if (ChargingMove)
+        {
+            return false;
+        }
+        else if (statusVol == Status.Sleep)
         {
             if (sleepTimer > 0)
             {
@@ -705,16 +724,16 @@ public class Pokemon
         }
         else if (statusVol == Status.Paralysis)
         {
-                int chance = rnd.Next(0, 4);
-                if (chance == 0)
-                {
-                    Console.WriteLine($"{species.name} is paralyzed and can't move!");
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+            int chance = rnd.Next(0, 4);
+            if (chance == 0)
+            {
+                Console.WriteLine($"{species.name} is paralyzed and can't move!");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         else
         {
@@ -764,6 +783,30 @@ public class Pokemon
             }
             return true;
         }
+    }
+    public bool IsImmune(Status st)
+    {
+        switch (st)
+        {
+            case Status.Burn:
+                if (species.type1 == 2 || species.type2 == 2) return true;
+                return false;
+            case Status.Freeze:
+                if (species.type1 == 6 || species.type2 == 6) return true;
+                return false;
+            case Status.Paralysis:
+                if (species.type1 == 4 || species.type2 == 4) return true;
+                return false;
+            case Status.Poison:
+                if (species.type1 == 8 || species.type2 == 8 || species.type1 == 18 || species.type2 == 18) return true;
+                return false;
+            case Status.Toxic:
+                if (species.type1 == 8 || species.type2 == 8 || species.type1 == 18 || species.type2 == 18) return true;
+                return false;
+            default:
+                return false;
+        }
+        
     }
     public bool CheckStone()
     {
@@ -819,6 +862,7 @@ public class Pokemon
             if (species.name == s.name.Replace("-Mega", ""))
             {
                 Console.WriteLine($"{species.name} mega evolved into Mega {species.name}");
+                if(name == species.name) name = s.name;
                 species = s;
                 break;
             }
@@ -828,7 +872,8 @@ public class Pokemon
                     Console.Write($"Charizard mega evolved into {s.name} X");
                 else
                     Console.Write($"Mewtwo mega evolved into {s.name} X");
-                species = s;
+                if (name == species.name) name = s.name;
+                species = s;              
                 break;
             }
             else if (species.name == "Charizard" && s.name == "Charizard-Mega-Y" || species.name == "Mewtwo" && s.name == "Mewtwo-Mega-Y")
@@ -837,6 +882,7 @@ public class Pokemon
                     Console.Write($"Charizard mega evolved into {s.name} Y");
                 else
                     Console.Write($"Mewtwo mega evolved into {s.name} Y");
+                if(name == species.name) name = s.name;
                 species = s;
                 break;
             }
@@ -1002,7 +1048,8 @@ public class Move
     public MoveB moveB { get; set; }
     public int PP { get; set; }
     public Move(MoveB moveB)
-    { 
+    {
+        if (moveB == null) return;
         this.moveB = moveB;
         this.PP = moveB.maxPP;
     }
@@ -1026,7 +1073,7 @@ public static class Program
         Converters = { new JsonStringEnumConverter() },
         PropertyNameCaseInsensitive = true
     };
-    public static List<Species> AllPokemon { get;  } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText("AllPokemon.json"));
+    public static List<Species> AllPokemon { get; } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText("AllPokemon.json"));
     public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText("AllMoves.json"), JsonOptions);
     public static int GetTypeId(string typeName)
     {
@@ -1207,19 +1254,38 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move)
     {
-        if(move.PP <= 0)
+        if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
             MoveB struggle = new MoveB("Struggle", 0, 50, 1, 100, 101, 0, true, false, new List<MoveEffect>());
+            Console.WriteLine($"{pokemonA.species.name} used Struggle!");
             pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
             if (pokemonD.hp < 0) pokemonD.hp = 0;
-            Console.WriteLine($"{pokemonA.species.name} used Struggle!");
             pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 4.0));
             Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
             return;
         }
         move.PP--;
-        if (CheckAcc(move, pokemonA, pokemonD) == true)
+        List<string> OHKO = new List<string> { "Fissure", "Guillotine", "Horn Drill", "Sheer Cold" };
+        if (OHKO.Contains(move.moveB.name))
+        {
+            if(pokemonD.level > pokemonA.level) return;
+            int OHKOcheck = 30 + pokemonA.level - pokemonD.level;
+            if(!(move.moveB.name == "Sheer Cold" && (pokemonA.species.type1 == 6 || pokemonA.species.type2 == 6)))
+            {
+                OHKOcheck = 20 + pokemonA.level - pokemonD.level;
+            }
+            Random rnd = new Random();
+            int check = rnd.Next(1, 101);
+
+            if (check <= OHKOcheck)
+            {
+                pokemonD.hp = 0;
+            }
+                return;
+        }
+
+        if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.ChargingMove)
         {
             double attack = 0.0;
             double defense = 0.0;
@@ -1234,6 +1300,38 @@ public static class Program
                 attack = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
                 defense = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
             }
+            List<string> critMoves = new List<string> { "Aeroblast", "Air Cutter", "Aqua Cutter", "Attack Order", "Blaze Kick", "Crabhammer", "Cross Chop", "Cross Poison", "Drill Run", "Esper Wing", "Ivy Cudgel", "Karate Chop", "Leaf Blade", "Night Slash", "Plasma Fists", "Poison Tail", "Psycho Cut", "Razor Leaf", "Razor Wind", "Shadow Blast", "Shadow Claw", "Sky Attack", "Slash", "Snipe Shot", "Spacial Rend", "Stone Edge", "Triple Arrows" };
+            if (critMoves.Contains(move.moveB.name))
+            {
+                rcrit = 8;
+            }
+            if (move.moveB.name == "Night Shade" || move.moveB.name == "Seismic Toss")
+            {
+                pokemonD.hp -= pokemonA.level;
+                if (pokemonD.hp < 0) pokemonD.hp = 0;
+                return;
+            }
+            if (move.moveB.name == "Super Fang")
+            {
+                int halfHp = Convert.ToInt32(Math.Floor((double)pokemonD.hp / 2));
+                pokemonD.hp -= halfHp;
+                if (pokemonD.hp < 0) pokemonD.hp = 0;
+                return;
+            }
+            List<string> twoTurn = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock", "Hyper Beam", "Giga Impact" };
+            if(twoTurn.Contains(move.moveB.name) && !pokemonA.ChargingMove)
+            {
+                pokemonA.ChargingMove = true;
+                Console.WriteLine($"{pokemonA.species.name} is charging up for {move.moveB.name}!");
+                return;
+            }
+            else
+            {
+                if (pokemonA.ChargingMove)
+                {
+                    pokemonA.ChargingMove = false;
+                }
+            }
             int numHits = 1;
             if (move.moveB.effectList != null && move.moveB.effectList.Count > 0) numHits = move.moveB.effectList[0].multiHit;
             for (int i = 0; i < numHits; i++)
@@ -1241,14 +1339,26 @@ public static class Program
                 pokemonD.hp -= Damage(pokemonA, pokemonD, move, move.moveB.power, attack, defense, rcrit, false);
                 if (pokemonD.hp < 0) pokemonD.hp = 0;
                 if (move.moveB.effectList != null)
-                { 
+                {
                     foreach (MoveEffect effect in move.moveB.effectList)
                     {
                         if (effect.recoil)
                         {
-                            int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
-                            pokemonA.hp -= recoilDamage;
-                            Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+                            if (effect.effectPower > 0)
+                            {
+                                int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
+                                pokemonA.hp -= recoilDamage;
+                                if (pokemonA.hp < 0) pokemonA.hp = 0;
+                                Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+                            }
+                            else
+                            {
+
+                                int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / Math.Abs(effect.effectPower)));
+                                pokemonA.hp += lifeSteel;
+                                if (pokemonA.hp > pokemonA.maxHP) pokemonA.hp = pokemonA.maxHP;
+                                Console.WriteLine($"{pokemonA.species.name} regained some hp");
+                            }
                         }
                         else
                         {
@@ -1378,6 +1488,7 @@ public static class Program
             //        if (pokemonD.hp < 0) pokemonD.hp = 0;
             //        if (status == true) InflictStatus(pokemon, move);
             //    }
+            pokemonA.critRatio = 25;
         }
         else
         {
@@ -1413,7 +1524,7 @@ public static class Program
                 stab = 2.0;
             }
         }
-        
+
         double status = 1.00;
         if (pokemonA.statusVol == Status.Burn && move.moveB.split == 1)
         {
@@ -1425,8 +1536,7 @@ public static class Program
 
         Random rnd = new Random();
         double crit = 1;
-        if (rcrit != 25) rcrit = 7;
-        if (rnd.Next(0, rcrit) == 0 && !test)
+        if (rnd.Next(0, pokemonA.critRatio + 1) == 0 && !test)
         {
             crit = 1.5;
             Console.Write("Critical hit!");
@@ -1450,7 +1560,7 @@ public static class Program
     public static void InflictStatus(Pokemon pk, MoveEffect effect)
     {
         if (effect.effectChance < 101)
-        { 
+        {
             Random rnd = new Random();
             int check = rnd.Next(1, 101);
 
@@ -1548,13 +1658,14 @@ public static class Program
                             break;
                     }
                 }
+                List<Status> nonVolitile = new List<Status> {Status.Confusion, Status.Infatuation, Status.Flinch }; 
                 if (effect.effectStatus != Status.None)
                 {
-                    if (pk.statusVol == Status.None)
+                    if (pk.statusVol == Status.None && !nonVolitile.Contains(effect.effectStatus) && !pk.IsImmune(effect.effectStatus))
                     {
                         pk.statusVol = effect.effectStatus;
                     }
-                    else if (!pk.statusNov.Contains(effect.effectStatus))
+                    else if (!pk.statusNov.Contains(effect.effectStatus) && effect.effectStatus != Status.Flinch && !pk.IsImmune(effect.effectStatus))
                     {
                         pk.statusNov.Add(effect.effectStatus);
                     }
@@ -2458,7 +2569,7 @@ public static class Program
         {
             if (s != null && s.name == pk)
             {
-                return s;            
+                return s;
             }
         }
         return null;
@@ -2696,7 +2807,7 @@ public static class Program
             }
             else if (presetName == "Lion")
             {
-               // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+                // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Species species = new Species("Lion", 1, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Pokemon Lion = new Pokemon(species, 50);
                 MoveB physical = new MoveB("Physical", 0, 60, 1, 100, 100, 0, true, false, null);
@@ -2799,7 +2910,7 @@ public static class Program
                     }
                     else break;
                 }
-                if(PokemonList.Count() == 0) Console.WriteLine("Lion won");
+                if (PokemonList.Count() == 0) Console.WriteLine("Lion won");
                 else Console.WriteLine("Pokemon won");
 
                 Console.WriteLine("Lion in progress");

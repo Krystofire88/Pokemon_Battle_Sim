@@ -604,5 +604,1472 @@
         "multiHit": 1
       }
     ]
+  },
+  {
+    "name": "Acid",
+    "type": 8,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 10,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Ember",
+    "type": 2,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Flamethrower",
+    "type": 2,
+    "power": 90,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Water Gun",
+    "type": 3,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Hydro Pump",
+    "type": 3,
+    "power": 110,
+    "split": 2,
+    "acc": 80,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Surf",
+    "type": 3,
+    "power": 90,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Ice Beam",
+    "type": 6,
+    "power": 90,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 2,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Blizzard",
+    "type": 6,
+    "power": 110,
+    "split": 2,
+    "acc": 70,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 2,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Psybeam",
+    "type": 11,
+    "power": 65,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Bubble Beam",
+    "type": 3,
+    "power": 65,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 10,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Aurora Beam",
+    "type": 6,
+    "power": 65,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 10,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Hyper Beam",
+    "type": 1,
+    "power": 150,
+    "split": 2,
+    "acc": 90,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Peck",
+    "type": 10,
+    "power": 35,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Drill Peck",
+    "type": 10,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Seismic Toss",
+    "type": 7,
+    "power": 0,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Strength",
+    "type": 1,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Absorb",
+    "type": 5,
+    "power": 20,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Mega Drain",
+    "type": 5,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Growth",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Razor Leaf",
+    "type": 5,
+    "power": 55,
+    "split": 1,
+    "acc": 95,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Solar Beam",
+    "type": 5,
+    "power": 120,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Poison Powder",
+    "type": 8,
+    "power": 0,
+    "split": 3,
+    "acc": 75,
+    "maxPP": 35,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Stun Spore",
+    "type": 5,
+    "power": 0,
+    "split": 3,
+    "acc": 75,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Sleep Powder",
+    "type": 5,
+    "power": 0,
+    "split": 3,
+    "acc": 75,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 6,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "String Shot",
+    "type": 12,
+    "power": 0,
+    "split": 3,
+    "acc": 95,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thunder Shock",
+    "type": 4,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thunderbolt",
+    "type": 4,
+    "power": 90,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thunder Wave",
+    "type": 4,
+    "power": 0,
+    "split": 3,
+    "acc": 90,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thunder",
+    "type": 4,
+    "power": 110,
+    "split": 2,
+    "acc": 70,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Rock Throw",
+    "type": 13,
+    "power": 50,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Earthquake",
+    "type": 9,
+    "power": 100,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Fissure",
+    "type": 9,
+    "power": -1,
+    "split": 1,
+    "acc": 30,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Dig",
+    "type": 9,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Toxic",
+    "type": 8,
+    "power": 0,
+    "split": 3,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 5,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Confusion",
+    "type": 11,
+    "power": 50,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Psychic",
+    "type": 11,
+    "power": 90,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 10,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Hypnosis",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 60,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 6,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Agility",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Quick Attack",
+    "type": 1,
+    "power": 40,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 1,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Night Shade",
+    "type": 14,
+    "power": 0,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Screech",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 85,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Double Team",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 7,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Recover",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Harden",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Minimize",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 7,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Smokescreen",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 6,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Confuse Ray",
+    "type": 14,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Withdraw",
+    "type": 3,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Defense Curl",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Haze",
+    "type": 6,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Metronome",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Self-Destruct",
+    "type": 1,
+    "power": 200,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 1,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Lick",
+    "type": 14,
+    "power": 30,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Smog",
+    "type": 8,
+    "power": 30,
+    "split": 2,
+    "acc": 70,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 40,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Sludge",
+    "type": 8,
+    "power": 65,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 40,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Fire Blast",
+    "type": 2,
+    "power": 110,
+    "split": 2,
+    "acc": 85,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Waterfall",
+    "type": 3,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 9,
+        "effectStat": 0,
+        "effectChance": 20,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Swift",
+    "type": 1,
+    "power": 60,
+    "split": 2,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Skull Bash",
+    "type": 1,
+    "power": 130,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Amnesia",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Kinesis",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 80,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 6,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Soft-Boiled",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "High Jump Kick",
+    "type": 7,
+    "power": 130,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Glare",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Dream Eater",
+    "type": 11,
+    "power": 100,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Poison Gas",
+    "type": 8,
+    "power": 0,
+    "split": 3,
+    "acc": 90,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Leech Life",
+    "type": 12,
+    "power": 80,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Sky Attack",
+    "type": 10,
+    "power": 140,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 9,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Spore",
+    "type": 5,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 6,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Splash",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 40,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Acid Armor",
+    "type": 8,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Crabhammer",
+    "type": 3,
+    "power": 100,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Explosion",
+    "type": 1,
+    "power": 250,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 1,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Bonemerang",
+    "type": 9,
+    "power": 50,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 2
+      }
+    ]
+  },
+  {
+    "name": "Rest",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 6,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Rock Slide",
+    "type": 13,
+    "power": 75,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 9,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Tri Attack",
+    "type": 1,
+    "power": 80,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 7,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 7,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 2,
+        "effectStat": 0,
+        "effectChance": 6,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Super Fang",
+    "type": 1,
+    "power": 0,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Slash",
+    "type": 1,
+    "power": 70,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
   }
 ]

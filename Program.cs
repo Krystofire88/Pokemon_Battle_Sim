@@ -42,6 +42,43 @@ public enum Weather
     HarshSun = 5,
     HeavyRain = 6
 }
+public enum Terrain
+{
+    None = 0,
+    Electric = 1,
+    Grassy = 2,
+    Misty = 3,
+    Psychic = 4
+}
+public enum Type
+{
+    None = 0,
+    Normal = 1,
+    Fire = 2,
+    Water = 3,
+    Electric = 4,
+    Grass = 5,
+    Ice = 6,
+    Fighting = 7,
+    Poison = 8,
+    Ground = 9,
+    Flying = 10,
+    Psychic = 11,
+    Bug = 12,
+    Rock = 13,
+    Ghost = 14,
+    Dragon = 15,
+    Dark = 16,
+    Steel = 17,
+    Fairy = 18,
+    Stellar = 19
+}
+public enum Split
+{
+    Physical = 1,
+    Special = 2,
+    Status = 3
+}
 public class Trainer
 {
     public string name { get; }
@@ -168,8 +205,8 @@ public class Trainer
 public class Species
 {
     public string name { get; }
-    public int type1 { get; }
-    public int type2 { get; }
+    public Type type1 { get; }
+    public Type type2 { get; }
     public int Hp { get; }
     public int Atk { get; }
     public int Def { get; }
@@ -183,7 +220,7 @@ public class Species
     public int ratio { get; }
     public bool mega { get; }
     public bool gmax { get; }
-    public Species(string name, int type1, int type2, int Hp, int Atk, int Def, int Spa, int Spd, int Spe, string ability1, string ability2, string abilityH, bool noRatio, int ratio, bool mega, bool gmax)
+    public Species(string name, Type type1, Type type2, int Hp, int Atk, int Def, int Spa, int Spd, int Spe, string ability1, string ability2, string abilityH, bool noRatio, int ratio, bool mega, bool gmax)
     {
         this.name = name;
         this.type1 = type1;
@@ -221,7 +258,7 @@ public class Pokemon
     public bool gmax { get; set; }
     int dMaxLevel;
     public bool isDmax { get; set; } = false;
-    public int tera { get; }
+    public Type tera { get; }
     public bool terastallized { get; set; } = false;
     public int dMaxTimer { get; set; } = 0;
     public int sleepTimer { get; set; } = 0;
@@ -237,7 +274,7 @@ public class Pokemon
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
     public int wins { get; set; }
-    public Pokemon(Species species, string name, bool gender, int level, int ability, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, int tera)
+    public Pokemon(Species species, string name, bool gender, int level, int ability, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, Type tera)
     {
         this.species = species;
         this.name = name;
@@ -275,8 +312,7 @@ public class Pokemon
     {
         this.species = species;
         this.name = species.name;
-        Random rnd = new Random();
-        int gender = rnd.Next(1, 101);
+        int gender = Random.Shared.Next(1, 101);
         bool g = false;
         if (gender <= species.ratio)
         {
@@ -286,21 +322,21 @@ public class Pokemon
         int ability = 1;
         if (species.ability2 != "")
         {
-            ability = rnd.Next(1, 3);
+            ability = Random.Shared.Next(1, 3);
         }
         this.ability = ability;
         this.level = level;
-        this.HpIV = rnd.Next(0, 32);
+        this.HpIV = Random.Shared.Next(0, 32);
         this.HpEV = 0;
-        this.AtkIV = rnd.Next(0, 32);
+        this.AtkIV = Random.Shared.Next(0, 32);
         this.AtkEV = 0;
-        this.DefIV = rnd.Next(0, 32);
+        this.DefIV = Random.Shared.Next(0, 32);
         this.DefEV = 0;
-        this.SpaIV = rnd.Next(0, 32);
+        this.SpaIV = Random.Shared.Next(0, 32);
         this.SpaEV = 0;
-        this.SpdIV = rnd.Next(0, 32);
+        this.SpdIV = Random.Shared.Next(0, 32);
         this.SpdEV = 0;
-        this.SpeIV = rnd.Next(0, 32);
+        this.SpeIV = Random.Shared.Next(0, 32);
         this.SpeEV = 0;
         this.AtkMod = 0;
         this.DefMod = 0;
@@ -317,20 +353,20 @@ public class Pokemon
         "Calm", "Gentle", "Sassy", "Careful", "Quirky"
         };
 
-        string n = natures[rnd.Next(0, 25)];
+        string n = natures[Random.Shared.Next(0, 25)];
         this.nature = n;
         this.heldItem = null;
         bool gMax = false;
-        if (0 == rnd.Next(0, 101))
+        if (0 == Random.Shared.Next(0, 101))
         {
             gMax = true;
         }
         this.gmax = gMax;
         this.dMaxLevel = 10;
-        int typ = species.type1;
+        Type typ = species.type1;
         if (species.type2 != 0)
         {
-            if (rnd.Next(0, 2) == 1) typ = species.type2;
+            if (Random.Shared.Next(0, 2) == 1) typ = species.type2;
         }
         this.tera = typ;
         this.maxHP = CalcHp();
@@ -475,30 +511,29 @@ public class Pokemon
         }
         Console.WriteLine();
     }
-    public string GetType(int type)
+    public string GetType(Type type)
     {
         return type switch
         {
-            0 => "",
-            1 => "Normal",
-            2 => "Fire",
-            3 => "Water",
-            4 => "Electric",
-            5 => "Grass",
-            6 => "Ice",
-            7 => "Fighting",
-            8 => "Poison",
-            9 => "Ground",
-            10 => "Flying",
-            11 => "Psychic",
-            12 => "Bug",
-            13 => "Rock",
-            14 => "Ghost",
-            15 => "Dragon",
-            16 => "Dark",
-            17 => "Steel",
-            18 => "Fairy",
-            19 => "Stellar",
+            Type.None => "",
+            Type.Normal => "Normal",
+            Type.Fire => "Fire",
+            Type.Water => "Water",
+            Type.Electric => "Electric",
+            Type.Grass => "Grass",
+            Type.Ice => "Ice",
+            Type.Fighting => "Fighting",
+            Type.Poison => "Poison",
+            Type.Ground => "Ground",
+            Type.Flying => "Flying",
+            Type.Psychic => "Psychic",
+            Type.Bug => "Bug",
+            Type.Rock => "Rock",
+            Type.Ghost => "Ghost",
+            Type.Dragon => "Dragon",
+            Type.Dark => "Dark",
+            Type.Steel => "Steel",
+            Type.Fairy => "Fairy",
             _ => "error"
         };
     }
@@ -658,17 +693,17 @@ public class Pokemon
             }
         }
         if (moveNum == 1) return currentMoveSet[0];
-        Random rnd = new Random();
         int move = 0;
         if (ai == 1)
-        {
-            move = rnd.Next(0, moveNum);
+        { 
+            move = Random.Shared.Next(0, moveNum);
         }
         else if (ai == 4)
         {
             double highestScore = 0;
             for (int i = 0; i < moveNum; i++)
             {
+                if (currentMoveSet[i].PP == 0) continue;
                 double typing = Program.MatchUp(currentMoveSet[i].moveB.type, opp.species.type1) * Program.MatchUp(currentMoveSet[i].moveB.type, opp.species.type2);
 
                 if (highestScore < typing * Program.FindBestMove(this, opp))
@@ -683,6 +718,7 @@ public class Pokemon
             double highestScore = 0;
             for (int i = 0; i < moveNum; i++)
             {
+                if (currentMoveSet[i].PP == 0) continue;
                 double typing = Program.MatchUp(currentMoveSet[i].moveB.type, opp.species.type1) * Program.MatchUp(currentMoveSet[i].moveB.type, opp.species.type2);
                 if (highestScore < typing)
                 {
@@ -695,7 +731,6 @@ public class Pokemon
     }
     public bool DoIMove()
     {
-        Random rnd = new Random();
         if (reCharge)
         {
             Console.WriteLine($"{name} must recharge and can't move!");
@@ -719,7 +754,7 @@ public class Pokemon
         }
         else if (statusVol == Status.Freeze)
         {
-            int thaw = rnd.Next(0, 5);
+            int thaw = Random.Shared.Next(0, 5);
             if (thaw == 0)
             {
                 statusVol = Status.None;
@@ -734,7 +769,7 @@ public class Pokemon
         }
         else if (statusVol == Status.Paralysis)
         {
-            int chance = rnd.Next(0, 4);
+            int chance = Random.Shared.Next(0, 4);
             if (chance == 0)
             {
                 Console.WriteLine($"{name} is paralyzed and can't move!");
@@ -755,7 +790,7 @@ public class Pokemon
                         if (confusionTimer > 0)
                         {
                             confusionTimer--;
-                            int check = rnd.Next(0, 3);
+                            int check = Random.Shared.Next(0, 3);
                             if (check == 0)
                             {
                                 Console.WriteLine($"{name} is confused and hurt itself in its confusion!");
@@ -777,7 +812,7 @@ public class Pokemon
                         }
                     case
                     Status.Infatuation:
-                        int infatuation = rnd.Next(0, 2);
+                        int infatuation = Random.Shared.Next(0, 2);
                         if (infatuation == 0)
                         {
                             Console.WriteLine($"{name} is immobilized by love!");
@@ -799,19 +834,19 @@ public class Pokemon
         switch (st)
         {
             case Status.Burn:
-                if (species.type1 == 2 || species.type2 == 2) return true;
+                if (species.type1 == Type.Fire || species.type2 == Type.Fire) return true;
                 return false;
             case Status.Freeze:
-                if (species.type1 == 6 || species.type2 == 6) return true;
+                if (species.type1 == Type.Ice || species.type2 == Type.Ice) return true;
                 return false;
             case Status.Paralysis:
-                if (species.type1 == 4 || species.type2 == 4) return true;
+                if (species.type1 == Type.Electric || species.type2 == Type.Electric) return true;
                 return false;
             case Status.Poison:
-                if (species.type1 == 8 || species.type2 == 8 || species.type1 == 18 || species.type2 == 18) return true;
+                if (species.type1 == Type.Poison || species.type2 == Type.Poison || species.type1 == Type.Steel || species.type2 == Type.Steel) return true;
                 return false;
             case Status.Toxic:
-                if (species.type1 == 8 || species.type2 == 8 || species.type1 == 18 || species.type2 == 18) return true;
+                if (species.type1 == Type.Poison || species.type2 == Type.Poison || species.type1 == Type.Steel || species.type2 == Type.Steel) return true;
                 return false;
             default:
                 return false;
@@ -1012,16 +1047,16 @@ public class Pokemon
 public class MoveB
 {
     public string name { get; }
-    public int type { get; }
+    public Type type { get; }
     public int power { get; }
-    public int split { get; }
+    public Split split { get; }
     public int acc { get; }
     public int maxPP { get; }
     public int priority { get; } = 0;
     public bool contact { get; }
     public bool protect { get; }
     public List<MoveEffect> effectList { get; private set; }
-    public MoveB(string name, int type, int power, int split, int acc, int maxPP, int priority, bool contact, bool protect, List<MoveEffect> effectList)
+    public MoveB(string name, Type type, int power, Split split, int acc, int maxPP, int priority, bool contact, bool protect, List<MoveEffect> effectList)
     {
         this.name = name;
         this.type = type;
@@ -1085,33 +1120,33 @@ public static class Program
     };
     public static List<Species> AllPokemon { get; } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText("AllPokemon.json"));
     public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText("AllMoves.json"), JsonOptions);
-    public static int GetTypeId(string typeName)
+    public static Type GetTypeId(string typeName)
     {
         return typeName.ToLower() switch
         {
-            "" => 0,
-            "normal" => 1,
-            "fire" => 2,
-            "water" => 3,
-            "electric" => 4,
-            "grass" => 5,
-            "ice" => 6,
-            "fighting" => 7,
-            "poison" => 8,
-            "ground" => 9,
-            "flying" => 10,
-            "psychic" => 11,
-            "bug" => 12,
-            "rock" => 13,
-            "ghost" => 14,
-            "dragon" => 15,
-            "dark" => 16,
-            "steel" => 17,
-            "fairy" => 18,
-            _ => -1
+            "" => Type.None,
+            "normal" => Type.Normal,
+            "fire" => Type.Fire,
+            "water" => Type.Water,
+            "electric" => Type.Electric,
+            "grass" => Type.Grass,
+            "ice" => Type.Ice,
+            "fighting" => Type.Fighting,
+            "poison" => Type.Poison,
+            "ground" => Type.Ground,
+            "flying" => Type.Flying,
+            "psychic" => Type.Psychic,
+            "bug" => Type.Bug,
+            "rock" => Type.Rock,
+            "ghost" => Type.Ghost,
+            "dragon" => Type.Dragon,
+            "dark" => Type.Dark,
+            "steel" => Type.Steel,
+            "fairy" => Type.Fairy,
+            _ => Type.None
         };
     }
-    public static double MatchUp(int attackType, int defenseType)
+    public static double MatchUp(Type attackType, Type defenseType)
     {
         if (defenseType == 0) return 1.0;
 
@@ -1119,119 +1154,119 @@ public static class Program
 
         switch (attackType)
         {
-            case 1:
+            case Type.Normal:
                 //Normal
-                if (defenseType == 13 || defenseType == 17) eff = 0.5; //vs Rock, Steel
-                else if (defenseType == 14) eff = 0.0;// vs Ghost
+                if (defenseType == Type.Rock || defenseType == Type.Steel) eff = 0.5; //vs Rock, Steel
+                else if (defenseType == Type.Ghost) eff = 0.0;// vs Ghost
                 break;
 
-            case 2:
+            case Type.Fire:
                 // Fire
-                if (defenseType == 5 || defenseType == 6 || defenseType == 12 || defenseType == 17) eff = 2.0; //vs Grass, Ice, Bug, Steel
-                else if (defenseType == 2 || defenseType == 3 || defenseType == 13 || defenseType == 15) eff = 0.5; //vs Fire, Water, Rock, Dragon
+                if (defenseType == Type.Grass || defenseType == Type.Ice || defenseType == Type.Bug || defenseType == Type.Steel) eff = 2.0; //vs Grass, Ice, Bug, Steel
+                else if (defenseType == Type.Fire || defenseType == Type.Water || defenseType == Type.Rock || defenseType == Type.Dragon) eff = 0.5; //vs Fire, Water, Rock, Dragon
                 break;
 
-            case 3:
+            case Type.Water:
                 // Water
-                if (defenseType == 2 || defenseType == 9 || defenseType == 13) eff = 2.0;// vs Fire, Ground, Rock
-                else if (defenseType == 3 || defenseType == 5 || defenseType == 15) eff = 0.5;// vs Water, Grass, Dragon
+                if (defenseType == Type.Fire || defenseType == Type.Ground || defenseType == Type.Rock) eff = 2.0;// vs Fire, Ground, Rock
+                else if (defenseType == Type.Water || defenseType == Type.Grass || defenseType == Type.Dragon) eff = 0.5;// vs Water, Grass, Dragon
                 break;
 
-            case 4:
+            case Type.Electric:
                 // Electric
-                if (defenseType == 3 || defenseType == 10) eff = 2.0; //vs Water, Flying
-                else if (defenseType == 4 || defenseType == 5 || defenseType == 15) eff = 0.5;// vs Electric, Grass, Dragon
-                else if (defenseType == 9) eff = 0.0;// vs Ground
+                if (defenseType == Type.Water || defenseType == Type.Flying) eff = 2.0; //vs Water, Flying
+                else if (defenseType == Type.Electric || defenseType == Type.Grass || defenseType == Type.Dragon) eff = 0.5;// vs Electric, Grass, Dragon
+                else if (defenseType == Type.Ground) eff = 0.0;// vs Ground
                 break;
 
-            case 5:
+            case Type.Grass:
                 // Grass
-                if (defenseType == 3 || defenseType == 9 || defenseType == 13) eff = 2.0;// vs Water, Ground, Rock
-                else if (defenseType == 2 || defenseType == 5 || defenseType == 8 || defenseType == 10 || defenseType == 12 || defenseType == 15 || defenseType == 17) eff = 0.5; //vs Fire, Grass, Poison, Flying, Bug, Dragon, Steel
+                if (defenseType == Type.Water || defenseType == Type.Ground || defenseType == Type.Rock) eff = 2.0;// vs Water, Ground, Rock
+                else if (defenseType == Type.Fire || defenseType == Type.Grass || defenseType == Type.Poison || defenseType == Type.Flying || defenseType == Type.Bug || defenseType == Type.Dragon || defenseType == Type.Steel) eff = 0.5; //vs Fire, Grass, Poison, Flying, Bug, Dragon, Steel
                 break;
 
-            case 6:
+            case Type.Ice:
                 // Ice
-                if (defenseType == 5 || defenseType == 9 || defenseType == 10 || defenseType == 15) eff = 2.0; //vs Grass, Ground, Flying, Dragon
-                else if (defenseType == 2 || defenseType == 3 || defenseType == 6 || defenseType == 17) eff = 0.5;// vs Fire, Water, Ice, Steel
+                if (defenseType == Type.Grass || defenseType == Type.Ground || defenseType == Type.Flying || defenseType == Type.Dragon) eff = 2.0; //vs Grass, Ground, Flying, Dragon
+                else if (defenseType == Type.Fire || defenseType == Type.Water || defenseType == Type.Ice || defenseType == Type.Steel) eff = 0.5;// vs Fire, Water, Ice, Steel
                 break;
 
-            case 7:
+            case Type.Fighting:
                 //   Fighting
-                if (defenseType == 1 || defenseType == 6 || defenseType == 13 || defenseType == 16 || defenseType == 17) eff = 2.0; //vs Normal, Ice, Rock, Dark, Steel
-                else if (defenseType == 8 || defenseType == 10 || defenseType == 11 || defenseType == 12 || defenseType == 18) eff = 0.5; //vs Poison, Flying, Psychic, Bug, Fairy
-                else if (defenseType == 14) eff = 0.0; //vs Ghost
+                if (defenseType == Type.Normal || defenseType == Type.Ice || defenseType == Type.Rock || defenseType == Type.Dark || defenseType == Type.Steel) eff = 2.0; //vs Normal, Ice, Rock, Dark, Steel
+                else if (defenseType == Type.Poison || defenseType == Type.Flying || defenseType == Type.Psychic || defenseType == Type.Bug || defenseType == Type.Fairy) eff = 0.5; //vs Poison, Flying, Psychic, Bug, Fairy
+                else if (defenseType == Type.Ghost) eff = 0.0; //vs Ghost
                 break;
 
-            case 8:
+            case Type.Poison:
                 //  Poison
-                if (defenseType == 5 || defenseType == 18) eff = 2.0;// vs Grass, Fairy
-                else if (defenseType == 8 || defenseType == 9 || defenseType == 13 || defenseType == 14) eff = 0.5; //vs Poison, Ground, Rock, Ghost
-                else if (defenseType == 17) eff = 0.0; //vs Steel
+                if (defenseType == Type.Grass || defenseType == Type.Fairy) eff = 2.0;// vs Grass, Fairy
+                else if (defenseType == Type.Poison || defenseType == Type.Ground || defenseType == Type.Rock || defenseType == Type.Ghost) eff = 0.5; //vs Poison, Ground, Rock, Ghost
+                else if (defenseType == Type.Steel) eff = 0.0; //vs Steel
                 break;
 
-            case 9:
+            case Type.Ground:
                 //Ground
-                if (defenseType == 2 || defenseType == 4 || defenseType == 8 || defenseType == 13 || defenseType == 17) eff = 2.0;// vs Fire, Electric, Poison, Rock, Steel
-                else if (defenseType == 5 || defenseType == 12) eff = 0.5; //vs Grass, Bug
-                else if (defenseType == 10) eff = 0.0; //vs Flying
+                if (defenseType == Type.Fire || defenseType == Type.Electric || defenseType == Type.Poison || defenseType == Type.Rock || defenseType == Type.Steel) eff = 2.0;// vs Fire, Electric, Poison, Rock, Steel
+                else if (defenseType == Type.Grass || defenseType == Type.Bug) eff = 0.5; //vs Grass, Bug
+                else if (defenseType == Type.Flying) eff = 0.0; //vs Flying
                 break;
 
-            case 10:
+            case Type.Flying:
                 // Flying
-                if (defenseType == 5 || defenseType == 7 || defenseType == 12) eff = 2.0; //vs Grass, Fighting, Bug
-                else if (defenseType == 4 || defenseType == 13 || defenseType == 17) eff = 0.5; //vs Electric, Rock, Steel
+                if (defenseType == Type.Grass || defenseType == Type.Fighting || defenseType == Type.Bug) eff = 2.0; //vs Grass, Fighting, Bug
+                else if (defenseType == Type.Electric || defenseType == Type.Rock || defenseType == Type.Steel) eff = 0.5; //vs Electric, Rock, Steel
                 break;
 
-            case 11:
+            case Type.Psychic:
                 //Psychic
-                if (defenseType == 7 || defenseType == 8) eff = 2.0;// vs Fighting, Poison
-                else if (defenseType == 11 || defenseType == 17) eff = 0.5;// vs Psychic, Steel
-                else if (defenseType == 16) eff = 0.0;// vs Dark
+                if (defenseType == Type.Fighting || defenseType == Type.Poison) eff = 2.0;// vs Fighting, Poison
+                else if (defenseType == Type.Psychic || defenseType == Type.Steel) eff = 0.5;// vs Psychic, Steel
+                else if (defenseType == Type.Dark) eff = 0.0;// vs Dark
                 break;
 
-            case 12:
+            case Type.Bug:
                 //  Bug
-                if (defenseType == 5 || defenseType == 11 || defenseType == 16) eff = 2.0;// vs Grass, Psychic, Dark
-                else if (defenseType == 2 || defenseType == 7 || defenseType == 8 || defenseType == 10 || defenseType == 14 || defenseType == 17 || defenseType == 18) eff = 0.5; //vs Fire, Fighting, Poison, Flying, Ghost, Steel, Fairy
+                if (defenseType == Type.Grass || defenseType == Type.Psychic || defenseType == Type.Dark) eff = 2.0;// vs Grass, Psychic, Dark
+                else if (defenseType == Type.Fire || defenseType == Type.Fighting || defenseType == Type.Poison || defenseType == Type.Flying || defenseType == Type.Ghost || defenseType == Type.Steel || defenseType == Type.Fairy) eff = 0.5; //vs Fire, Fighting, Poison, Flying, Ghost, Steel, Fairy
                 break;
 
-            case 13:
+            case Type.Rock:
                 //  Rock
-                if (defenseType == 2 || defenseType == 6 || defenseType == 10 || defenseType == 12) eff = 2.0;// vs Fire, Ice, Flying, Bug
-                else if (defenseType == 7 || defenseType == 9 || defenseType == 17) eff = 0.5; //vs Fighting, Ground, Steel
+                if (defenseType == Type.Fire || defenseType == Type.Ice || defenseType == Type.Flying || defenseType == Type.Bug) eff = 2.0;// vs Fire, Ice, Flying, Bug
+                else if (defenseType == Type.Fighting || defenseType == Type.Ground || defenseType == Type.Steel) eff = 0.5; //vs Fighting, Ground, Steel
                 break;
 
-            case 14:
+            case Type.Ghost:
                 //  Ghost
-                if (defenseType == 11 || defenseType == 14) eff = 2.0; //vs Psychic, Ghost
-                else if (defenseType == 16) eff = 0.5;// vs Dark
-                else if (defenseType == 1) eff = 0.0; //vs Normal
+                if (defenseType == Type.Psychic || defenseType == Type.Ghost) eff = 2.0; //vs Psychic, Ghost
+                else if (defenseType == Type.Dark) eff = 0.5;// vs Dark
+                else if (defenseType == Type.Normal) eff = 0.0; //vs Normal
                 break;
 
-            case 15:
+            case Type.Dragon:
                 // Dragon
-                if (defenseType == 15) eff = 2.0;// vs Dragon
-                else if (defenseType == 17) eff = 0.5; //vs Steel
-                else if (defenseType == 18) eff = 0.0; //vs Fairy
+                if (defenseType == Type.Dragon) eff = 2.0;// vs Dragon
+                else if (defenseType == Type.Steel) eff = 0.5; //vs Steel
+                else if (defenseType == Type.Fairy) eff = 0.0; //vs Fairy
                 break;
 
-            case 16:
+            case Type.Dark:
                 // Dark
-                if (defenseType == 11 || defenseType == 14) eff = 2.0;// vs Psychic, Ghost
-                else if (defenseType == 7 || defenseType == 16 || defenseType == 18) eff = 0.5;// vs Fighting, Dark, Fairy
+                if (defenseType == Type.Psychic || defenseType == Type.Ghost) eff = 2.0;// vs Psychic, Ghost
+                else if (defenseType == Type.Fighting || defenseType == Type.Dark || defenseType == Type.Fairy) eff = 0.5;// vs Fighting, Dark, Fairy
                 break;
 
-            case 17:
+            case Type.Steel:
                 //Steel
-                if (defenseType == 6 || defenseType == 13 || defenseType == 18) eff = 2.0; //vs Ice, Rock, Fairy
-                else if (defenseType == 2 || defenseType == 3 || defenseType == 4 || defenseType == 17) eff = 0.5; //vs Fire, Water, Electric, Steel
+                if (defenseType == Type.Ice || defenseType == Type.Rock || defenseType == Type.Fairy) eff = 2.0; //vs Ice, Rock, Fairy
+                else if (defenseType == Type.Fire || defenseType == Type.Water || defenseType == Type.Electric || defenseType == Type.Steel) eff = 0.5; //vs Fire, Water, Electric, Steel
                 break;
 
-            case 18:
+            case Type.Fairy:
                 //Fairy
-                if (defenseType == 7 || defenseType == 15 || defenseType == 16) eff = 2.0; //vs Fighting, Dragon, Dark
-                else if (defenseType == 2 || defenseType == 8 || defenseType == 17) eff = 0.5; //vs Fire, Poison, Steel
+                if (defenseType == Type.Fighting || defenseType == Type.Dragon || defenseType == Type.Dark) eff = 2.0; //vs Fighting, Dragon, Dark
+                else if (defenseType == Type.Fire || defenseType == Type.Poison || defenseType == Type.Steel) eff = 0.5; //vs Fire, Poison, Steel
                 break;
         }
 
@@ -1253,8 +1288,7 @@ public static class Program
     {
         if (move.moveB.acc == 101) return true;
 
-        Random rnd = new Random();
-        int check = rnd.Next(1, 101);
+        int check = Random.Shared.Next(1, 101);
 
         if (check <= (move.moveB.acc * pokemonA.GetMod(pokemonA.AccMod) * pokemonD.GetMod(pokemonD.EvaMod)))
         {
@@ -1267,7 +1301,7 @@ public static class Program
         if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
-            MoveB struggle = new MoveB("Struggle", 0, 50, 1, 100, 101, 0, true, false, new List<MoveEffect>());
+            MoveB struggle = new MoveB("Struggle", 0, 50, Split.Physical, 100, 101, 0, true, false, new List<MoveEffect>());
             move = new Move(struggle);
             Console.WriteLine($"{pokemonA.species.name} used Struggle!");
             pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
@@ -1284,8 +1318,7 @@ public static class Program
             pokemonA.protectTimes++;
             if (pokemonA.protectTimes > 1)
             {
-                Random rnd = new Random();
-                int check = rnd.Next(1, 101);
+                int check = Random.Shared.Next(1, 101);
                 double protectChance = 1.0 / Math.Pow(3, pokemonA.protectTimes - 1);
                 if (check > protectChance * 100)
                 {
@@ -1316,12 +1349,11 @@ public static class Program
         {
             if(pokemonD.level > pokemonA.level) return;
             int OHKOcheck = 30 + pokemonA.level - pokemonD.level;
-            if(!(move.moveB.name == "Sheer Cold" && (pokemonA.species.type1 == 6 || pokemonA.species.type2 == 6)))
+            if(!(move.moveB.name == "Sheer Cold" && (pokemonA.species.type1 == Type.Ice || pokemonA.species.type2 == Type.Ice)))
             {
                 OHKOcheck = 20 + pokemonA.level - pokemonD.level;
             }
-            Random rnd = new Random();
-            int check = rnd.Next(1, 101);
+            int check = Random.Shared.Next(1, 101);
 
             if (check <= OHKOcheck)
             {
@@ -1336,12 +1368,12 @@ public static class Program
             double attack = 0.0;
             double defense = 0.0;
             int rcrit = 25;
-            if (move.moveB.split == 1)
+            if (move.moveB.split == Split.Physical)
             {
                 attack = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
                 defense = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
             }
-            else if (move.moveB.split == 2)
+            else if (move.moveB.split == Split.Special)
             {
                 attack = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
                 defense = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
@@ -1436,10 +1468,10 @@ public static class Program
     }
     public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, int rcrit, bool test)
     {
-        int pkAtype1 = pokemonA.species.type1;
-        int pkAtype2 = pokemonA.species.type2;
-        int pkDtype1 = pokemonD.species.type1;
-        int pkDtype2 = pokemonD.species.type2;
+        Type pkAtype1 = pokemonA.species.type1;
+        Type pkAtype2 = pokemonA.species.type2;
+        Type pkDtype1 = pokemonD.species.type1;
+        Type pkDtype2 = pokemonD.species.type2;
 
         if (pokemonA.terastallized)
         {
@@ -1465,7 +1497,7 @@ public static class Program
         }
 
         double status = 1.00;
-        if (pokemonA.statusVol == Status.Burn && move.moveB.split == 1)
+        if (pokemonA.statusVol == Status.Burn && move.moveB.split == Split.Physical)
         {
             status = 0.50;
         }
@@ -1473,16 +1505,15 @@ public static class Program
         double eff1 = MatchUp(move.moveB.type, pkDtype1);
         double eff2 = MatchUp(move.moveB.type, pkDtype2);
 
-        Random rnd = new Random();
         double crit = 1;
-        if (rnd.Next(0, pokemonA.critRatio + 1) == 0 && !test)
+        if (Random.Shared.Next(0, pokemonA.critRatio + 1) == 0 && !test)
         {
             crit = 1.5;
             Console.Write("Critical hit!");
         }
 
         double item = 1.00;
-        double ran = rnd.Next(85, 101) / 100.0;
+        double ran = Random.Shared.Next(85, 101) / 100.0;
         if (test) ran = 9.2;
         int dmg = Convert.ToInt32(Math.Round(((((((((2 * pokemonA.level) / 5) + 2) * power * ((double)atk / def)) / 50) * crit) + 2) * stab * eff1 * eff2 * ran * status * item), 0));// too complicated check https:bulbapedia.bulbagarden.net / wiki / Damage
         if (pokemonD.hp < dmg && !test)
@@ -1500,8 +1531,7 @@ public static class Program
     {
         if (effect.effectChance < 101)
         {
-            Random rnd = new Random();
-            int check = rnd.Next(1, 101);
+            int check = Random.Shared.Next(1, 101);
 
             if (check <= effect.effectChance)
             {
@@ -1616,7 +1646,6 @@ public static class Program
     {
         Pokemon currentPokemon1 = pokemon1;
         Pokemon currentPokemon2 = pokemon2;
-        Random rnd = new Random();
         currentPokemon1.dMaxTimer = 0;
         currentPokemon2.dMaxTimer = 0;
         while (currentPokemon1.hp > 0 && currentPokemon2.hp > 0)
@@ -1628,14 +1657,20 @@ public static class Program
 
             if (currentPokemon1.DoIMove())
             {
-                move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
+                    move1 = currentPokemon1.lastMove;
+                else
+                    move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                 double para = 1;
                 if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
                 spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
             }
             if (currentPokemon2.DoIMove())
             {
-                move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
+                    move2 = currentPokemon2.lastMove;
+                else
+                    move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                 double para = 1;
                 if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
                 spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
@@ -1681,7 +1716,7 @@ public static class Program
                 }
                 else
                 {
-                    int tie = rnd.Next(0, 2);
+                    int tie = Random.Shared.Next(0, 2);
                     if (tie == 0 && move1 != null)
                     {
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1722,7 +1757,6 @@ public static class Program
         Pokemon currentPokemon2 = team2.team[0];
         Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
         Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
-        Random rnd = new Random();
         bool gimmick1 = false;
         bool gimmick2 = false;
         while (team1.AbleToBattle() && team2.AbleToBattle())
@@ -1855,7 +1889,7 @@ public static class Program
                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
                 if (move2 != null && currentPokemon2.hp > 0)
                 {
-                    if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                    if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                     {
                         Console.WriteLine($"{move2.moveB.name} failed");
                     }
@@ -1868,7 +1902,7 @@ public static class Program
                 ExecuteMove(currentPokemon2, currentPokemon1, move2);
                 if (move1 != null && currentPokemon1.hp > 0)
                 {
-                    if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                    if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                     {
                         Console.WriteLine($"{move1.moveB.name} failed");
                     }
@@ -1883,7 +1917,7 @@ public static class Program
                     ExecuteMove(currentPokemon1, currentPokemon2, move1);
                     if (move2 != null && currentPokemon2.hp > 0)
                     {
-                        if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                        if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                         {
                             Console.WriteLine($"{move2.moveB.name} failed");
                         }
@@ -1896,7 +1930,7 @@ public static class Program
                     ExecuteMove(currentPokemon2, currentPokemon1, move2);
                     if (move1 != null && currentPokemon1.hp > 0)
                     {
-                        if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                        if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                         {
                             Console.WriteLine($"{move1.moveB.name} failed");
                         }
@@ -1906,13 +1940,13 @@ public static class Program
                 }
                 else
                 {
-                    int tie = rnd.Next(0, 2);
+                    int tie = Random.Shared.Next(0, 2);
                     if (tie == 0 && move1 != null)
                     {
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
                         if (move2 != null && currentPokemon2.hp > 0)
                         {
-                            if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                             {
                                 Console.WriteLine($"{move2.moveB.name} failed");
                             }
@@ -1925,7 +1959,7 @@ public static class Program
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         if (move1 != null && currentPokemon1.hp > 0)
                         {
-                            if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                             {
                                 Console.WriteLine($"{move1.moveB.name} failed");
                             }
@@ -1991,7 +2025,6 @@ public static class Program
     {
         if (pk.hp <= 0) return;
         if (ai == 1) return;
-        Random rnd = new Random();
 
         bool isLastAlive = tr.LastInBattle();
         bool isAcePokemon = (pk == tr.team[tr.team.Count - 1]);
@@ -2021,7 +2054,7 @@ public static class Program
         }
         else
         {
-            int check = rnd.Next(0, 100);
+            int check = Random.Shared.Next(0, 100);
             if (check < 50)
             {
                 pk.Dmax();
@@ -2310,7 +2343,7 @@ public static class Program
         bool gmax = false;
         int dmaxlvl = 10;
         int HpIV = 0, HpEV = 0, AtkIV = 0, AtkEV = 0, DefIV = 0, DefEV = 0, SpaIV = 0, SpaEV = 0, SpdIV = 0, SpdEV = 0, SpeIV = 0, SpeEV = 0;
-        int tera = 1;
+        Type tera = Type.Normal;
 
         foreach (Species s in AllPokemon)
         {
@@ -2351,8 +2384,7 @@ public static class Program
         }
         else
         {
-            Random rnd = new Random();
-            if (rnd.Next(0, 2) == 0)
+            if (Random.Shared.Next(0, 2) == 0)
             {
                 gender = true;
             }
@@ -2583,7 +2615,6 @@ public static class Program
     }
     public static void Main()
     {
-        Random rnd = new Random();
 
         Item LifeOrb = new Item("Life Orb", "01&01&30", false);
         Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
@@ -2596,8 +2627,8 @@ public static class Program
             Galladite
         };
 
-        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, 7);
-        Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, 18);
+        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, Type.Fighting);
+        Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, Type.Fairy);
         Gallade.MegaEvo();
         Console.WriteLine(Gallade.species.name);
         Gallade.UnMegaEvolve();
@@ -2739,45 +2770,45 @@ public static class Program
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
                         if (s.Atk > s.Spa)
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                            MoveB a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                                a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
                         }
                         else if (s.Atk < s.Spa)
                         {
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                            MoveB b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                                b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
                         }
                         else
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                            MoveB a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                                a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                            MoveB b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                                b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
@@ -2804,9 +2835,9 @@ public static class Program
             else if (presetName == "Lion")
             {
                 // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
-                Species species = new Species("Lion", 1, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+                Species species = new Species("Lion", Type.Normal, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Pokemon Lion = new Pokemon(species, 50);
-                MoveB physical = new MoveB("Physical", 0, 60, 1, 100, 100, 0, true, false, null);
+                MoveB physical = new MoveB("Physical", 0, 60, Split.Physical, 100, 100, 0, true, false, null);
                 Move physMove = new Move(physical);
                 Lion.AddMove(physMove);
                 List<Pokemon> PokemonList = new List<Pokemon>();
@@ -2823,45 +2854,45 @@ public static class Program
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
                         if (s.Atk > s.Spa)
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                            MoveB a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                                a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
                         }
                         else if (s.Atk < s.Spa)
                         {
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                            MoveB b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                                b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
                         }
                         else
                         {
-                            MoveB a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                            MoveB a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                             Move a1 = new Move(a);
                             temp.AddMove(a1);
                             if (s.type2 != 0)
                             {
-                                a = new MoveB("Physical", s.type2, 60, 2, 100, 100, 0, true, false, null);
+                                a = new MoveB("Physical", s.type2, 60, Split.Physical, 100, 100, 0, true, false, null);
                                 a1 = new Move(a);
                                 temp.AddMove(a1);
                             }
-                            MoveB b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                            MoveB b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                             Move b1 = new Move(b);
                             temp.AddMove(b1);
                             if (s.type2 != 0)
                             {
-                                b = new MoveB("Special", s.type2, 60, 2, 100, 100, 0, false, false, null);
+                                b = new MoveB("Special", s.type2, 60, Split.Special, 100, 100, 0, false, false, null);
                                 b1 = new Move(b);
                                 temp.AddMove(b1);
                             }
@@ -2930,13 +2961,13 @@ public static class Program
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[681], 50);
-                pk.AddMove(new Move(FetchMove("Fly")));
+                pk.AddMove(new Move(FetchMove("Iron Head")));
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[6], 50);
-                pk.AddMove(new Move(FetchMove("Fly")));
-                pk.AddMove(new Move(FetchMove("Fly")));
+                pk.AddMove(new Move(FetchMove("Flamethrower")));
+                pk.AddMove(new Move(FetchMove("Air Slash")));
                 pk.gmax = true;
                 trainer2.AddPokemon(pk);
                 pk.PokeInfo();

@@ -231,6 +231,7 @@ public class Pokemon
     public bool chargingMove { get; set; } = false;
     public bool reCharge { get; set; } = false;
     public bool invurnable { get; set; } = false;
+    public int protectTimes { get; set; } = 0;
     public Move lastMove { get; set; } = null;
 
     public Move[] moveSet = new Move[4];
@@ -697,6 +698,8 @@ public class Pokemon
         Random rnd = new Random();
         if (reCharge)
         {
+            Console.WriteLine($"{name} must recharge and can't move!");
+            reCharge = false;
             return false;
         }
         else if (statusVol == Status.Sleep)
@@ -704,13 +707,13 @@ public class Pokemon
             if (sleepTimer > 0)
             {
                 sleepTimer--;
-                Console.WriteLine($"{species.name} is asleep and can't move!");
+                Console.WriteLine($"{name} is asleep and can't move!");
                 return false;
             }
             else
             {
                 statusVol = Status.None;
-                Console.WriteLine($"{species.name} woke up!");
+                Console.WriteLine($"{name} woke up!");
                 return true;
             }
         }
@@ -720,12 +723,12 @@ public class Pokemon
             if (thaw == 0)
             {
                 statusVol = Status.None;
-                Console.WriteLine($"{species.name} thawed out!");
+                Console.WriteLine($"{name} thawed out!");
                 return true;
             }
             else
             {
-                Console.WriteLine($"{species.name} is frozen solid and can't move!");
+                Console.WriteLine($"{name} is frozen solid and can't move!");
                 return false;
             }
         }
@@ -734,7 +737,7 @@ public class Pokemon
             int chance = rnd.Next(0, 4);
             if (chance == 0)
             {
-                Console.WriteLine($"{species.name} is paralyzed and can't move!");
+                Console.WriteLine($"{name} is paralyzed and can't move!");
                 return false;
             }
             else
@@ -755,7 +758,7 @@ public class Pokemon
                             int check = rnd.Next(0, 3);
                             if (check == 0)
                             {
-                                Console.WriteLine($"{species.name} is confused and hurt itself in its confusion!");
+                                Console.WriteLine($"{name} is confused and hurt itself in its confusion!");
                                 int damage = Convert.ToInt32(Math.Floor((double)(((((2 * level) / 5) + 2) * 40 * CalcAtkStat()) / CalcDefStat()) / 50) + 2);
                                 hp -= damage;
                                 if (hp < 0) hp = 0;
@@ -769,7 +772,7 @@ public class Pokemon
                         else
                         {
                             statusNov.Remove(Status.Confusion);
-                            Console.WriteLine($"{species.name} snapped out of its confusion!");
+                            Console.WriteLine($"{name} snapped out of its confusion!");
                             return true;
                         }
                     case
@@ -777,7 +780,7 @@ public class Pokemon
                         int infatuation = rnd.Next(0, 2);
                         if (infatuation == 0)
                         {
-                            Console.WriteLine($"{species.name} is immobilized by love!");
+                            Console.WriteLine($"{name} is immobilized by love!");
                             return false;
                         }
                         else
@@ -1265,14 +1268,49 @@ public static class Program
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
             MoveB struggle = new MoveB("Struggle", 0, 50, 1, 100, 101, 0, true, false, new List<MoveEffect>());
+            move = new Move(struggle);
             Console.WriteLine($"{pokemonA.species.name} used Struggle!");
             pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
             if (pokemonD.hp < 0) pokemonD.hp = 0;
             pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 4.0));
+            if (pokemonA.hp < 0) pokemonA.hp = 0;
             Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+            Console.WriteLine($"recoil brought to: {pokemonA.hp}");
             return;
         }
         move.PP--;
+        if (move.moveB.protect)
+        {
+            pokemonA.protectTimes++;
+            if (pokemonA.protectTimes > 1)
+            {
+                Random rnd = new Random();
+                int check = rnd.Next(1, 101);
+                double protectChance = 1.0 / Math.Pow(3, pokemonA.protectTimes - 1);
+                if (check > protectChance * 100)
+                {
+                    pokemonA.invurnable = false;
+                    Console.WriteLine($"{pokemonA.name} tried to use Protect but failed!");
+                    pokemonA.lastMove = move;
+                    return;
+                }
+            }
+            pokemonA.invurnable = true;
+            Console.WriteLine($"{pokemonA.name} used {move.moveB.name}!");
+            pokemonA.lastMove = move;
+            return;
+        }
+        else if(pokemonA.lastMove != null && pokemonA.lastMove.moveB.protect)
+        {
+            pokemonA.invurnable = false;
+            pokemonA.protectTimes = 0;
+        }
+        if (pokemonD.invurnable)
+        {
+            Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
+            pokemonA.lastMove = move;
+            return;
+        }
         List<string> OHKO = new List<string> { "Fissure", "Guillotine", "Horn Drill", "Sheer Cold" };
         if (OHKO.Contains(move.moveB.name))
         {
@@ -1289,7 +1327,8 @@ public static class Program
             {
                 pokemonD.hp = 0;
             }
-                return;
+            pokemonA.lastMove = move;
+            return;
         }
 
         if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.chargingMove)
@@ -1316,6 +1355,7 @@ public static class Program
             {
                 pokemonD.hp -= pokemonA.level;
                 if (pokemonD.hp < 0) pokemonD.hp = 0;
+                pokemonA.lastMove = move;
                 return;
             }
             if (move.moveB.name == "Super Fang")
@@ -1323,6 +1363,7 @@ public static class Program
                 int halfHp = Convert.ToInt32(Math.Floor((double)pokemonD.hp / 2));
                 pokemonD.hp -= halfHp;
                 if (pokemonD.hp < 0) pokemonD.hp = 0;
+                pokemonA.lastMove = move;
                 return;
             }
             List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock" };
@@ -1330,7 +1371,7 @@ public static class Program
             if (charge.Contains(move.moveB.name) && !pokemonA.chargingMove)
             {
                 pokemonA.chargingMove = true;
-                Console.WriteLine($"{pokemonA.species.name} is charging up for {move.moveB.name}!");
+                Console.WriteLine($"{pokemonA.name} is charging up for {move.moveB.name}!");
                 if (invurnable.Contains(move.moveB.name))
                 {
                     pokemonA.invurnable = true;
@@ -1345,6 +1386,10 @@ public static class Program
                     {
                         pokemonA.invurnable = false;
                     }
+            }
+            if (move.moveB.name == "Hyper Beam" || move.moveB.name == "Giga Impact")
+            {
+                pokemonA.reCharge = true;
             }
             pokemonA.lastMove = move;
             int numHits = 1;
@@ -1364,7 +1409,7 @@ public static class Program
                                 int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
                                 pokemonA.hp -= recoilDamage;
                                 if (pokemonA.hp < 0) pokemonA.hp = 0;
-                                Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+                                Console.WriteLine($"{pokemonA.name} is hit with recoil");
                             }
                             else
                             {
@@ -1372,7 +1417,7 @@ public static class Program
                                 int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / Math.Abs(effect.effectPower)));
                                 pokemonA.hp += lifeSteel;
                                 if (pokemonA.hp > pokemonA.maxHP) pokemonA.hp = pokemonA.maxHP;
-                                Console.WriteLine($"{pokemonA.species.name} regained some hp");
+                                Console.WriteLine($"{pokemonA.name} regained some hp");
                             }
                         }
                         else
@@ -1382,127 +1427,6 @@ public static class Program
                     }
                 }
             }
-            //{
-            //    if (move.moveB.split == 3)
-            //    {
-            //        if (DecodeEffect(move.moveB.effect, 1) == 1) pokemon = pokemonA;
-            //        else if (DecodeEffect(move.moveB.effect, 1) == 2) pokemon = pokemonD;
-            //        InflictStatus(pokemon, move);
-            //    }
-            //    else
-            //    {
-            //        int power = 0;
-            //        double atk = 1.00;
-            //        double def = 1.00;
-            //        double burn = 1.00;
-            //        bool status = false;
-            //        int rcrit = 23;
-            //        switch (DecodeEffect(move.moveB.effect, 1))
-            //        {
-            //            case 01:
-            //                if (move.moveB.split == 1)
-            //                {
-            //                    if (pokemonA.status == 1) burn = 0.50;
-            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-            //                }
-            //                else
-            //                {
-            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-            //                }
-            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-            //                {
-            //                    status = true;
-            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-            //                }
-            //                power = DecodeEffect(move.moveB.effect, 2);
-            //                break;
-            //            case 02:
-            //                if (move.moveB.split == 1)
-            //                {
-            //                    if (pokemonA.status == 1) burn = 0.50;
-            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-            //                }
-            //                else
-            //                {
-            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-            //                }
-            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-            //                {
-            //                    status = true;
-            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-            //                }
-            //                def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-            //                power = DecodeEffect(move.moveB.effect, 2);
-            //                break;
-            //            case 03:
-            //                if (move.moveB.split == 1)
-            //                {
-            //                    if (pokemonA.status == 1) burn = 0.50;
-            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-            //                }
-            //                else
-            //                {
-            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-            //                }
-            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-            //                {
-            //                    status = true;
-            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-            //                }
-            //                def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-            //                power = DecodeEffect(move.moveB.effect, 2);
-            //                break;
-            //            case 04:
-            //                if (move.moveB.split == 1)
-            //                {
-            //                    if (pokemonA.status == 1) burn = 0.50;
-            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-            //                }
-            //                else
-            //                {
-            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-            //                }
-            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-            //                {
-            //                    status = true;
-            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-            //                }
-            //                power = DecodeEffect(move.moveB.effect, 2);
-            //                rcrit = 7;
-            //                break;
-            //            case 05:
-            //                if (move.moveB.split == 1)
-            //                {
-            //                    if (pokemonA.status == 1) burn = 0.50;
-            //                    atk = (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod));
-            //                    def = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
-            //                }
-            //                else
-            //                {
-            //                    atk = (pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod));
-            //                    def = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
-            //                }
-            //                if (DecodeEffect(move.moveB.effect, 3) != 0)
-            //                {
-            //                    status = true;
-            //                    if (DecodeEffect(move.moveB.effect, 3) == 01) pokemon = pokemonA;
-            //                    else if (DecodeEffect(move.moveB.effect, 3) != 01) pokemon = pokemonD;
-            //                }
-            //                power = DecodeEffect(move.moveB.effect, 2);
-            //                break;
-            //        }
-            //        pokemonD.hp -= Damage(pokemonA, pokemonD, move, power, atk, def, burn, rcrit, false);
-            //        if (pokemonD.hp < 0) pokemonD.hp = 0;
-            //        if (status == true) InflictStatus(pokemon, move);
-            //    }
             pokemonA.critRatio = 25;
         }
         else
@@ -1931,7 +1855,12 @@ public static class Program
                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
                 if (move2 != null && currentPokemon2.hp > 0)
                 {
-                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                    {
+                        Console.WriteLine($"{move2.moveB.name} failed");
+                    }
+                    else
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
                 }
             }
             else if (priority1 < priority2 && move2 != null)
@@ -1939,7 +1868,12 @@ public static class Program
                 ExecuteMove(currentPokemon2, currentPokemon1, move2);
                 if (move1 != null && currentPokemon1.hp > 0)
                 {
-                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                    {
+                        Console.WriteLine($"{move1.moveB.name} failed");
+                    }
+                    else
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
                 }
             }
             else
@@ -1949,7 +1883,12 @@ public static class Program
                     ExecuteMove(currentPokemon1, currentPokemon2, move1);
                     if (move2 != null && currentPokemon2.hp > 0)
                     {
-                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                        {
+                            Console.WriteLine($"{move2.moveB.name} failed");
+                        }
+                        else
+                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
                     }
                 }
                 else if (spe1 < spe2 && move2 != null)
@@ -1957,7 +1896,12 @@ public static class Program
                     ExecuteMove(currentPokemon2, currentPokemon1, move2);
                     if (move1 != null && currentPokemon1.hp > 0)
                     {
-                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                        {
+                            Console.WriteLine($"{move1.moveB.name} failed");
+                        }
+                        else
+                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
                     }
                 }
                 else
@@ -1968,7 +1912,12 @@ public static class Program
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
                         if (move2 != null && currentPokemon2.hp > 0)
                         {
-                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                            if (currentPokemon1.hp <= 0 && move2.moveB.split != 3)
+                            {
+                                Console.WriteLine($"{move2.moveB.name} failed");
+                            }
+                            else
+                                ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         }
                     }
                     else if (tie == 1 && move2 != null)
@@ -1976,7 +1925,12 @@ public static class Program
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         if (move1 != null && currentPokemon1.hp > 0)
                         {
-                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                            if (currentPokemon2.hp <= 0 && move1.moveB.split != 3)
+                            {
+                                Console.WriteLine($"{move1.moveB.name} failed");
+                            }
+                            else
+                                ExecuteMove(currentPokemon1, currentPokemon2, move1);
                         }
                     }
                 }
@@ -2969,8 +2923,8 @@ public static class Program
                 pk.PokeInfo();
 
                 pk = new Pokemon(AllPokemon[445], 50);
-                pk.AddMove(new Move(FetchMove("Earthquake")));
                 pk.AddMove(new Move(FetchMove("Dragon Claw")));
+                pk.AddMove(new Move(FetchMove("Earthquake")));
                 pk.heldItem = new Item("Garchompite", "01&01&30", true);
                 trainer1.AddPokemon(pk);
                 pk.PokeInfo();

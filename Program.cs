@@ -1755,9 +1755,9 @@ public static class Program
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         if (move1 != null && currentPokemon1.hp > 0)
                         {
-                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+                            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                             {
-                                Console.WriteLine($"{move2.moveB.name} failed");
+                                Console.WriteLine($"{move1.moveB.name} failed");
                             }
                             else
                                 ExecuteMove(currentPokemon1, currentPokemon2, move1);

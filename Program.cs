@@ -1685,7 +1685,12 @@ public static class Program
                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
                 if (move2 != null && currentPokemon2.hp > 0)
                 {
-                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+                    {
+                        Console.WriteLine($"{move2.moveB.name} failed");
+                    }
+                    else
+                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
                 }
             }
             else if (priority1 < priority2 && move2 != null)
@@ -1693,7 +1698,12 @@ public static class Program
                 ExecuteMove(currentPokemon2, currentPokemon1, move2);
                 if (move1 != null && currentPokemon1.hp > 0)
                 {
-                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
+                    {
+                        Console.WriteLine($"{move1.moveB.name} failed");
+                    }
+                    else
+                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
                 }
             }
             else
@@ -1703,7 +1713,12 @@ public static class Program
                     ExecuteMove(currentPokemon1, currentPokemon2, move1);
                     if (move2 != null && currentPokemon2.hp > 0)
                     {
-                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+                        {
+                            Console.WriteLine($"{move2.moveB.name} failed");
+                        }
+                        else
+                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
                     }
                 }
                 else if (spe1 < spe2 && move2 != null)
@@ -1711,7 +1726,12 @@ public static class Program
                     ExecuteMove(currentPokemon2, currentPokemon1, move2);
                     if (move1 != null && currentPokemon1.hp > 0)
                     {
-                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                        if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
+                        {
+                            Console.WriteLine($"{move1.moveB.name} failed");
+                        }
+                        else
+                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
                     }
                 }
                 else
@@ -1722,7 +1742,12 @@ public static class Program
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
                         if (move2 != null && currentPokemon2.hp > 0)
                         {
-                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+                            {
+                                Console.WriteLine($"{move2.moveB.name} failed");
+                            }
+                            else
+                                ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         }
                     }
                     else if (tie == 1 && move2 != null)
@@ -1730,11 +1755,18 @@ public static class Program
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
                         if (move1 != null && currentPokemon1.hp > 0)
                         {
-                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+                            {
+                                Console.WriteLine($"{move2.moveB.name} failed");
+                            }
+                            else
+                                ExecuteMove(currentPokemon1, currentPokemon2, move1);
                         }
                     }
                 }
             }
+            PostTurnPokemonCheck(currentPokemon1);
+            PostTurnPokemonCheck(currentPokemon2);
         }
         if (currentPokemon1.hp > 0)
         {

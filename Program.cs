@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
+using System.Threading.Tasks;
 public enum Status
 {
     None = 0,
@@ -244,19 +245,19 @@ public class Pokemon
 {
     public Species species { get; set; }
     public string name { get; set; }
-    bool gender;
+    public bool gender;
     public int level { get; }
     public int maxHP { get; private set; }
     public int hp;
-    int ability;
+    public int ability;
     public Status statusVol { get; set; } = Status.None;
     public List<Status> statusNov { get; set; } = new List<Status>();
     public int HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV;
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
-    string nature;
+    public string nature;
     public Item heldItem { get; set; }
     public bool gmax { get; set; }
-    int dMaxLevel;
+    public int dMaxLevel;
     public bool isDmax { get; set; } = false;
     public Type tera { get; }
     public bool terastallized { get; set; } = false;
@@ -373,6 +374,35 @@ public class Pokemon
         this.hp = maxHP;
         this.wins = 0;
     }
+    public static Pokemon ClonePokemon(Pokemon original)
+    {
+        Pokemon clone = new Pokemon(
+            original.species,
+            original.name,
+            original.gender,
+            original.level,
+            original.ability,
+            original.HpIV, original.HpEV,
+            original.AtkIV, original.AtkEV,
+            original.DefIV, original.DefEV,
+            original.SpaIV, original.SpaEV,
+            original.SpdIV, original.SpdEV,
+            original.SpeIV, original.SpeEV,
+            original.nature,
+            original.heldItem,
+            original.gmax,
+            original.dMaxLevel,
+            original.tera
+        );
+
+        for (int i = 0; i < original.moveNum; i++)
+        {
+            clone.AddMove(new Move(original.moveSet[i].moveB));
+        }
+
+        return clone;
+    }
+
     public void AddMove(Move move)
     {
         if (move == null) return;
@@ -401,13 +431,13 @@ public class Pokemon
     }
     public void Modifiers()
     {
-        Console.Write($"Atk: {AtkMod} / ");
-        Console.Write($"Def: {DefMod} / ");
-        Console.Write($"Spa: {SpaMod} / ");
-        Console.Write($"Spd: {SpdMod} / ");
-        Console.Write($"Acc: {AccMod} / ");
-        Console.Write($"Eva: {EvaMod} / ");
-        Console.WriteLine($"Spe: {SpeMod} ");
+        // Console.Write($"Atk: {AtkMod} / ");
+        // Console.Write($"Def: {DefMod} / ");
+        // Console.Write($"Spa: {SpaMod} / ");
+        // Console.Write($"Spd: {SpdMod} / ");
+        // Console.Write($"Acc: {AccMod} / ");
+        // Console.Write($"Eva: {EvaMod} / ");
+        // Console.WriteLine($"Spe: {SpeMod} ");
     }
     public void ClearMods()
     {
@@ -445,29 +475,29 @@ public class Pokemon
     {
         if (name != species.name)
         {
-            Console.Write(name);
-            Console.Write($"({species.name})");
+            // Console.Write(name);
+            // Console.Write($"({species.name})");
         }
         else
         {
-            Console.Write(species.name);
+            // Console.Write(species.name);
         }
         if (species.noRatio != true)
         {
-            if (gender == true) Console.Write(" (M) ");
-            else Console.Write(" (F) ");
+           // if (gender == true) Console.Write(" (M) ");
+           // else Console.Write(" (F) ");
         }
         if (heldItem != null)
         {
-            Console.WriteLine($" @ {heldItem.name}");
+            // Console.WriteLine($" @ {heldItem.name}");
         }
         else
         {
-            Console.WriteLine();
+            // Console.WriteLine();
         }
-        Console.WriteLine($"Ability: {FetchAbility(ability)}");
-        Console.WriteLine($"Level: {level}");
-        Console.WriteLine($"Tera Type: {GetType(tera)}");
+        // Console.WriteLine($"Ability: {FetchAbility(ability)}");
+        // Console.WriteLine($"Level: {level}");
+        // Console.WriteLine($"Tera Type: {GetType(tera)}");
 
 
         var evParts = new List<string>();
@@ -480,10 +510,10 @@ public class Pokemon
 
         if (evParts.Count > 0)
         {
-            Console.WriteLine($"EVs: {string.Join(" / ", evParts)}");
+            // Console.WriteLine($"EVs: {string.Join(" / ", evParts)}");
         }
 
-        Console.WriteLine($"{nature} Nature");
+        // Console.WriteLine($"{nature} Nature");
 
         var ivParts = new List<string>();
         if (HpIV != 0) ivParts.Add($"{HpIV} HP");
@@ -495,7 +525,7 @@ public class Pokemon
 
         if (ivParts.Count > 0)
         {
-            Console.WriteLine($"IVs: {string.Join(" / ", ivParts)}");
+            // Console.WriteLine($"IVs: {string.Join(" / ", ivParts)}");
         }
 
         for (int i = 0; i < moveSet.Length; i++)
@@ -506,10 +536,10 @@ public class Pokemon
             }
             else
             {
-                Console.WriteLine($"-{moveSet[i].moveB.name}");
+                // Console.WriteLine($"-{moveSet[i].moveB.name}");
             }
         }
-        Console.WriteLine();
+        // Console.WriteLine();
     }
     public string GetType(Type type)
     {
@@ -733,7 +763,7 @@ public class Pokemon
     {
         if (reCharge)
         {
-            Console.WriteLine($"{name} must recharge and can't move!");
+            // Console.WriteLine($"{name} must recharge and can't move!");
             reCharge = false;
             return false;
         }
@@ -742,13 +772,13 @@ public class Pokemon
             if (sleepTimer > 0)
             {
                 sleepTimer--;
-                Console.WriteLine($"{name} is asleep and can't move!");
+                // Console.WriteLine($"{name} is asleep and can't move!");
                 return false;
             }
             else
             {
                 statusVol = Status.None;
-                Console.WriteLine($"{name} woke up!");
+                // Console.WriteLine($"{name} woke up!");
                 return true;
             }
         }
@@ -758,12 +788,12 @@ public class Pokemon
             if (thaw == 0)
             {
                 statusVol = Status.None;
-                Console.WriteLine($"{name} thawed out!");
+                // Console.WriteLine($"{name} thawed out!");
                 return true;
             }
             else
             {
-                Console.WriteLine($"{name} is frozen solid and can't move!");
+                // Console.WriteLine($"{name} is frozen solid and can't move!");
                 return false;
             }
         }
@@ -772,7 +802,7 @@ public class Pokemon
             int chance = Random.Shared.Next(0, 4);
             if (chance == 0)
             {
-                Console.WriteLine($"{name} is paralyzed and can't move!");
+                // Console.WriteLine($"{name} is paralyzed and can't move!");
                 return false;
             }
             else
@@ -782,8 +812,11 @@ public class Pokemon
         }
         else
         {
-            foreach (Status statusN in statusNov)
+            // Iterate by index to allow safe modification (removal) from statusNov inside the loop
+            for (int i = statusNov.Count - 1; i >= 0; i--)
             {
+                Status statusN = statusNov[i];
+
                 switch (statusN)
                 {
                     case Status.Confusion:
@@ -793,7 +826,7 @@ public class Pokemon
                             int check = Random.Shared.Next(0, 3);
                             if (check == 0)
                             {
-                                Console.WriteLine($"{name} is confused and hurt itself in its confusion!");
+                                // Console.WriteLine($"{name} is confused and hurt itself in its confusion!");
                                 int damage = Convert.ToInt32(Math.Floor((double)(((((2 * level) / 5) + 2) * 40 * CalcAtkStat()) / CalcDefStat()) / 50) + 2);
                                 hp -= damage;
                                 if (hp < 0) hp = 0;
@@ -806,16 +839,15 @@ public class Pokemon
                         }
                         else
                         {
-                            statusNov.Remove(Status.Confusion);
-                            Console.WriteLine($"{name} snapped out of its confusion!");
+                            statusNov.RemoveAt(i);
+                            // Console.WriteLine($"{name} snapped out of its confusion!");
                             return true;
                         }
-                    case
-                    Status.Infatuation:
+                    case Status.Infatuation:
                         int infatuation = Random.Shared.Next(0, 2);
                         if (infatuation == 0)
                         {
-                            Console.WriteLine($"{name} is immobilized by love!");
+                            // Console.WriteLine($"{name} is immobilized by love!");
                             return false;
                         }
                         else
@@ -890,13 +922,13 @@ public class Pokemon
             }
             else
             {
-                Console.WriteLine("Mega Evolution failed: No valid Mega Stone found.");
+                // Console.WriteLine("Mega Evolution failed: No valid Mega Stone found.");
                 return;
             }
         }
         else
         {
-            Console.WriteLine("Mega Evolution failed: This species cannot Mega Evolve.");
+            // Console.WriteLine("Mega Evolution failed: This species cannot Mega Evolve.");
             return;
         }
     }
@@ -906,27 +938,27 @@ public class Pokemon
         {
             if (species.name == s.name.Replace("-Mega", ""))
             {
-                Console.WriteLine($"{species.name} mega evolved into Mega {species.name}");
+                // Console.WriteLine($"{species.name} mega evolved into Mega {species.name}");
                 if(name == species.name) name = s.name;
                 species = s;
                 break;
             }
             else if (species.name == "Charizard" && s.name == "Charizard-Mega-X" || species.name == "Mewtwo" && s.name == "Mewtwo-Mega-X")
             {
-                if (species.name == "Charizard")
-                    Console.Write($"Charizard mega evolved into {s.name} X");
-                else
-                    Console.Write($"Mewtwo mega evolved into {s.name} X");
+              //  if (species.name == "Charizard")
+                    // Console.Write($"Charizard mega evolved into {s.name} X");
+              //  else
+                    // Console.Write($"Mewtwo mega evolved into {s.name} X");
                 if (name == species.name) name = s.name;
                 species = s;              
                 break;
             }
             else if (species.name == "Charizard" && s.name == "Charizard-Mega-Y" || species.name == "Mewtwo" && s.name == "Mewtwo-Mega-Y")
             {
-                if (species.name == "Charizard")
-                    Console.Write($"Charizard mega evolved into {s.name} Y");
-                else
-                    Console.Write($"Mewtwo mega evolved into {s.name} Y");
+               // if (species.name == "Charizard")
+                    // Console.Write($"Charizard mega evolved into {s.name} Y");
+                //else
+                    // Console.Write($"Mewtwo mega evolved into {s.name} Y");
                 if(name == species.name) name = s.name;
                 species = s;
                 break;
@@ -957,7 +989,7 @@ public class Pokemon
                 }
             }
         }
-        Console.WriteLine(species.name + " returned to normal from Mega evolution");
+        // Console.WriteLine(species.name + " returned to normal from Mega evolution");
     }
     public string FetchZmoveName(int typeId)
     {
@@ -1014,11 +1046,11 @@ public class Pokemon
             hp = (int)Math.Ceiling(hp * dmaxHpCoef);
             if (gmax)
             {
-                Console.WriteLine($"{species.name} gigantamaxed");
+                // Console.WriteLine($"{species.name} gigantamaxed");
             }
             else
             {
-                Console.WriteLine($"{species.name} dynamaxed");
+                // Console.WriteLine($"{species.name} dynamaxed");
             }
         }
     }
@@ -1031,13 +1063,13 @@ public class Pokemon
             isDmax = false;
             maxHP = (int)Math.Ceiling(maxHP / dmaxHpCoef);
             hp = (int)Math.Ceiling(hp / dmaxHpCoef);
-            Console.WriteLine($"{species.name} returned to normal size");
+            // Console.WriteLine($"{species.name} returned to normal size");
         }
     }
     public void Terastallize()
     {
         terastallized = true;
-        Console.WriteLine($"{species.name} terastallized into a {GetType(tera)} type");
+        // Console.WriteLine($"{species.name} terastallized into a {GetType(tera)} type");
     }
     public void UnTerastallize()
     {
@@ -1300,16 +1332,16 @@ public static class Program
     {
         if (move.PP <= 0)
         {
-            Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
+            // Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
             MoveB struggle = new MoveB("Struggle", 0, 50, Split.Physical, 100, 101, 0, true, false, new List<MoveEffect>());
             move = new Move(struggle);
-            Console.WriteLine($"{pokemonA.species.name} used Struggle!");
+            // Console.WriteLine($"{pokemonA.species.name} used Struggle!");
             pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
             if (pokemonD.hp < 0) pokemonD.hp = 0;
             pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 4.0));
             if (pokemonA.hp < 0) pokemonA.hp = 0;
-            Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
-            Console.WriteLine($"recoil brought to: {pokemonA.hp}");
+            // Console.WriteLine($"{pokemonA.species.name} is hit with recoil");
+            // Console.WriteLine($"recoil brought to: {pokemonA.hp}");
             return;
         }
         move.PP--;
@@ -1323,13 +1355,13 @@ public static class Program
                 if (check > protectChance * 100)
                 {
                     pokemonA.invurnable = false;
-                    Console.WriteLine($"{pokemonA.name} tried to use Protect but failed!");
+                    // Console.WriteLine($"{pokemonA.name} tried to use Protect but failed!");
                     pokemonA.lastMove = move;
                     return;
                 }
             }
             pokemonA.invurnable = true;
-            Console.WriteLine($"{pokemonA.name} used {move.moveB.name}!");
+            // Console.WriteLine($"{pokemonA.name} used {move.moveB.name}!");
             pokemonA.lastMove = move;
             return;
         }
@@ -1340,7 +1372,7 @@ public static class Program
         }
         if (pokemonD.invurnable)
         {
-            Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
+            // Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
             pokemonA.lastMove = move;
             return;
         }
@@ -1403,7 +1435,7 @@ public static class Program
             if (charge.Contains(move.moveB.name) && !pokemonA.chargingMove)
             {
                 pokemonA.chargingMove = true;
-                Console.WriteLine($"{pokemonA.name} is charging up for {move.moveB.name}!");
+                // Console.WriteLine($"{pokemonA.name} is charging up for {move.moveB.name}!");
                 if (invurnable.Contains(move.moveB.name))
                 {
                     pokemonA.invurnable = true;
@@ -1441,7 +1473,7 @@ public static class Program
                                 int recoilDamage = Convert.ToInt32(Math.Floor((double)(pokemonA.maxHP / effect.effectPower)));
                                 pokemonA.hp -= recoilDamage;
                                 if (pokemonA.hp < 0) pokemonA.hp = 0;
-                                Console.WriteLine($"{pokemonA.name} is hit with recoil");
+                                // Console.WriteLine($"{pokemonA.name} is hit with recoil");
                             }
                             else
                             {
@@ -1449,7 +1481,7 @@ public static class Program
                                 int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / Math.Abs(effect.effectPower)));
                                 pokemonA.hp += lifeSteel;
                                 if (pokemonA.hp > pokemonA.maxHP) pokemonA.hp = pokemonA.maxHP;
-                                Console.WriteLine($"{pokemonA.name} regained some hp");
+                                // Console.WriteLine($"{pokemonA.name} regained some hp");
                             }
                         }
                         else
@@ -1463,7 +1495,7 @@ public static class Program
         }
         else
         {
-            Console.WriteLine("haha you missed");
+            // Console.WriteLine("haha you missed");
         }
     }
     public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, int rcrit, bool test)
@@ -1509,7 +1541,7 @@ public static class Program
         if (Random.Shared.Next(0, pokemonA.critRatio + 1) == 0 && !test)
         {
             crit = 1.5;
-            Console.Write("Critical hit!");
+            // Console.Write("Critical hit!");
         }
 
         double item = 1.00;
@@ -1518,11 +1550,11 @@ public static class Program
         int dmg = Convert.ToInt32(Math.Round(((((((((2 * pokemonA.level) / 5) + 2) * power * ((double)atk / def)) / 50) * crit) + 2) * stab * eff1 * eff2 * ran * status * item), 0));// too complicated check https:bulbapedia.bulbagarden.net / wiki / Damage
         if (pokemonD.hp < dmg && !test)
         {
-            Console.WriteLine($" It did {pokemonD.hp} damage!");
+            // Console.WriteLine($" It did {pokemonD.hp} damage!");
         }
         else if (!test)
         {
-            Console.WriteLine($" It did {dmg} damage!");
+            // Console.WriteLine($" It did {dmg} damage!");
         }
 
         return dmg;
@@ -1548,7 +1580,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Def:
@@ -1560,7 +1592,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Spa:
@@ -1572,7 +1604,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Spd:
@@ -1584,7 +1616,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Acc:
@@ -1596,7 +1628,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Eva:
@@ -1608,7 +1640,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         case Stat.Spe:
@@ -1620,7 +1652,7 @@ public static class Program
                             }
                             else
                             {
-                                Console.WriteLine("It cant go higher");
+                                // Console.WriteLine("It cant go higher");
                             }
                             break;
                         default:
@@ -1687,7 +1719,7 @@ public static class Program
                 {
                     if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                     {
-                        Console.WriteLine($"{move2.moveB.name} failed");
+                        // Console.WriteLine($"{move2.moveB.name} failed");
                     }
                     else
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1700,7 +1732,7 @@ public static class Program
                 {
                     if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                     {
-                        Console.WriteLine($"{move1.moveB.name} failed");
+                        // Console.WriteLine($"{move1.moveB.name} failed");
                     }
                     else
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1715,7 +1747,7 @@ public static class Program
                     {
                         if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                         {
-                            Console.WriteLine($"{move2.moveB.name} failed");
+                            // Console.WriteLine($"{move2.moveB.name} failed");
                         }
                         else
                             ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1728,7 +1760,7 @@ public static class Program
                     {
                         if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                         {
-                            Console.WriteLine($"{move1.moveB.name} failed");
+                            // Console.WriteLine($"{move1.moveB.name} failed");
                         }
                         else
                             ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1744,7 +1776,7 @@ public static class Program
                         {
                             if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                             {
-                                Console.WriteLine($"{move2.moveB.name} failed");
+                                // Console.WriteLine($"{move2.moveB.name} failed");
                             }
                             else
                                 ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1757,7 +1789,7 @@ public static class Program
                         {
                             if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                             {
-                                Console.WriteLine($"{move1.moveB.name} failed");
+                                // Console.WriteLine($"{move1.moveB.name} failed");
                             }
                             else
                                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1770,12 +1802,12 @@ public static class Program
         }
         if (currentPokemon1.hp > 0)
         {
-            Console.WriteLine($"{currentPokemon1.name} wins the battle!");
+            // Console.WriteLine($"{currentPokemon1.name} wins the battle!");
             currentPokemon1.wins++;
         }
         else
         {
-            Console.WriteLine($"{currentPokemon2.name} wins the battle!");
+            // Console.WriteLine($"{currentPokemon2.name} wins the battle!");
             currentPokemon2.wins++;
         }
         currentPokemon1.Heal();
@@ -1787,13 +1819,13 @@ public static class Program
         team2.HealTeam();
         Pokemon currentPokemon1 = team1.team[0];
         Pokemon currentPokemon2 = team2.team[0];
-        Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
-        Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
+        // Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
+        // Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
         bool gimmick1 = false;
         bool gimmick2 = false;
         while (team1.AbleToBattle() && team2.AbleToBattle())
         {
-            Console.WriteLine("\n=next turn=\n");
+            // Console.WriteLine("\n=next turn=\n");
             Move move1 = null;
             Move move2 = null;
             double spe1 = 0;
@@ -1801,7 +1833,7 @@ public static class Program
             if (currentPokemon1.hp <= 0)
             {
                 currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
-                Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
+                // Console.WriteLine($"{team1.name} sent out {currentPokemon1.name}");
                 currentPokemon1.lastMove = null;
                 if (gimmick1 == false)
                 {
@@ -1825,7 +1857,7 @@ public static class Program
             if (currentPokemon2.hp <= 0)
             {
                 currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
-                Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
+                // Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
                 currentPokemon2.lastMove = null;
                 if (gimmick2 == false)
                 {
@@ -1853,7 +1885,7 @@ public static class Program
                 currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
                 if (preSwitch1 != currentPokemon1)
                 {
-                    Console.WriteLine($"{team1.name} switched to {currentPokemon1.name}");
+                    // Console.WriteLine($"{team1.name} switched to {currentPokemon1.name}");
                     currentPokemon1.lastMove = null;
                 }
                 else
@@ -1884,7 +1916,7 @@ public static class Program
                 currentPokemon2 = team2.ShouldSwitch(currentPokemon2, currentPokemon1, ai);
                 if (preSwitch2 != currentPokemon2)
                 {
-                    Console.WriteLine($"{team2.name} switched to {currentPokemon2.name}");
+                    // Console.WriteLine($"{team2.name} switched to {currentPokemon2.name}");
                     currentPokemon2.lastMove = null;
                 }
                 else
@@ -1910,8 +1942,7 @@ public static class Program
                 }
             }
 
-            if(currentPokemon1.lastMove != null) Console.WriteLine($"last move: {currentPokemon1.lastMove.moveB.name}");
-            else Console.WriteLine("last move: none");
+           
             int priority1 = 0;
             int priority2 = 0;
             if (move1 != null) priority1 = move1.moveB.priority;
@@ -1923,7 +1954,7 @@ public static class Program
                 {
                     if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                     {
-                        Console.WriteLine($"{move2.moveB.name} failed");
+                        // Console.WriteLine($"{move2.moveB.name} failed");
                     }
                     else
                         ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1936,7 +1967,7 @@ public static class Program
                 {
                     if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                     {
-                        Console.WriteLine($"{move1.moveB.name} failed");
+                        // Console.WriteLine($"{move1.moveB.name} failed");
                     }
                     else
                         ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1951,7 +1982,7 @@ public static class Program
                     {
                         if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                         {
-                            Console.WriteLine($"{move2.moveB.name} failed");
+                            // Console.WriteLine($"{move2.moveB.name} failed");
                         }
                         else
                             ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1964,7 +1995,7 @@ public static class Program
                     {
                         if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                         {
-                            Console.WriteLine($"{move1.moveB.name} failed");
+                            // Console.WriteLine($"{move1.moveB.name} failed");
                         }
                         else
                             ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -1980,7 +2011,7 @@ public static class Program
                         {
                             if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
                             {
-                                Console.WriteLine($"{move2.moveB.name} failed");
+                                // Console.WriteLine($"{move2.moveB.name} failed");
                             }
                             else
                                 ExecuteMove(currentPokemon2, currentPokemon1, move2);
@@ -1993,7 +2024,7 @@ public static class Program
                         {
                             if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
                             {
-                                Console.WriteLine($"{move1.moveB.name} failed");
+                                // Console.WriteLine($"{move1.moveB.name} failed");
                             }
                             else
                                 ExecuteMove(currentPokemon1, currentPokemon2, move1);
@@ -2019,12 +2050,12 @@ public static class Program
         }
         if (team1.AbleToBattle())
         {
-            Console.WriteLine($"{team1.name} wins the battle!");
+            // Console.WriteLine($"{team1.name} wins the battle!");
             team1.wins++;
         }
         else
         {
-            Console.WriteLine($"{team2.name} wins the battle!");
+            // Console.WriteLine($"{team2.name} wins the battle!");
             team2.wins++;
         }
         team1.HealTeam();
@@ -2032,12 +2063,12 @@ public static class Program
     }
     public static void ExecuteMove(Pokemon atk, Pokemon def, Move move)
     {
-        Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
+        // Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
         Move(atk, def, move);
-        Console.WriteLine(def.hp);
+        // Console.WriteLine(def.hp);
         if (def.hp <= 0)
         {
-            Console.WriteLine($"{def.name} fainted");
+            // Console.WriteLine($"{def.name} fainted");
             def.UnDmax();
             def.UnMegaEvolve();
             def.UnTerastallize();
@@ -2045,7 +2076,7 @@ public static class Program
         }
         if (atk.hp <= 0)
         {
-            Console.WriteLine($"{atk.name} fainted");
+            // Console.WriteLine($"{atk.name} fainted");
             atk.UnDmax();
             atk.UnMegaEvolve();
             atk.UnTerastallize();
@@ -2112,63 +2143,155 @@ public static class Program
             case Status.Poison:
                 int dmg = Convert.ToInt32(Math.Round(pk.maxHP / 8.0, 0));
                 pk.hp -= dmg;
-                Console.WriteLine($"{pk.name} is hurt by poison and lost {dmg} HP!");
+                // Console.WriteLine($"{pk.name} is hurt by poison and lost {dmg} HP!");
                 if (pk.hp < 0) pk.hp = 0;
                 break;
             case Status.Toxic:
                 if (pk.toxicCounter == 0) pk.toxicCounter = 1;
                 int toxicDmg = Convert.ToInt32(Math.Round((pk.maxHP / 16.0) * pk.toxicCounter, 0));
                 pk.hp -= toxicDmg;
-                Console.WriteLine($"{pk.name} is hurt by toxic poison and lost {toxicDmg} HP!");
+                // Console.WriteLine($"{pk.name} is hurt by toxic poison and lost {toxicDmg} HP!");
                 pk.toxicCounter++;
                 if (pk.hp < 0) pk.hp = 0;
                 break;
             case Status.Burn:
                 int burnDmg = Convert.ToInt32(Math.Round(pk.maxHP / 16.0, 0));
                 pk.hp -= burnDmg;
-                Console.WriteLine($"{pk.name} is hurt by its burn and lost {burnDmg} HP!");
+                // Console.WriteLine($"{pk.name} is hurt by its burn and lost {burnDmg} HP!");
                 if (pk.hp < 0) pk.hp = 0;
                 break;
         }
     }
     public static void RunAllPokemonBattles(List<Pokemon> pokemons, int battlesPerPair, int ai)
     {
-        double prcnt = 0.0;
+        //double prcnt = 0.0;
+        //for (int i = 0; i < pokemons.Count; i++)
+        //{
+        //    prcnt = (i + 1) * 100 / pokemons.Count;
+        //    for (int j = i + 1; j < pokemons.Count; j++)
+        //    {
+        //        for (int k = 0; k < battlesPerPair; k++)
+        //        {
+        //            // Console.WriteLine($"Battle {k + 1} between {pokemons[i].name} and {pokemons[j].name}");
+        //            // Console.WriteLine($"{prcnt}");
+        //            PokeBattle(pokemons[i], pokemons[j], ai);
+        //            Console.Clear();
+        //        }
+        //    }
+        //}
+        DateTime now = DateTime.Now;
+        Console.WriteLine($"{now}");
+        var pairs = new List<(int i, int j)>();
+
+        // Build list of all pairs
         for (int i = 0; i < pokemons.Count; i++)
         {
-            prcnt = (i + 1) * 100 / pokemons.Count;
             for (int j = i + 1; j < pokemons.Count; j++)
             {
-                for (int k = 0; k < battlesPerPair; k++)
-                {
-                    Console.WriteLine($"Battle {k + 1} between {pokemons[i].name} and {pokemons[j].name}");
-                    Console.WriteLine($"{prcnt}");
-                    PokeBattle(pokemons[i], pokemons[j], ai);
-                    Console.Clear();
-                }
+                pairs.Add((i, j));
             }
         }
+
+        object lockObj = new object();
+        int completed = 0;
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var watchEst = System.Diagnostics.Stopwatch.StartNew();
+        var watchEst50 = System.Diagnostics.Stopwatch.StartNew();
+        var estTime = 0;
+        bool tst = true;
+        bool tst50 = true;
+        // Parallelize across pairs
+        Parallel.ForEach(pairs, pair =>
+        {
+            for (int k = 0; k < battlesPerPair; k++)
+            {
+                Pokemon clone1 = Pokemon.ClonePokemon(pokemons[pair.i]);
+                Pokemon clone2 = Pokemon.ClonePokemon(pokemons[pair.j]);
+
+                PokeBattle(clone1, clone2, ai);
+
+                lock (lockObj)
+                {
+                    if (clone1.hp > 0) pokemons[pair.i].wins++;
+                    else pokemons[pair.j].wins++;
+                }
+            }
+
+            lock (lockObj)
+            {
+                completed++;
+                double prcnt = (completed * 100.0) / pairs.Count;
+                if (tst && prcnt > 1.00)
+                {
+                    tst = false;
+                    watchEst.Stop();
+                    estTime = Convert.ToInt32(watchEst.ElapsedMilliseconds * 100);
+                }
+                else if (tst50 && prcnt > 50.00)
+                {
+                    tst50 = false;
+                    watchEst50.Stop();
+                    estTime = Convert.ToInt32(watchEst50.ElapsedMilliseconds * 2);
+                }
+                Console.Clear();
+                Console.WriteLine($"Progress: {prcnt:F2}% ({completed}/{pairs.Count} pairs) Est Time: {estTime} ms");
+            }
+        });
+
+        watch.Stop();
+        Console.WriteLine($"Start: {now} End:{DateTime.Now} Elapsed time: {watch.ElapsedMilliseconds} ms\n");
     }
     public static void RunAllTrainerBattles(List<Trainer> trainers, int battlesPerPair, int ai)
     {
+        //for (int i = 0; i < trainers.Count; i++)
+        //{
+        //    for (int j = i + 1; j < trainers.Count; j++)
+        //    {
+        //        for (int k = 0; k < battlesPerPair; k++)
+        //        {
+        //            // Console.WriteLine($"Trainer {trainers[i].name} vs Trainer {trainers[j].name} ({k + 1})");
+
+        //            TrainerBattle(trainers[i], trainers[j], ai);
+        //        }
+        //    }
+        //}
+        var pairs = new List<(int i, int j)>();
+
+        // Build list of all pairs
         for (int i = 0; i < trainers.Count; i++)
         {
             for (int j = i + 1; j < trainers.Count; j++)
             {
-                for (int k = 0; k < battlesPerPair; k++)
-                {
-                    Console.WriteLine($"Trainer {trainers[i].name} vs Trainer {trainers[j].name} ({k + 1})");
-
-                    TrainerBattle(trainers[i], trainers[j], ai);
-                }
+                pairs.Add((i, j));
             }
         }
+
+        object lockObj = new object();
+        int completed = 0;
+
+        // Parallelize across pairs
+        Parallel.ForEach(pairs, pair =>
+        {
+            for (int k = 0; k < battlesPerPair; k++)
+            {
+                TrainerBattle(trainers[pair.i], trainers[pair.j], ai);
+            }
+
+            lock (lockObj)
+            {
+                completed++;
+                double prcnt = (completed * 100.0) / pairs.Count;
+                Console.Clear();
+                Console.WriteLine($"Progress: {prcnt:F2}% ({completed}/{pairs.Count} pairs)");
+            }
+        });
     }
     public static void MakePokeListEasy(List<Pokemon> PokemonList, List<Species> AllPokemon, List<MoveB> AllMoves, bool trainer)
     {
         int lvl = 0;
         bool levl = false;
-        Console.WriteLine("same level for all pokemon? [input a number for yes else proceed by ENTER]");
+        // Console.WriteLine("same level for all pokemon? [input a number for yes else proceed by ENTER]");
         try
         {
             lvl = Convert.ToInt32(Console.ReadLine());
@@ -2177,7 +2300,7 @@ public static class Program
         {
             levl = true;
         }
-        Console.WriteLine("Enter how many you want pokemon if you type \"NO\" the species of the pokemon it will register all previus pokemon");
+        // Console.WriteLine("Enter how many you want pokemon if you type \"NO\" the species of the pokemon it will register all previus pokemon");
         int pk = int.MaxValue;
         if (trainer == true)
         {
@@ -2185,7 +2308,7 @@ public static class Program
         }
         for (int i = 0; i < pk; i++)
         {
-            Console.Write($"Enter the name of the species of Pokemon {i + 1}: ");
+            // Console.Write($"Enter the name of the species of Pokemon {i + 1}: ");
             string checkSpecies = Console.ReadLine().ToLower();
             if (checkSpecies == "no") break;
             Species speciesInput = null;
@@ -2200,16 +2323,16 @@ public static class Program
             }
             if (levl == true)
             {
-                Console.Write($"Enter the level of Pokemon {i + 1}: ");
+                // Console.Write($"Enter the level of Pokemon {i + 1}: ");
                 lvl = Convert.ToInt32(Console.ReadLine());
             }
             if (speciesInput != null)
             {
                 Pokemon pokemon = new Pokemon(speciesInput, lvl);
-                Console.WriteLine("Input atleast one move then type NO when finished");
+                // Console.WriteLine("Input atleast one move then type NO when finished");
                 for (int j = 0; j < 4; j++)
                 {
-                    Console.Write($"Enter move name {j + 1}: ");
+                    // Console.Write($"Enter move name {j + 1}: ");
                     string move = Console.ReadLine().ToLower();
                     if (move == "no" && j > 0) break;
                     MoveB moveInput = null;
@@ -2241,7 +2364,7 @@ public static class Program
     {
         int lvl = 0;
         bool levl = false;
-        Console.WriteLine("same level for all pokemon? [input a number for yes else proceed by ENTER]");
+        // Console.WriteLine("same level for all pokemon? [input a number for yes else proceed by ENTER]");
         try
         {
             lvl = Convert.ToInt32(Console.ReadLine());
@@ -2250,7 +2373,7 @@ public static class Program
         {
             levl = true;
         }
-        Console.WriteLine("Enter how many you want pokemon if you type \"NO\" the species of the pokemon it will register all previus pokemon");
+        // Console.WriteLine("Enter how many you want pokemon if you type \"NO\" the species of the pokemon it will register all previus pokemon");
         int pk = int.MaxValue;
         if (trainer == true)
         {
@@ -2258,7 +2381,7 @@ public static class Program
         }
         for (int i = 0; i < pk; i++)
         {
-            Console.Write($"Enter the name of the species of Pokemon {i + 1}: ");
+            // Console.Write($"Enter the name of the species of Pokemon {i + 1}: ");
             string checkSpecies = Console.ReadLine().ToLower();
             if (checkSpecies == "no") break;
             Species speciesInput = null;
@@ -2271,18 +2394,18 @@ public static class Program
                     break;
                 }
             }
-            Console.WriteLine($"Emter the nick name of Pokemon {i + 1} (Press 'ENTER' for no nick): ");
+            // Console.WriteLine($"Emter the nick name of Pokemon {i + 1} (Press 'ENTER' for no nick): ");
             string name = Console.ReadLine();
-            Console.WriteLine($"Input gender of pokemon {i + 1} (♂ = True, ♀ = False): ");
+            // Console.WriteLine($"Input gender of pokemon {i + 1} (♂ = True, ♀ = False): ");
             bool gender = Convert.ToBoolean(Console.ReadLine());
             if (levl == true)
             {
-                Console.Write($"Enter the level of Pokemon {i + 1}: ");
+                // Console.Write($"Enter the level of Pokemon {i + 1}: ");
                 lvl = Convert.ToInt32(Console.ReadLine());
             }
             if (speciesInput != null)
             {
-                Console.WriteLine($"Input the ability of Pokemon {i + 1} ( 1, 2, 3-hidden): ");
+                // Console.WriteLine($"Input the ability of Pokemon {i + 1} ( 1, 2, 3-hidden): ");
                 int ability = Convert.ToInt32(Console.ReadLine());
                 string[] statNames = { "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed" };
                 int[] IVs = new int[6];
@@ -2290,10 +2413,10 @@ public static class Program
 
                 for (int k = 0; k < statNames.Length; k++)
                 {
-                    Console.Write($"Enter IV for {statNames[k]} (0–31): ");
+                    // Console.Write($"Enter IV for {statNames[k]} (0–31): ");
                     IVs[k] = int.Parse(Console.ReadLine());
 
-                    Console.Write($"Enter EV for {statNames[k]} (0–252): ");
+                    // Console.Write($"Enter EV for {statNames[k]} (0–252): ");
                     EVs[k] = int.Parse(Console.ReadLine());
                 }
 
@@ -2303,10 +2426,10 @@ public static class Program
                 }
                 if (speciesInput.abilityH == "" && ability == 3) ability = 1;
                 else if (speciesInput.ability2 == "" && ability == 2) ability = 1;
-                Console.WriteLine($"Input the nature of Pokemon {i + 1}: ");
+                // Console.WriteLine($"Input the nature of Pokemon {i + 1}: ");
                 string nature = Console.ReadLine().ToLower();
 
-                Console.WriteLine($"Input the item of Pokemon {i + 1} (Press 'ENTER' for no item): ");
+                // Console.WriteLine($"Input the item of Pokemon {i + 1} (Press 'ENTER' for no item): ");
                 string checkItem = Console.ReadLine().ToLower();
                 Item itemInput = null;
                 if (checkItem == "")
@@ -2323,18 +2446,18 @@ public static class Program
                     }
                 }
 
-                Console.WriteLine($"INput if the Pokemon {i + 1} can Gmax: ");
+                // Console.WriteLine($"INput if the Pokemon {i + 1} can Gmax: ");
                 bool gmax = Convert.ToBoolean(Console.ReadLine());
                 if (speciesInput.gmax == false) gmax = false;
 
 
-                Console.WriteLine($"Input the tera type of Pokemon {i + 1}: ");
+                // Console.WriteLine($"Input the tera type of Pokemon {i + 1}: ");
                 string tera = Console.ReadLine().ToLower();
                 Pokemon pokemon = new Pokemon(speciesInput, name, gender, lvl, ability, IVs[0], EVs[0], IVs[1], EVs[1], IVs[2], EVs[2], IVs[3], EVs[3], IVs[4], EVs[4], IVs[5], EVs[5], nature, itemInput, gmax, 10, GetTypeId(tera));
-                Console.WriteLine("Input atleast one move then type NO when finished");
+                // Console.WriteLine("Input atleast one move then type NO when finished");
                 for (int j = 0; j < 4; j++)
                 {
-                    Console.Write($"Enter move name {j + 1}: ");
+                    // Console.Write($"Enter move name {j + 1}: ");
                     string move = Console.ReadLine().ToLower();
                     if (move == "no" && j > 0) break;
                     MoveB moveInput = null;
@@ -2866,7 +2989,7 @@ public static class Program
             }
             else if (presetName == "Lion")
             {
-                // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+                //Species species = new Species("Lion", Type.Normal, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Species species = new Species("Lion", Type.Normal, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
                 Pokemon Lion = new Pokemon(species, 50);
                 MoveB physical = new MoveB("Physical", 0, 60, Split.Physical, 100, 100, 0, true, false, null);
@@ -2969,10 +3092,10 @@ public static class Program
                     }
                     else break;
                 }
-                if (PokemonList.Count() == 0) Console.WriteLine("Lion won");
-                else Console.WriteLine("Pokemon won");
+               // if (PokemonList.Count() == 0) // Console.WriteLine("Lion won");
+               //  else // Console.WriteLine("Pokemon won");
 
-                Console.WriteLine("Lion in progress");
+                            Console.WriteLine("Lion in progress");
             }
             else if (presetName == "Test Trainer")
             {

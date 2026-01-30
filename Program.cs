@@ -9,6 +9,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Reflection.Metadata;
 using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections;
+using System.Diagnostics.Metrics;
+using System.Reflection.Emit;
 public enum Status
 {
     None = 0,
@@ -94,7 +97,7 @@ public class Trainer
     }
     public void AddPokemon(Pokemon pokemon)
     {
-        if (pokemon.moveNum == 0) return;
+        if (pokemon.moveNum == 0 || pokemon == null || pokemon.species == null) return;
         if (numPoke < 6)
         {
             team.Add(pokemon);
@@ -380,7 +383,7 @@ public class Pokemon
     }
     public void AddMove(Move move)
     {
-        if (move == null) return;
+        if (move == null || move.moveB == null) return;
         if (moveNum < 4)
         {
             moveSet[moveNum] = move;
@@ -1123,8 +1126,8 @@ public static class Program
         Converters = { new JsonStringEnumConverter() },
         PropertyNameCaseInsensitive = true
     };
-    public static List<Species> AllPokemon { get; } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("POKEMON_JSON_PATH")?? throw new InvalidOperationException("POKEMON_JSON_PATH is not set."), "AllPokemon.json")));
-    public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("POKEMON_JSON_PATH")?? throw new InvalidOperationException("POKEMON_JSON_PATH is not set."),"AllMoves.json")),JsonOptions)!;
+    public static List<Species> AllPokemon { get; } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path")?? throw new InvalidOperationException("Pokemon_Json_Path is not set."), "AllPokemon.json")));
+    public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path")?? throw new InvalidOperationException("Pokemon_Json_Path is not set."),"AllMoves.json")),JsonOptions)!;
     public static Type GetTypeId(string typeName)
     {
         return typeName.ToLower() switch
@@ -1388,27 +1391,38 @@ public static class Program
         }
 
         if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.chargingMove)
-        {
-            if (move.moveB.name == "Spite")
-            {
-                pokemonD.lastMove.PP -= 4;
-                return;
-            }
-            if(move.moveB.name == "Curse" && (pokemonA.species.type1 == Type.Ghost || pokemonA.species.type2 == Type.Ghost))
-            {
-                Console.WriteLine("Ghost Curse not implemented");
-                return;
-            }
-            if(move.moveB.name == "Attract")
-            {
-                if ((!pokemonD.species.noRatio) || (!pokemonA.species.noRatio))
-                {
-                    if (pokemonA.gender == pokemonD.gender)
-                        return;
-                }
-            }
+        {    
             if (move.moveB.split == Split.Status)
             {
+                if (move.moveB.name == "Spite")
+                {
+                    pokemonD.lastMove.PP -= 4;
+                    return;
+                }
+                if (move.moveB.name == "Curse" && (pokemonA.species.type1 == Type.Ghost || pokemonA.species.type2 == Type.Ghost))
+                {
+                    Console.WriteLine("Ghost Curse not implemented");
+                    return;
+                }
+                if (move.moveB.name == "Attract")
+                {
+                    if ((!pokemonD.species.noRatio) || (!pokemonA.species.noRatio))
+                    {
+                        if (pokemonA.gender == pokemonD.gender)
+                            return;
+                    }
+                }
+                if (move.moveB.name == "Memento")
+                {
+                   pokemonA.hp = 0;
+                }
+                if (move.moveB.name == "Trick")
+                {
+                    Item temp = pokemonA.heldItem;
+                    pokemonA.heldItem = pokemonD.heldItem;
+                    pokemonD.heldItem = temp;
+                    return;
+                }
                 foreach (MoveEffect effect in move.moveB.effectList)
                 {
                     InflictStatus(pokemonD, effect);
@@ -1442,6 +1456,10 @@ public static class Program
                     pokemonA.lastMove = move;
                     return;
                 }
+                if (move.moveB.name == "Fake Out" && pokemonA.lastMove != null)
+                {
+                    return;
+                }
                 if (move.moveB.name == "Flail" || move.moveB.name == "Reversal")
                 {
                     int N = (48 * pokemonA.hp) / pokemonA.maxHP;
@@ -1459,6 +1477,38 @@ public static class Program
                     else
                         power = 20;
                 }
+                if(move.moveB.name == "Eruption" || move.moveB.name == "Water Spout")
+                {
+                    power = Convert.ToInt32(Math.Floor((double)(150 * pokemonA.hp) / pokemonA.maxHP));
+                }
+                if (move.moveB.name == "Facade")
+                {
+                    if(pokemonA.statusVol == Status.Burn || pokemonA.statusVol == Status.Paralysis || pokemonA.statusVol == Status.Poison || pokemonA.statusVol == Status.Toxic)
+                    {
+                        power *= 2;
+                    }
+                }
+                if (move.moveB.name == "Knock Off")
+                {
+                    if (pokemonD.heldItem != null)
+                    {
+                        power = Convert.ToInt32(Math.Floor(power * 1.5));
+                    }
+
+                }
+                if (move.moveB.name == "Endeavor")
+                {
+                    if (pokemonD.hp < pokemonA.hp)
+                    {
+                        return;
+                    }
+                    else
+                        pokemonD.hp = pokemonA.hp;
+                    if (pokemonD.hp < 0) pokemonD.hp = 0;
+                    pokemonA.lastMove = move;
+                    return;
+
+                }
                 if (move.moveB.name == "Super Fang")
                 {
                     int halfHp = Convert.ToInt32(Math.Floor((double)pokemonD.hp / 2));
@@ -1466,6 +1516,10 @@ public static class Program
                     if (pokemonD.hp < 0) pokemonD.hp = 0;
                     pokemonA.lastMove = move;
                     return;
+                }
+                if(pokemonA.lastMove != null && pokemonA.lastMove.moveB.name == "Charge" && move.moveB.type == Type.Electric)
+                {
+                    power *= 2;
                 }
                 if (move.moveB.name == "Fury Cutter")
                 {
@@ -1508,7 +1562,8 @@ public static class Program
                         pokemonA.invurnable = false;
                     }
                 }
-                if (move.moveB.name == "Hyper Beam" || move.moveB.name == "Giga Impact")
+                List<string> reChargeMoves = new List<string> { "Hyper Beam", "Giga Impact", "Blast Burn", "Eternabeam", "Frenzy Plant", "Hydro Cannon", "Meteor Assault", "Prismatic Laser", "Roar of Time", "Rock Wrecker"};
+                if (reChargeMoves.Contains(move.moveB.name))
                 {
                     pokemonA.reCharge = true;
                 }
@@ -2289,10 +2344,6 @@ public static class Program
             }
         }
     }
-    public static void PreTurnPokemonCheck(Pokemon pk, int ai)
-    {
-
-    }
     public static void PostTurnPokemonCheck(Pokemon pk)
     {
         if (pk == null) return;
@@ -2331,10 +2382,10 @@ public static class Program
             {
                 for (int k = 0; k < battlesPerPair; k++)
                 {
+                    Console.Clear();
                     Console.WriteLine($"Battle {k + 1} between {pokemons[i].name} and {pokemons[j].name}");
                     Console.WriteLine($"{prcnt}");
                     PokeBattle(pokemons[i], pokemons[j], ai);
-                    Console.Clear();
                 }
             }
         }
@@ -2837,25 +2888,7 @@ public static class Program
     }
     public static void Main()
     {
-
-        Item LifeOrb = new Item("Life Orb", "01&01&30", false);
-        Item ExpertBelt = new Item("Expert Belt", "01&02&10", false);
-        Item Galladite = new Item("Galladite", "03&07&00", true);
-
-        List<Item> AllItems = new List<Item>
-        {
-            LifeOrb,
-            ExpertBelt,
-            Galladite
-        };
-
-        Pokemon Gallade = new Pokemon(AllPokemon[475], "Gallade", true, 69, 2, 31, 8, 31, 252, 31, 0, 31, 0, 31, 0, 31, 252, "Adamant", Galladite, false, 1, Type.Fighting);
-        Pokemon Gardevoir = new Pokemon(AllPokemon[282], "Gardevoir", false, 69, 1, 31, 8, 0, 0, 31, 0, 31, 252, 31, 0, 31, 252, "Modest", ExpertBelt, false, 1, Type.Fairy);
-        Gallade.MegaEvo();
-        Console.WriteLine(Gallade.species.name);
-        Gallade.UnMegaEvolve();
-        Console.WriteLine(Gallade.species.name);
-
+        List<Item> AllItems = new List<Item>();
         Console.WriteLine("Trainer or pokemon");
         Console.WriteLine("[1] Pokemon");
         Console.WriteLine("[2] Trainer");

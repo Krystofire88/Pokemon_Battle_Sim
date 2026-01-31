@@ -12,6 +12,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections;
 using System.Diagnostics.Metrics;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.Intrinsics.X86;
+using System.Transactions;
 public enum Status
 {
     None = 0,
@@ -274,8 +277,10 @@ public class Pokemon
     public bool invurnable { get; set; } = false;
     public int protectTimes { get; set; } = 0;
     public Move lastMove { get; set; } = null;
+    public Move selectedMove { get; set; } = null;
+    public bool moveFirst { get; set; } = false;
     public bool lockedMove { get; set; } = false;
-    public int lockTimer { get; set; } = 0;
+    public int lockTimer { get; set; } = 0; 
     public bool endure { get; set; } = false;
     public int furyCutter { get; set; } = 0;
 
@@ -1055,7 +1060,7 @@ public class Pokemon
 public class MoveB
 {
     public string name { get; }
-    public Type type { get; }
+    public Type type { get; set; }
     public int power { get; }
     public Split split { get; }
     public int acc { get; }
@@ -1365,7 +1370,7 @@ public static class Program
             pokemonA.lastMove = move;
             return;
         }
-        if (pokemonD.invurnable)
+        if (pokemonD.invurnable && move.moveB.name != "Feint")
         {
             Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
             pokemonA.lastMove = move;
@@ -1416,12 +1421,26 @@ public static class Program
                 {
                    pokemonA.hp = 0;
                 }
-                if (move.moveB.name == "Trick")
+                if (move.moveB.name == "Trick" || move.moveB.name == "Switcheroo")
                 {
                     Item temp = pokemonA.heldItem;
                     pokemonA.heldItem = pokemonD.heldItem;
                     pokemonD.heldItem = temp;
                     return;
+                }
+                if (move.moveB.name == "Roost")
+                {
+                    int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / Math.Abs(move.moveB.effectList[0].effectPower)));
+                    pokemonA.hp += lifeSteel;
+                    if (pokemonA.hp > pokemonA.maxHP) pokemonA.hp = pokemonA.maxHP;
+                }
+                if (move.moveB.name == "Acupressure")
+                {
+                        int st = Random.Shared.Next(1, 8);
+                        Stat stt = (Stat)st;
+                        MoveEffect effect = new MoveEffect(Status.None, stt, 100, 2, false, 1);
+                        InflictStatus(pokemonD, effect);
+                        return;
                 }
                 foreach (MoveEffect effect in move.moveB.effectList)
                 {
@@ -1481,6 +1500,27 @@ public static class Program
                 {
                     power = Convert.ToInt32(Math.Floor((double)(150 * pokemonA.hp) / pokemonA.maxHP));
                 }
+                if (move.moveB.name == "Gyro Ball")
+                {
+                    double spe1;
+                    double spe2;
+                    double para = 1.00;
+                    if (pokemonA.statusVol == Status.Paralysis) para = 0.5;
+                    spe1 = pokemonA.CalcSpeStat() * pokemonA.GetMod(pokemonA.SpeMod) * para;
+
+                    para = 1;
+                    if (pokemonD.statusVol == Status.Paralysis) para = 0.5;
+                    spe2 = pokemonD.CalcSpeStat() * pokemonD.GetMod(pokemonD.SpeMod) * para;
+
+                    power = Math.Min(150, (int)((25 * spe1) / spe2) + 1);
+                }
+                if(move.moveB.name == "Brine")
+                {
+                    if(pokemonA.hp < pokemonA.maxHP / 2)
+                    {
+                        power *= 2;
+                    }
+                }
                 if (move.moveB.name == "Facade")
                 {
                     if(pokemonA.statusVol == Status.Burn || pokemonA.statusVol == Status.Paralysis || pokemonA.statusVol == Status.Poison || pokemonA.statusVol == Status.Toxic)
@@ -1496,6 +1536,37 @@ public static class Program
                     }
 
                 }
+                if (move.moveB.name == "Last Resort")
+                {
+                    foreach (Move m in pokemonA.moveSet)
+                    {
+                        if (m != move && m.PP > 0)
+                        {
+                            return;
+                        }
+                    }
+                }
+                if (move.moveB.name == "Ancient Power")
+                {
+                    int chance = Random.Shared.Next(0, 100);
+                    if (chance < 10)
+                    {
+                        for (int i = 1; i < 6; i++)
+                        {
+                            Stat stt = (Stat)i;
+                            MoveEffect eff = new MoveEffect(Status.None, stt, 100, 1, false, 1);
+                            InflictStatus(pokemonA, eff);
+                        }
+                    }
+                }
+                if (move.moveB.name == "Judgment")
+                {
+                    move.moveB.type = pokemonA.species.type1;
+                }
+                if (move.moveB.name == "Crush Grip")
+                {
+                    power = Convert.ToInt32(Math.Floor((double)(120 * pokemonD.hp) / pokemonD.maxHP));
+                }
                 if (move.moveB.name == "Endeavor")
                 {
                     if (pokemonD.hp < pokemonA.hp)
@@ -1508,6 +1579,10 @@ public static class Program
                     pokemonA.lastMove = move;
                     return;
 
+                }
+                if (move.moveB.name == "U-Turn")
+                {
+                    Console.WriteLine("Switch not implemented");
                 }
                 if (move.moveB.name == "Super Fang")
                 {
@@ -1542,7 +1617,7 @@ public static class Program
                     }
                 }
                 List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock" };
-                List<string> invurnable = new List<string> { "Fly", "Dig", "Dive", "Bounce" };
+                List<string> invurnable = new List<string> { "Fly", "Dig", "Dive", "Bounce", "Phantom Force", "Shadow Force", "Sky Drop"};
                 if (charge.Contains(move.moveB.name) && !pokemonA.chargingMove)
                 {
                     pokemonA.chargingMove = true;
@@ -1573,6 +1648,19 @@ public static class Program
                     pokemonA.lockedMove = true;
                     pokemonA.lockTimer = 1;
                     pokemonA.lastMove = move;
+                }
+                if (move.moveB.name == "Payback")
+                {
+                    if (pokemonA.moveFirst == false)
+                    {
+                        power *= 2;
+                    }
+                }
+                if (move.moveB.name == "Sucker Punch")
+                {
+                    if (pokemonD.moveFirst) return;
+                    if (pokemonD.selectedMove.moveB.split == Split.Status) return;
+
                 }
                 if (move.moveB.name == "Thief")
                 {
@@ -1828,19 +1916,21 @@ public static class Program
         currentPokemon2.dMaxTimer = 0;
         while (currentPokemon1.hp > 0 && currentPokemon2.hp > 0)
         {
-            Move move1 = null;
-            Move move2 = null;
+            pokemon1.moveFirst = false;
+            pokemon2.moveFirst = false;
+            pokemon1.selectedMove = null;
+            pokemon2.selectedMove = null;
             double spe1 = 0;
             double spe2 = 0;
 
             //Pkmn 1 turn
             if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
             {
-                move1 = currentPokemon1.lastMove;
+                pokemon1.selectedMove = currentPokemon1.lastMove;
             }
             else if (currentPokemon1.lockedMove)
             {
-                move1 = currentPokemon1.lastMove;
+                pokemon1.selectedMove = currentPokemon1.lastMove;
                 currentPokemon1.lockTimer++;
                 if (currentPokemon1.lockTimer >= 3)
                 {
@@ -1853,7 +1943,7 @@ public static class Program
             }
             else
             {
-                move1 = currentPokemon1.PickMove(currentPokemon2, ai);
+                pokemon1.selectedMove = currentPokemon1.PickMove(currentPokemon2, ai);
             }
 
             double para = 1;
@@ -1863,11 +1953,11 @@ public static class Program
             // Pkmn 2 turn
             if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
             {
-                move2 = currentPokemon2.lastMove;
+                pokemon2.selectedMove = currentPokemon2.lastMove;
             }
             else if (currentPokemon2.lockedMove)
             {
-                move2 = currentPokemon2.lastMove;
+                pokemon2.selectedMove = currentPokemon2.lastMove;
                 currentPokemon2.lockTimer++;
                 if (currentPokemon2.lockTimer >= 3)
                 {
@@ -1880,7 +1970,7 @@ public static class Program
             }
             else
             {
-                move2 = currentPokemon2.PickMove(currentPokemon1, ai);
+                pokemon2.selectedMove = currentPokemon2.PickMove(currentPokemon1, ai);
             }
 
             para = 1;
@@ -1889,121 +1979,186 @@ public static class Program
 
             int priority1 = 0;
             int priority2 = 0;
-            if (move1 != null) priority1 = move1.moveB.priority;
-            if (move2 != null) priority2 = move2.moveB.priority;
+            if (pokemon1.selectedMove != null) priority1 = pokemon1.selectedMove.moveB.priority;
+            if (pokemon2.selectedMove != null) priority2 = pokemon2.selectedMove.moveB.priority;
 
-            if (priority1 > priority2 && move1 != null)
+            //if (priority1 > priority2 && move1 != null)
+            //{
+            //    if (currentPokemon1.DoIMove())
+            //    {
+            //        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //    }
+
+            //    if (move2 != null && currentPokemon2.hp > 0)
+            //    {
+            //        if (currentPokemon2.DoIMove())
+            //        {
+            //            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+            //                Console.WriteLine($"{move2.moveB.name} failed");
+            //            else
+            //                ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //        }
+            //    }
+            //}
+            //else if (priority1 < priority2 && move2 != null)
+            //{
+            //    if (currentPokemon2.DoIMove())
+            //    {
+            //        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //    }
+
+            //    if (move1 != null && currentPokemon1.hp > 0)
+            //    {
+            //        if (currentPokemon1.DoIMove())
+            //        {
+            //            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
+            //                Console.WriteLine($"{move1.moveB.name} failed");
+            //            else
+            //                ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    if (spe1 > spe2 && move1 != null)
+            //    {
+            //        if (currentPokemon1.DoIMove())
+            //        {
+            //            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //        }
+
+            //        if (move2 != null && currentPokemon2.hp > 0)
+            //        {
+            //            if (currentPokemon2.DoIMove())
+            //            {
+            //                if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+            //                    Console.WriteLine($"{move2.moveB.name} failed");
+            //                else
+            //                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //            }
+            //        }
+            //    }
+            //    else if (spe1 < spe2 && move2 != null)
+            //    {
+            //        if (currentPokemon2.DoIMove())
+            //        {
+            //            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //        }
+
+            //        if (move1 != null && currentPokemon1.hp > 0)
+            //        {
+            //            if (currentPokemon1.DoIMove())
+            //            {
+            //                if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
+            //                    Console.WriteLine($"{move1.moveB.name} failed");
+            //                else
+            //                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        int tie = Random.Shared.Next(0, 2);
+            //        if (tie == 0 && move1 != null)
+            //        {
+            //            if (currentPokemon1.DoIMove())
+            //            {
+            //                ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //            }
+
+            //            if (move2 != null && currentPokemon2.hp > 0)
+            //            {
+            //                if (currentPokemon2.DoIMove())
+            //                {
+            //                    if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
+            //                        Console.WriteLine($"{move2.moveB.name} failed");
+            //                    else
+            //                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //                }
+            //            }
+            //        }
+            //        else if (tie == 1 && move2 != null)
+            //        {
+            //            if (currentPokemon2.DoIMove())
+            //            {
+            //                ExecuteMove(currentPokemon2, currentPokemon1, move2);
+            //            }
+
+            //            if (move1 != null && currentPokemon1.hp > 0)
+            //            {
+            //                if (currentPokemon1.DoIMove())
+            //                {
+            //                    if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
+            //                        Console.WriteLine($"{move1.moveB.name} failed");
+            //                    else
+            //                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            if (priority1 > priority2)
             {
-                if (currentPokemon1.DoIMove())
+                pokemon1.moveFirst = true;
+            }
+            else if (priority1 < priority2)
+            {
+                pokemon2.moveFirst = true;
+            }
+            else
+            {
+                if (spe1 > spe2)
                 {
-                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                    pokemon1.moveFirst = true;
                 }
-
-                if (move2 != null && currentPokemon2.hp > 0)
+                else if (spe1 < spe2)
                 {
-                    if (currentPokemon2.DoIMove())
+                    pokemon2.moveFirst = true;
+                }
+                else
+                {
+                    int tie = Random.Shared.Next(0, 2);
+                    if (tie == 0)
                     {
-                        if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                            Console.WriteLine($"{move2.moveB.name} failed");
-                        else
-                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                        pokemon1.moveFirst = true;
+                    }
+                    else 
+                    {
+                        pokemon2.moveFirst = true;
                     }
                 }
             }
-            else if (priority1 < priority2 && move2 != null)
-            {
-                if (currentPokemon2.DoIMove())
+            if (pokemon1.moveFirst)
+            { 
+                if (pokemon1.selectedMove != null && currentPokemon1.DoIMove())
                 {
-                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
+                    ExecuteMove(currentPokemon1, currentPokemon2, pokemon1.selectedMove);
                 }
-
-                if (move1 != null && currentPokemon1.hp > 0)
+                if (pokemon2.selectedMove != null && currentPokemon2.hp > 0)
                 {
-                    if (currentPokemon1.DoIMove())
+                    if (currentPokemon2.DoIMove())
                     {
-                        if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                            Console.WriteLine($"{move1.moveB.name} failed");
+                        if (currentPokemon1.hp <= 0 && pokemon2.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{pokemon2.selectedMove.moveB.name} failed");
                         else
-                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
+                            ExecuteMove(currentPokemon2, currentPokemon1, pokemon2.selectedMove);
                     }
                 }
             }
             else
             {
-                if (spe1 > spe2 && move1 != null)
+                if (pokemon2.selectedMove != null && currentPokemon2.DoIMove())
+                {
+                    ExecuteMove(currentPokemon2, currentPokemon1, pokemon2.selectedMove);
+                }
+                if (pokemon1.selectedMove != null && currentPokemon1.hp > 0)
                 {
                     if (currentPokemon1.DoIMove())
                     {
-                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                    }
-
-                    if (move2 != null && currentPokemon2.hp > 0)
-                    {
-                        if (currentPokemon2.DoIMove())
-                        {
-                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                                Console.WriteLine($"{move2.moveB.name} failed");
-                            else
-                                ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                        }
-                    }
-                }
-                else if (spe1 < spe2 && move2 != null)
-                {
-                    if (currentPokemon2.DoIMove())
-                    {
-                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                    }
-
-                    if (move1 != null && currentPokemon1.hp > 0)
-                    {
-                        if (currentPokemon1.DoIMove())
-                        {
-                            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                                Console.WriteLine($"{move1.moveB.name} failed");
-                            else
-                                ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                        }
-                    }
-                }
-                else
-                {
-                    int tie = Random.Shared.Next(0, 2);
-                    if (tie == 0 && move1 != null)
-                    {
-                        if (currentPokemon1.DoIMove())
-                        {
-                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                        }
-
-                        if (move2 != null && currentPokemon2.hp > 0)
-                        {
-                            if (currentPokemon2.DoIMove())
-                            {
-                                if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                                    Console.WriteLine($"{move2.moveB.name} failed");
-                                else
-                                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                            }
-                        }
-                    }
-                    else if (tie == 1 && move2 != null)
-                    {
-                        if (currentPokemon2.DoIMove())
-                        {
-                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                        }
-
-                        if (move1 != null && currentPokemon1.hp > 0)
-                        {
-                            if (currentPokemon1.DoIMove())
-                            {
-                                if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                                    Console.WriteLine($"{move1.moveB.name} failed");
-                                else
-                                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                            }
-                        }
+                        if (currentPokemon2.hp <= 0 && pokemon1.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{pokemon1.selectedMove.moveB.name} failed");
+                        else
+                            ExecuteMove(currentPokemon1, currentPokemon2, pokemon1.selectedMove);
                     }
                 }
             }
@@ -2888,6 +3043,10 @@ public static class Program
     }
     public static void Main()
     {
+        foreach(MoveB mv in AllMoves)
+        {
+            Console.WriteLine(mv.name);
+        }
         List<Item> AllItems = new List<Item>();
         Console.WriteLine("Trainer or pokemon");
         Console.WriteLine("[1] Pokemon");

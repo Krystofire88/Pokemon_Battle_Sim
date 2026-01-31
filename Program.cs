@@ -15,6 +15,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Intrinsics.X86;
 using System.Transactions;
+using static System.Net.Mime.MediaTypeNames;
 public enum Status
 {
     None = 0,
@@ -256,8 +257,8 @@ public class Pokemon
     public int maxHP { get; private set; }
     public int hp { get; set; }
     public int ability { get; }
-    public Status statusVol { get; set; } = Status.None;
-    public List<Status> statusNov { get; set; } = new List<Status>();
+    public Status statusNonVol { get; set; } = Status.None;
+    public List<Status> statusVol { get; set; } = new List<Status>();
     public int HpIV, HpEV, AtkIV, AtkEV, DefIV, DefEV, SpaIV, SpaEV, SpdIV, SpdEV, SpeIV, SpeEV;
     public int AtkMod, DefMod, SpaMod, SpdMod, SpeMod, AccMod, EvaMod;
     public string nature { get; }
@@ -283,6 +284,7 @@ public class Pokemon
     public int lockTimer { get; set; } = 0; 
     public bool endure { get; set; } = false;
     public int furyCutter { get; set; } = 0;
+    public int echoedVoice { get; set; } = 0;
 
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
@@ -435,8 +437,8 @@ public class Pokemon
     public void Heal()
     {
         hp = maxHP;
-        statusVol = 0;
-        statusNov.Clear();
+        statusNonVol = 0;
+        statusVol.Clear();
         ClearMods();
         foreach (Move m in moveSet)
         {
@@ -750,7 +752,7 @@ public class Pokemon
             reCharge = false;
             return false;
         }
-        else if (statusVol == Status.Sleep)
+        else if (statusNonVol == Status.Sleep)
         {
             if (sleepTimer > 0)
             {
@@ -760,17 +762,17 @@ public class Pokemon
             }
             else
             {
-                statusVol = Status.None;
+                statusNonVol = Status.None;
                 Console.WriteLine($"{name} woke up!");
                 return true;
             }
         }
-        else if (statusVol == Status.Freeze)
+        else if (statusNonVol == Status.Freeze)
         {
             int thaw = Random.Shared.Next(0, 5);
             if (thaw == 0)
             {
-                statusVol = Status.None;
+                statusNonVol = Status.None;
                 Console.WriteLine($"{name} thawed out!");
                 return true;
             }
@@ -780,7 +782,7 @@ public class Pokemon
                 return false;
             }
         }
-        else if (statusVol == Status.Paralysis)
+        else if (statusNonVol == Status.Paralysis)
         {
             int chance = Random.Shared.Next(0, 4);
             if (chance == 0)
@@ -795,7 +797,7 @@ public class Pokemon
         }
         else
         {
-            foreach (Status statusN in statusNov)
+            foreach (Status statusN in statusVol)
             {
                 switch (statusN)
                 {
@@ -819,7 +821,7 @@ public class Pokemon
                         }
                         else
                         {
-                            statusNov.Remove(Status.Confusion);
+                            statusVol.Remove(Status.Confusion);
                             Console.WriteLine($"{name} snapped out of its confusion!");
                             return true;
                         }
@@ -1468,6 +1470,49 @@ public static class Program
                 {
                     rcrit = 8;
                 }
+                List<string> garCritMoves = new List<string> { "Flower Trick", "Frost Breath", "Storm Throw", "Surging Strikes", "Wicked Blow" };
+                if (garCritMoves.Contains(move.moveB.name))
+                {
+                    rcrit = 0;
+                }
+                if (move.moveB.name == "Psyshock" || move.moveB.name == "Psystrike")
+                {
+                    defense = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+                }
+                if (move.moveB.name == "Secret Sword")
+                {
+                    defense = (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod));
+                }
+                if (move.moveB.name == "Sacred Sword")
+                {
+                    defense = pokemonD.CalcDefStat();
+                }
+                if (move.moveB.name == "Body Press")
+                {
+                    attack = (pokemonA.CalcDefStat() * pokemonA.GetMod(pokemonA.DefMod));
+                }
+                if (move.moveB.name == "Foul Play")
+                {
+                    attack = (pokemonD.CalcAtkStat() * pokemonD.GetMod(pokemonD.AtkMod));
+                }
+                if (move.moveB.name == "Relic Song")
+                {
+                    if (pokemonA.species.name == "Meloetta")
+                    {
+                        Console.WriteLine("Meloetta changed to Aria Forme!");
+                        pokemonA.species = Program.AllPokemon.Find(sp => sp.name == "Meloetta-Aria");
+                    }
+                    else if (pokemonA.species.name == "Meloetta-Aria")
+                    {
+                        Console.WriteLine("Meloetta changed to Pirouette Forme!");
+                        pokemonA.species = Program.AllPokemon.Find(sp => sp.name == "Meloetta");
+                    }
+
+                }
+                if (move.moveB.name == "Dragon Tail" || move.moveB.name == "Circle Throw")
+                {
+                    Console.WriteLine("Switching not implemented");
+                }               
                 if (move.moveB.name == "Night Shade" || move.moveB.name == "Seismic Toss")
                 {
                     pokemonD.hp -= pokemonA.level;
@@ -1478,6 +1523,20 @@ public static class Program
                 if (move.moveB.name == "Fake Out" && pokemonA.lastMove != null)
                 {
                     return;
+                }
+                if (move.moveB.name == "Venoshock")
+                {
+                    if (pokemonD.statusNonVol == Status.Poison || pokemonD.statusNonVol == Status.Toxic)
+                    {
+                        power *= 2;
+                    }
+                }
+                if (move.moveB.name == "Hex")
+                {
+                    if (pokemonD.statusNonVol != Status.None)
+                    {
+                        power *= 2;
+                    }
                 }
                 if (move.moveB.name == "Flail" || move.moveB.name == "Reversal")
                 {
@@ -1505,14 +1564,38 @@ public static class Program
                     double spe1;
                     double spe2;
                     double para = 1.00;
-                    if (pokemonA.statusVol == Status.Paralysis) para = 0.5;
+                    if (pokemonA.statusNonVol == Status.Paralysis) para = 0.5;
                     spe1 = pokemonA.CalcSpeStat() * pokemonA.GetMod(pokemonA.SpeMod) * para;
 
                     para = 1;
-                    if (pokemonD.statusVol == Status.Paralysis) para = 0.5;
+                    if (pokemonD.statusNonVol == Status.Paralysis) para = 0.5;
                     spe2 = pokemonD.CalcSpeStat() * pokemonD.GetMod(pokemonD.SpeMod) * para;
 
                     power = Math.Min(150, (int)((25 * spe1) / spe2) + 1);
+                }
+                if (move.moveB.name == "Electro Ball")
+                {
+                    double spe1;
+                    double spe2;
+                    double para = 1.00;
+                    if (pokemonA.statusNonVol == Status.Paralysis) para = 0.5;
+                    spe1 = pokemonA.CalcSpeStat() * pokemonA.GetMod(pokemonA.SpeMod) * para;
+
+                    para = 1;
+                    if (pokemonD.statusNonVol == Status.Paralysis) para = 0.5;
+                    spe2 = pokemonD.CalcSpeStat() * pokemonD.GetMod(pokemonD.SpeMod) * para;
+
+                    double ratio = spe1 / spe2;
+                    if (ratio >= 4.0)
+                        power = 150;
+                    else if (ratio >= 3.0)
+                        power = 120;
+                    else if (ratio >= 2.0)
+                        power = 80;
+                    else if (ratio >= 1.0)
+                        power = 60;
+                    else
+                        power = 40;
                 }
                 if(move.moveB.name == "Brine")
                 {
@@ -1523,7 +1606,7 @@ public static class Program
                 }
                 if (move.moveB.name == "Facade")
                 {
-                    if(pokemonA.statusVol == Status.Burn || pokemonA.statusVol == Status.Paralysis || pokemonA.statusVol == Status.Poison || pokemonA.statusVol == Status.Toxic)
+                    if(pokemonA.statusNonVol == Status.Burn || pokemonA.statusNonVol == Status.Paralysis || pokemonA.statusNonVol == Status.Poison || pokemonA.statusNonVol == Status.Toxic)
                     {
                         power *= 2;
                     }
@@ -1534,7 +1617,6 @@ public static class Program
                     {
                         power = Convert.ToInt32(Math.Floor(power * 1.5));
                     }
-
                 }
                 if (move.moveB.name == "Last Resort")
                 {
@@ -1580,7 +1662,14 @@ public static class Program
                     return;
 
                 }
-                if (move.moveB.name == "U-Turn")
+                if (move.moveB.name == "Final Gambit")
+                {
+                    pokemonD.hp -= pokemonA.hp;
+                    if (pokemonD.hp < 0) pokemonD.hp = 0;
+                    pokemonA.hp = 0;
+                    return;
+                }
+                if (move.moveB.name == "U-Turn" || move.moveB.name == "Volt Switch")
                 {
                     Console.WriteLine("Switch not implemented");
                 }
@@ -1615,6 +1704,22 @@ public static class Program
                             power = 40;
                             break;
                     }
+                }
+                if (move.moveB.name == "Echoed Voice")
+                {
+                    pokemonA.echoedVoice++;
+                    power += (pokemonA.echoedVoice * 40);
+                    if (power > 200) power = 200;
+                }
+                if (move.moveB.name == "Clear Smog")
+                {
+                    pokemonD.ClearMods();
+                }
+                if (move.moveB.name == "Stored Power")
+                {
+                    int statBoosts = Math.Max(0, pokemonA.AtkMod) + Math.Max(0, pokemonA.DefMod) + Math.Max(0, pokemonA.SpaMod) +  Math.Max(0, pokemonA.SpdMod) +  Math.Max(0, pokemonA.SpeMod) + Math.Max(0, pokemonA.AccMod) + Math.Max(0, pokemonA.EvaMod);
+                    power += statBoosts * 20;
+
                 }
                 List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock" };
                 List<string> invurnable = new List<string> { "Fly", "Dig", "Dive", "Bounce", "Phantom Force", "Shadow Force", "Sky Drop"};
@@ -1681,7 +1786,7 @@ public static class Program
                 }
                 if (move.moveB.name == "Snore")
                 {
-                    if (pokemonA.statusVol != Status.Sleep)
+                    if (pokemonA.statusNonVol != Status.Sleep)
                     {
                         Console.WriteLine($"{pokemonA.name} can't use Snore because it isn't asleep!");
                         pokemonA.lastMove = move;
@@ -1763,7 +1868,7 @@ public static class Program
         }
 
         double status = 1.00;
-        if (pokemonA.statusVol == Status.Burn && move.moveB.split == Split.Physical)
+        if (pokemonA.statusNonVol == Status.Burn && move.moveB.split == Split.Physical)
         {
             status = 0.50;
         }
@@ -1896,13 +2001,13 @@ public static class Program
                 List<Status> nonVolitile = new List<Status> {Status.Confusion, Status.Infatuation, Status.Flinch }; 
                 if (effect.effectStatus != Status.None)
                 {
-                    if (pk.statusVol == Status.None && !nonVolitile.Contains(effect.effectStatus) && !pk.IsImmune(effect.effectStatus))
+                    if (pk.statusNonVol == Status.None && !nonVolitile.Contains(effect.effectStatus) && !pk.IsImmune(effect.effectStatus))
                     {
-                        pk.statusVol = effect.effectStatus;
+                        pk.statusNonVol = effect.effectStatus;
                     }
-                    else if (!pk.statusNov.Contains(effect.effectStatus) && effect.effectStatus != Status.Flinch && !pk.IsImmune(effect.effectStatus))
+                    else if (!pk.statusVol.Contains(effect.effectStatus) && effect.effectStatus != Status.Flinch && !pk.IsImmune(effect.effectStatus))
                     {
-                        pk.statusNov.Add(effect.effectStatus);
+                        pk.statusVol.Add(effect.effectStatus);
                     }
                 }
             }
@@ -1947,7 +2052,7 @@ public static class Program
             }
 
             double para = 1;
-            if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
+            if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
             spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
 
             // Pkmn 2 turn
@@ -1974,7 +2079,7 @@ public static class Program
             }
 
             para = 1;
-            if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+            if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
             spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
 
             int priority1 = 0;
@@ -1982,121 +2087,6 @@ public static class Program
             if (pokemon1.selectedMove != null) priority1 = pokemon1.selectedMove.moveB.priority;
             if (pokemon2.selectedMove != null) priority2 = pokemon2.selectedMove.moveB.priority;
 
-            //if (priority1 > priority2 && move1 != null)
-            //{
-            //    if (currentPokemon1.DoIMove())
-            //    {
-            //        ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //    }
-
-            //    if (move2 != null && currentPokemon2.hp > 0)
-            //    {
-            //        if (currentPokemon2.DoIMove())
-            //        {
-            //            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-            //                Console.WriteLine($"{move2.moveB.name} failed");
-            //            else
-            //                ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //        }
-            //    }
-            //}
-            //else if (priority1 < priority2 && move2 != null)
-            //{
-            //    if (currentPokemon2.DoIMove())
-            //    {
-            //        ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //    }
-
-            //    if (move1 != null && currentPokemon1.hp > 0)
-            //    {
-            //        if (currentPokemon1.DoIMove())
-            //        {
-            //            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-            //                Console.WriteLine($"{move1.moveB.name} failed");
-            //            else
-            //                ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    if (spe1 > spe2 && move1 != null)
-            //    {
-            //        if (currentPokemon1.DoIMove())
-            //        {
-            //            ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //        }
-
-            //        if (move2 != null && currentPokemon2.hp > 0)
-            //        {
-            //            if (currentPokemon2.DoIMove())
-            //            {
-            //                if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-            //                    Console.WriteLine($"{move2.moveB.name} failed");
-            //                else
-            //                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //            }
-            //        }
-            //    }
-            //    else if (spe1 < spe2 && move2 != null)
-            //    {
-            //        if (currentPokemon2.DoIMove())
-            //        {
-            //            ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //        }
-
-            //        if (move1 != null && currentPokemon1.hp > 0)
-            //        {
-            //            if (currentPokemon1.DoIMove())
-            //            {
-            //                if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-            //                    Console.WriteLine($"{move1.moveB.name} failed");
-            //                else
-            //                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        int tie = Random.Shared.Next(0, 2);
-            //        if (tie == 0 && move1 != null)
-            //        {
-            //            if (currentPokemon1.DoIMove())
-            //            {
-            //                ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //            }
-
-            //            if (move2 != null && currentPokemon2.hp > 0)
-            //            {
-            //                if (currentPokemon2.DoIMove())
-            //                {
-            //                    if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-            //                        Console.WriteLine($"{move2.moveB.name} failed");
-            //                    else
-            //                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //                }
-            //            }
-            //        }
-            //        else if (tie == 1 && move2 != null)
-            //        {
-            //            if (currentPokemon2.DoIMove())
-            //            {
-            //                ExecuteMove(currentPokemon2, currentPokemon1, move2);
-            //            }
-
-            //            if (move1 != null && currentPokemon1.hp > 0)
-            //            {
-            //                if (currentPokemon1.DoIMove())
-            //                {
-            //                    if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-            //                        Console.WriteLine($"{move1.moveB.name} failed");
-            //                    else
-            //                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
             if (priority1 > priority2)
             {
                 pokemon1.moveFirst = true;
@@ -2218,7 +2208,7 @@ public static class Program
                     else
                         move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                     double para = 1;
-                    if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
+                    if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
                     spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
                 }
             }
@@ -2242,7 +2232,7 @@ public static class Program
                     else
                         move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                     double para = 1;
-                    if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+                    if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
                     spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
                 }
             }
@@ -2273,7 +2263,7 @@ public static class Program
                         else
                             move1 = currentPokemon1.PickMove(currentPokemon2, ai);
                         double para = 1;
-                        if (currentPokemon1.statusVol == Status.Paralysis) para = 0.5;
+                        if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
                         spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
                     }
                 }
@@ -2304,7 +2294,7 @@ public static class Program
                         else
                             move2 = currentPokemon2.PickMove(currentPokemon1, ai);
                         double para = 1;
-                        if (currentPokemon2.statusVol == Status.Paralysis) para = 0.5;
+                        if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
                         spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
                     }
                 }
@@ -2503,7 +2493,7 @@ public static class Program
     {
         if (pk == null) return;
         if (pk.hp <= 0) return;
-        switch (pk.statusVol)
+        switch (pk.statusNonVol)
         {
             case Status.Poison:
                 int dmg = Convert.ToInt32(Math.Round(pk.maxHP / 8.0, 0));

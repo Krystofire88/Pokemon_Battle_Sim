@@ -6192,5 +6192,690 @@
     "contact": false,
     "protect": false,
     "effectList": []
+  },
+  {
+    "name": "Flying Press",
+    "type": 7,
+    "power": 100,
+    "split": 1,
+    "acc": 95,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Fell Stinger",
+    "type": 12,
+    "power": 50,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 25,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Phantom Force",
+    "type": 14,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Noble Roar",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Parabolic Charge",
+    "type": 4,
+    "power": 65,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": -2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Petal Blizzard",
+    "type": 5,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Freeze-Dry",
+    "type": 6,
+    "power": 70,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 2,
+        "effectStat": 0,
+        "effectChance": 10,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Disarming Voice",
+    "type": 18,
+    "power": 40,
+    "split": 2,
+    "acc": 101,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Topsy-Turvy",
+    "type": 16,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Draining Kiss",
+    "type": 18,
+    "power": 50,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Play Rough",
+    "type": 18,
+    "power": 90,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 10,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Fairy Wind",
+    "type": 18,
+    "power": 40,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Moonblast",
+    "type": 18,
+    "power": 95,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 30,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Boomburst",
+    "type": 1,
+    "power": 140,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "King's Shield",
+    "type": 17,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 10,
+    "priority": 4,
+    "contact": false,
+    "protect": true,
+    "effectList": []
+  },
+  {
+    "name": "Play Nice",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Confide",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Diamond Storm",
+    "type": 13,
+    "power": 100,
+    "split": 1,
+    "acc": 95,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 50,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Steam Eruption",
+    "type": 3,
+    "power": 110,
+    "split": 2,
+    "acc": 95,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 1,
+        "effectStat": 0,
+        "effectChance": 30,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Hyperspace Hole",
+    "type": 11,
+    "power": 80,
+    "split": 2,
+    "acc": 0,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Mystical Fire",
+    "type": 2,
+    "power": 75,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Spiky Shield",
+    "type": 5,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 10,
+    "priority": 4,
+    "contact": false,
+    "protect": true,
+    "effectList": []
+  },
+  {
+    "name": "Eerie Impulse",
+    "type": 4,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Geomancy",
+    "type": 18,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Magnetic Flux",
+    "type": 4,
+    "power": 0,
+    "split": 3,
+    "acc": 0,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Dazzling Gleam",
+    "type": 18,
+    "power": 80,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Baby-Doll Eyes",
+    "type": 18,
+    "power": 0,
+    "split": 3,
+    "acc": 100,
+    "maxPP": 30,
+    "priority": 1,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Nuzzle",
+    "type": 4,
+    "power": 20,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Power-Up Punch",
+    "type": 7,
+    "power": 40,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Oblivion Wing",
+    "type": 10,
+    "power": 80,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Thousand Arrows",
+    "type": 9,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Thousand Waves",
+    "type": 9,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Land's Wrath",
+    "type": 9,
+    "power": 90,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Light of Ruin",
+    "type": 18,
+    "power": 140,
+    "split": 2,
+    "acc": 90,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 2,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Origin Pulse",
+    "type": 3,
+    "power": 110,
+    "split": 2,
+    "acc": 85,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Precipice Blades",
+    "type": 9,
+    "power": 120,
+    "split": 1,
+    "acc": 85,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Dragon Ascent",
+    "type": 10,
+    "power": 120,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Hyperspace Fury",
+    "type": 16,
+    "power": 100,
+    "split": 1,
+    "acc": 0,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   }
 ]

@@ -16,6 +16,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Intrinsics.X86;
 using System.Transactions;
 using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.InteropServices;
 public enum Status
 {
     None = 0,
@@ -1345,6 +1346,14 @@ public static class Program
             }
             pokemonA.invurnable = true;
             Console.WriteLine($"{pokemonA.name} used {move.moveB.name}!");
+            if (move.moveB.name == "Kings Shield")
+            {
+                if (pokemonA.species.name == "Aegislash-Blade")
+                {
+                    pokemonA.species = Program.AllPokemon.Find(sp => sp.name == "Aegislash");
+                    Console.WriteLine($"{pokemonA.name} transformed into {pokemonA.species.name}!");
+                }
+            }
             pokemonA.lastMove = move;
             return;
         }
@@ -1372,10 +1381,19 @@ public static class Program
             pokemonA.lastMove = move;
             return;
         }
-        if (pokemonD.invurnable && move.moveB.name != "Feint")
+        if (pokemonD.invurnable && (move.moveB.name != "Feint" && move.moveB.name != "Hyperspace Hole" && move.moveB.name != "Hyperspace Fury"))
         {
             Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
             pokemonA.lastMove = move;
+            if (move.moveB.name == "Spiky Shield" && move.moveB.contact)
+            {
+                pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 8.0));
+                if (pokemonA.hp < 0) pokemonD.hp = 0;
+            }
+            else if (move.moveB.name == "Kings Shield" && move.moveB.contact)
+            {
+                InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Atk, 100, -1, false, 1));
+            }
             return;
         }
         List<string> OHKO = new List<string> { "Fissure", "Guillotine", "Horn Drill", "Sheer Cold" };
@@ -1444,6 +1462,29 @@ public static class Program
                         InflictStatus(pokemonD, effect);
                         return;
                 }
+                if (move.moveB.name == "Topsy-Turvy")
+                {
+                    pokemonD.AtkMod *= -1;
+                    pokemonD.DefMod *= -1;
+                    pokemonD.SpaMod *= -1;
+                    pokemonD.SpdMod *= -1;
+                    pokemonD.SpeMod *= -1;
+                    pokemonD.AccMod *= -1;
+                    pokemonD.EvaMod *= -1;
+                    return;
+                }
+                if (move.moveB.name == "Geomancy" && !pokemonA.chargingMove)
+                {
+                    pokemonA.chargingMove = true;
+                    Console.WriteLine($"{pokemonA.name} is charging up for {move.moveB.name}!");
+                    pokemonA.lastMove = move;
+                    return;
+                }
+                else if (move.moveB.name == "Geomancy" && pokemonA.chargingMove)
+                {
+                    pokemonA.chargingMove = false;                    
+                }
+                pokemonA.lastMove = move;
                 foreach (MoveEffect effect in move.moveB.effectList)
                 {
                     InflictStatus(pokemonD, effect);
@@ -1711,6 +1752,10 @@ public static class Program
                     power += (pokemonA.echoedVoice * 40);
                     if (power > 200) power = 200;
                 }
+                if (move.moveB.name == "Thousand Waves")
+                {
+                    Console.WriteLine("Does not prevent switching");
+                }
                 if (move.moveB.name == "Clear Smog")
                 {
                     pokemonD.ClearMods();
@@ -1800,6 +1845,10 @@ public static class Program
                 {
                     pokemonD.hp -= Damage(pokemonA, pokemonD, move, power, attack, defense, rcrit, false);
                     if (pokemonD.hp < 0) pokemonD.hp = 0;
+                    if (pokemonD.hp == 0 && move.moveB.name == "Fell Stinger")
+                    {
+                        InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Atk, 100, 3, false, 1));
+                    }
                     if (move.moveB.effectList != null)
                     {
                         foreach (MoveEffect effect in move.moveB.effectList)
@@ -1815,8 +1864,12 @@ public static class Program
                                 }
                                 else
                                 {
-
-                                    int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / Math.Abs(effect.effectPower)));
+                                    double lfstl = Math.Abs(effect.effectPower);
+                                    if(move.moveB.name == "Draining Kiss" || move.moveB.name == "Oblivion Wing")
+                                    {
+                                        lfstl = 4/3;
+                                    }
+                                    int lifeSteel = Convert.ToInt32(Math.Floor((double)pokemonA.maxHP / lfstl));
                                     pokemonA.hp += lifeSteel;
                                     if (pokemonA.hp > pokemonA.maxHP) pokemonA.hp = pokemonA.maxHP;
                                     Console.WriteLine($"{pokemonA.name} regained some hp");
@@ -1829,6 +1882,7 @@ public static class Program
                         }
                     }
                 }
+
                 pokemonA.critRatio = 25;
             }
         }
@@ -1875,6 +1929,24 @@ public static class Program
 
         double eff1 = MatchUp(move.moveB.type, pkDtype1);
         double eff2 = MatchUp(move.moveB.type, pkDtype2);
+        if (pokemonA.selectedMove.moveB.name == "Flying Press")
+        {
+            eff1 = MatchUp(Type.Fighting, pkDtype1) * MatchUp(Type.Flying, pkDtype1);
+            eff2 = MatchUp(Type.Fighting, pkDtype2) * MatchUp(Type.Flying, pkDtype2);
+        }
+        if (pokemonA.selectedMove.moveB.name == "Freeze-Dry")
+        {
+            eff1 = MatchUp(Type.Ice, pkDtype1);
+            eff2 = MatchUp(Type.Ice, pkDtype2);
+            if (pkDtype1 == Type.Water) eff1 = 2.0;
+            if (pkDtype2 == Type.Water) eff2 = 2.0;
+        }
+        if (pokemonA.selectedMove.moveB.name == "Thousand Arrows")
+        {
+            if (pkDtype1 == Type.Flying) eff1 = 1.0;
+            if (pkDtype2 == Type.Flying) eff2 = 1.0;
+        }
+
 
         double crit = 1;
         if (Random.Shared.Next(0, pokemonA.critRatio + 1) == 0 && !test)

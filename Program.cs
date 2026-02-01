@@ -17,6 +17,13 @@ using System.Runtime.Intrinsics.X86;
 using System.Transactions;
 using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.InteropServices;
+using static System.Formats.Asn1.AsnWriter;
+using static System.Reflection.Metadata.BlobBuilder;
+using System.Drawing;
+using System.Net.Sockets;
+using System.Numerics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 public enum Status
 {
     None = 0,
@@ -280,6 +287,8 @@ public class Pokemon
     public int protectTimes { get; set; } = 0;
     public Move lastMove { get; set; } = null;
     public Move selectedMove { get; set; } = null;
+    public bool usedZMove { get; set; } = false;
+    public bool ZMove { get; set; } = false;
     public bool moveFirst { get; set; } = false;
     public bool lockedMove { get; set; } = false;
     public int lockTimer { get; set; } = 0; 
@@ -703,10 +712,13 @@ public class Pokemon
         Move[] currentMoveSet = moveSet;
         if (isDmax)
         {
-            for (int i = 0; i < moveNum; i++)
-            {
-                // currentMoveSet[i].FetchMaxMove();
-            }
+
+
+        }
+        if (ZMove)
+        {
+            
+
         }
         if (moveNum == 1) return currentMoveSet[0];
         int move = 0;
@@ -975,50 +987,6 @@ public class Pokemon
         }
         Console.WriteLine(species.name + " returned to normal from Mega evolution");
     }
-    public string FetchZmoveName(int typeId)
-    {
-        return typeId switch
-        {
-            1 => "Breakneck Blitz",
-            2 => "Inferno Overdrive",
-            3 => "Hydro Vortex",
-            4 => "Gigavolt Havoc",
-            5 => "Bloom Doom",
-            6 => "Subzero Slammer",
-            7 => "All-Out Pummeling",
-            8 => "Acid Downpour",
-            9 => "Tectonic Rage",
-            10 => "Supersonic Skystrike",
-            11 => "Shattered Psyche",
-            12 => "Savage Spin-Out",
-            13 => "Continental Crush",
-            14 => "Never-Ending Nightmare",
-            15 => "Devastating Drake",
-            16 => "Black Hole Eclipse",
-            17 => "Corkscrew Crash",
-            18 => "Twinkle Tackle",
-            _ => "Unknown Z-Move"
-        };
-    }
-    public static int ConvertToZMovePower(int basePower)
-    {
-        if (basePower <= 55) return 100;
-        if (basePower >= 60 && basePower <= 65) return 120;
-        if (basePower >= 70 && basePower <= 75) return 140;
-        if (basePower >= 80 && basePower <= 85) return 160;
-        if (basePower >= 90 && basePower <= 95) return 175;
-        if (basePower == 100) return 180;
-        if (basePower == 110) return 185;
-        if (basePower >= 120 && basePower <= 125) return 190;
-        if (basePower == 130) return 195;
-        if (basePower >= 140) return 200;
-
-        return 0;
-    }
-    public void ZMove(int slot)
-    {
-
-    }
     public void Dmax()
     {
         if (isDmax == false)
@@ -1106,7 +1074,7 @@ public class MoveEffect
 }
 public class Move
 {
-    public MoveB moveB { get; set; }
+    public MoveB moveB { get; private set; }
     public int PP { get; set; }
     public Move(MoveB moveB)
     {
@@ -1120,11 +1088,15 @@ public class Item
     public string name { get; }
     string effect;
     bool mega;
-    public Item(string name, string effect, bool mega)
+    public bool Zcrystal { get; }
+    public Type ZCrystalType { get; }
+    public Item(string name, string effect, bool mega, bool zcrystal, Type zCrystalType)
     {
         this.name = name;
         this.effect = effect;
         this.mega = mega;
+        Zcrystal = zcrystal;
+        ZCrystalType = zCrystalType;
     }
 }
 public static class Program
@@ -1314,6 +1286,66 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move)
     {
+        //Shore up
+        //First impression
+        //Baneful Bunker
+        //Spirit Shackle/ jaw lock/ no retreat
+        //Darkest Lariat
+        //Strength Sap
+        //Throat Chop
+        //Power Trip(Stored Power)
+        //Revelation dance
+        //Beak Blast
+        //Stomping Tantrum
+        //Spectral thief
+        //Natures Madness
+        //Multi - Attack
+        //Mind Blown
+        //Photon Geyser/ Shell side Arm/ Tera Blast / tera starstorm
+        //Dynamax cannon
+        //Tar Shot
+        //Bolt beak / Fishious rend
+        //Behemoth Blade / Bash
+        //Aura Wheel
+        //Check life dew
+        //Obstruct
+        //Expanding Force
+        //Steel Roller
+        //Misty Explosion/ Add explosion and self - destruct
+        //Grassy Glide
+        //Rising Voltage
+        //Poltergeist
+        //Flip Turn
+        //triple axel
+        //Jungle Healing / Lunar blessing
+        //Eerie Spell
+        //Dire Claw
+        //Stone Axe / Ceasless edge
+        //Barb Barrage
+        //Infernal parade
+        //Take Heart
+        //Silk Trap
+        //Axe Kick
+        //Last respects
+        //Population bomb
+        //Ice SPinner
+        //glaive Rush
+        //Mortal Spin
+        //Raging Bull
+        //Ruination
+        //Collision course/ electro drift
+        //Tidy Up
+        //Hyper Drill
+        //Gigaton hammer / Blood Moon
+        //Ivy Cudgel
+        //Fickle Beam
+        //Burning Bulwark
+        //Thunder Clap(sucker punch)
+        //Mighty cleave
+        //Hard Press
+        //Supercell Slam
+        //Psychic Noise
+        //Nihil Light
         if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
@@ -1596,7 +1628,7 @@ public static class Program
                     else
                         power = 20;
                 }
-                if(move.moveB.name == "Eruption" || move.moveB.name == "Water Spout")
+                if(move.moveB.name == "Eruption" || move.moveB.name == "Water Spout" || move.moveB.name == "Dragon Energy")
                 {
                     power = Convert.ToInt32(Math.Floor((double)(150 * pokemonA.hp) / pokemonA.maxHP));
                 }
@@ -1766,7 +1798,7 @@ public static class Program
                     power += statBoosts * 20;
 
                 }
-                List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock" };
+                List<string> charge = new List<string> { "Solar Beam", "Solar Blade", "Sky Drop", "Fly", "Dig", "Dive", "Bounce", "Skull Bash", "Razor Wind", "Ice Burn", "Freeze Shock", "Meteor Beam", "Electro Shot" };
                 List<string> invurnable = new List<string> { "Fly", "Dig", "Dive", "Bounce", "Phantom Force", "Shadow Force", "Sky Drop"};
                 if (charge.Contains(move.moveB.name) && !pokemonA.chargingMove)
                 {
@@ -1775,6 +1807,11 @@ public static class Program
                     if (invurnable.Contains(move.moveB.name))
                     {
                         pokemonA.invurnable = true;
+                    }
+                    if(move.moveB.name == "Meteor Beam" || move.moveB.name == "Electro Shot")
+                    {
+                       InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Spa, 100, 1, false, 1));
+
                     }
                     pokemonA.lastMove = move;
                     return;
@@ -1929,22 +1966,25 @@ public static class Program
 
         double eff1 = MatchUp(move.moveB.type, pkDtype1);
         double eff2 = MatchUp(move.moveB.type, pkDtype2);
-        if (pokemonA.selectedMove.moveB.name == "Flying Press")
+        if (pokemonA.selectedMove != null)
+        { 
+            if (pokemonA.selectedMove.moveB.name == "Flying Press")
         {
             eff1 = MatchUp(Type.Fighting, pkDtype1) * MatchUp(Type.Flying, pkDtype1);
             eff2 = MatchUp(Type.Fighting, pkDtype2) * MatchUp(Type.Flying, pkDtype2);
         }
-        if (pokemonA.selectedMove.moveB.name == "Freeze-Dry")
+            if (pokemonA.selectedMove.moveB.name == "Freeze-Dry")
         {
             eff1 = MatchUp(Type.Ice, pkDtype1);
             eff2 = MatchUp(Type.Ice, pkDtype2);
             if (pkDtype1 == Type.Water) eff1 = 2.0;
             if (pkDtype2 == Type.Water) eff2 = 2.0;
         }
-        if (pokemonA.selectedMove.moveB.name == "Thousand Arrows")
+            if (pokemonA.selectedMove.moveB.name == "Thousand Arrows")
         {
             if (pkDtype1 == Type.Flying) eff1 = 1.0;
             if (pkDtype2 == Type.Flying) eff2 = 1.0;
+        }
         }
 
 
@@ -2093,21 +2133,22 @@ public static class Program
         currentPokemon2.dMaxTimer = 0;
         while (currentPokemon1.hp > 0 && currentPokemon2.hp > 0)
         {
-            pokemon1.moveFirst = false;
-            pokemon2.moveFirst = false;
-            pokemon1.selectedMove = null;
-            pokemon2.selectedMove = null;
+            Console.WriteLine("\n=next turn=\n");
+            currentPokemon1.moveFirst = false;
+            currentPokemon2.moveFirst = false;
+            currentPokemon1.selectedMove = null;
+            currentPokemon2.selectedMove = null;
             double spe1 = 0;
             double spe2 = 0;
 
             //Pkmn 1 turn
             if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
             {
-                pokemon1.selectedMove = currentPokemon1.lastMove;
+                currentPokemon1.selectedMove = currentPokemon1.lastMove;
             }
             else if (currentPokemon1.lockedMove)
             {
-                pokemon1.selectedMove = currentPokemon1.lastMove;
+                currentPokemon1.selectedMove = currentPokemon1.lastMove;
                 currentPokemon1.lockTimer++;
                 if (currentPokemon1.lockTimer >= 3)
                 {
@@ -2120,7 +2161,7 @@ public static class Program
             }
             else
             {
-                pokemon1.selectedMove = currentPokemon1.PickMove(currentPokemon2, ai);
+                currentPokemon1.selectedMove = currentPokemon1.PickMove(currentPokemon2, ai);
             }
 
             double para = 1;
@@ -2130,11 +2171,11 @@ public static class Program
             // Pkmn 2 turn
             if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
             {
-                pokemon2.selectedMove = currentPokemon2.lastMove;
+                currentPokemon2.selectedMove = currentPokemon2.lastMove;
             }
             else if (currentPokemon2.lockedMove)
             {
-                pokemon2.selectedMove = currentPokemon2.lastMove;
+                currentPokemon2.selectedMove = currentPokemon2.lastMove;
                 currentPokemon2.lockTimer++;
                 if (currentPokemon2.lockTimer >= 3)
                 {
@@ -2147,7 +2188,7 @@ public static class Program
             }
             else
             {
-                pokemon2.selectedMove = currentPokemon2.PickMove(currentPokemon1, ai);
+                currentPokemon2.selectedMove = currentPokemon2.PickMove(currentPokemon1, ai);
             }
 
             para = 1;
@@ -2156,71 +2197,71 @@ public static class Program
 
             int priority1 = 0;
             int priority2 = 0;
-            if (pokemon1.selectedMove != null) priority1 = pokemon1.selectedMove.moveB.priority;
-            if (pokemon2.selectedMove != null) priority2 = pokemon2.selectedMove.moveB.priority;
+            if (currentPokemon1.selectedMove != null) priority1 = currentPokemon1.selectedMove.moveB.priority;
+            if (currentPokemon2.selectedMove != null) priority2 = currentPokemon2.selectedMove.moveB.priority;
 
             if (priority1 > priority2)
             {
-                pokemon1.moveFirst = true;
+                currentPokemon1.moveFirst = true;
             }
             else if (priority1 < priority2)
             {
-                pokemon2.moveFirst = true;
+                currentPokemon2.moveFirst = true;
             }
             else
             {
                 if (spe1 > spe2)
                 {
-                    pokemon1.moveFirst = true;
+                    currentPokemon1.moveFirst = true;
                 }
                 else if (spe1 < spe2)
                 {
-                    pokemon2.moveFirst = true;
+                    currentPokemon2.moveFirst = true;
                 }
                 else
                 {
                     int tie = Random.Shared.Next(0, 2);
                     if (tie == 0)
                     {
-                        pokemon1.moveFirst = true;
+                        currentPokemon1.moveFirst = true;
                     }
                     else 
                     {
-                        pokemon2.moveFirst = true;
+                        currentPokemon2.moveFirst = true;
                     }
                 }
             }
-            if (pokemon1.moveFirst)
+            if (currentPokemon1.moveFirst)
             { 
-                if (pokemon1.selectedMove != null && currentPokemon1.DoIMove())
+                if (currentPokemon1.selectedMove != null && currentPokemon1.DoIMove())
                 {
-                    ExecuteMove(currentPokemon1, currentPokemon2, pokemon1.selectedMove);
+                    ExecuteMove(currentPokemon1, currentPokemon2, currentPokemon1.selectedMove);
                 }
-                if (pokemon2.selectedMove != null && currentPokemon2.hp > 0)
+                if (currentPokemon2.selectedMove != null && currentPokemon2.hp > 0)
                 {
                     if (currentPokemon2.DoIMove())
                     {
-                        if (currentPokemon1.hp <= 0 && pokemon2.selectedMove.moveB.split != Split.Status)
-                            Console.WriteLine($"{pokemon2.selectedMove.moveB.name} failed");
+                        if (currentPokemon1.hp <= 0 && currentPokemon2.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{currentPokemon2.selectedMove.moveB.name} failed");
                         else
-                            ExecuteMove(currentPokemon2, currentPokemon1, pokemon2.selectedMove);
+                            ExecuteMove(currentPokemon2, currentPokemon1, currentPokemon2.selectedMove);
                     }
                 }
             }
             else
             {
-                if (pokemon2.selectedMove != null && currentPokemon2.DoIMove())
+                if (currentPokemon2.selectedMove != null && currentPokemon2.DoIMove())
                 {
-                    ExecuteMove(currentPokemon2, currentPokemon1, pokemon2.selectedMove);
+                    ExecuteMove(currentPokemon2, currentPokemon1, currentPokemon2.selectedMove);
                 }
-                if (pokemon1.selectedMove != null && currentPokemon1.hp > 0)
+                if (currentPokemon1.selectedMove != null && currentPokemon1.hp > 0)
                 {
                     if (currentPokemon1.DoIMove())
                     {
-                        if (currentPokemon2.hp <= 0 && pokemon1.selectedMove.moveB.split != Split.Status)
-                            Console.WriteLine($"{pokemon1.selectedMove.moveB.name} failed");
+                        if (currentPokemon2.hp <= 0 && currentPokemon1.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{currentPokemon1.selectedMove.moveB.name} failed");
                         else
-                            ExecuteMove(currentPokemon1, currentPokemon2, pokemon1.selectedMove);
+                            ExecuteMove(currentPokemon1, currentPokemon2, currentPokemon1.selectedMove);
                     }
                 }
             }
@@ -2256,10 +2297,13 @@ public static class Program
         while (team1.AbleToBattle() && team2.AbleToBattle())
         {
             Console.WriteLine("\n=next turn=\n");
-            Move move1 = null;
-            Move move2 = null;
+            currentPokemon1.moveFirst = false;
+            currentPokemon2.moveFirst = false;
+            currentPokemon1.selectedMove = null;
+            currentPokemon2.selectedMove = null;
             double spe1 = 0;
             double spe2 = 0;
+
             if (currentPokemon1.hp <= 0)
             {
                 currentPokemon1 = team1.ShouldSwitch(currentPokemon1, currentPokemon2, ai);
@@ -2268,21 +2312,36 @@ public static class Program
                 if (gimmick1 == false)
                 {
                     PreTurnTrainerCheck(currentPokemon1, team1, ai);
-                    if (currentPokemon1.terastallized || currentPokemon1.isDmax || currentPokemon1.species.name.Contains("-Mega"))
+                    if (currentPokemon1.terastallized || currentPokemon1.isDmax || currentPokemon1.species.name.Contains("-Mega") || currentPokemon1.usedZMove)
                     {
                         gimmick1 = true;
                     }
                 }
-                if (currentPokemon1.DoIMove())
+
+                if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
                 {
-                    if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
-                        move1 = currentPokemon1.lastMove;
-                    else
-                        move1 = currentPokemon1.PickMove(currentPokemon2, ai);
-                    double para = 1;
-                    if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
-                    spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
+                    currentPokemon1.selectedMove = currentPokemon1.lastMove;
                 }
+                else if (currentPokemon1.lockedMove)
+                {
+                    currentPokemon1.selectedMove = currentPokemon1.lastMove;
+                    currentPokemon1.lockTimer++;
+                    if (currentPokemon1.lockTimer >= 3)
+                    {
+                        if (Random.Shared.Next(0, 2) == 0 && currentPokemon1.lockTimer == 3)
+                        {
+                            currentPokemon1.lockedMove = false;
+                            currentPokemon1.lockTimer = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    currentPokemon1.selectedMove = currentPokemon1.PickMove(currentPokemon2, ai);
+                }
+                double para = 1;
+                if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
+                spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;             
             }
             if (currentPokemon2.hp <= 0)
             {
@@ -2292,21 +2351,36 @@ public static class Program
                 if (gimmick2 == false)
                 {
                     PreTurnTrainerCheck(currentPokemon2, team2, ai);
-                    if (currentPokemon2.terastallized || currentPokemon2.isDmax || currentPokemon2.species.name.Contains("-Mega"))
+                    if (currentPokemon2.terastallized || currentPokemon2.isDmax || currentPokemon2.species.name.Contains("-Mega") || currentPokemon2.usedZMove)
                     {
                         gimmick2 = true;
                     }
                 }
-                if (currentPokemon2.DoIMove())
+
+                if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
                 {
-                    if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
-                        move2 = currentPokemon2.lastMove;
-                    else
-                        move2 = currentPokemon2.PickMove(currentPokemon1, ai);
-                    double para = 1;
-                    if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
-                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
+                    currentPokemon2.selectedMove = currentPokemon2.lastMove;
                 }
+                else if (currentPokemon2.lockedMove)
+                {
+                    currentPokemon2.selectedMove = currentPokemon2.lastMove;
+                    currentPokemon2.lockTimer++;
+                    if (currentPokemon2.lockTimer >= 3)
+                    {
+                        if (Random.Shared.Next(0, 2) == 0 && currentPokemon2.lockTimer == 3)
+                        {
+                            currentPokemon2.lockedMove = false;
+                            currentPokemon2.lockTimer = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    currentPokemon2.selectedMove = currentPokemon2.PickMove(currentPokemon1, ai);
+                }
+                double para = 1;
+                if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
+                spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
             }
 
             if (currentPokemon1.hp > 0)
@@ -2328,16 +2402,31 @@ public static class Program
                             gimmick1 = true;
                         }
                     }
-                    if (currentPokemon1.DoIMove())
+
+                    if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
                     {
-                        if (currentPokemon1.chargingMove && currentPokemon1.invurnable)
-                            move1 = currentPokemon1.lastMove;
-                        else
-                            move1 = currentPokemon1.PickMove(currentPokemon2, ai);
-                        double para = 1;
-                        if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
-                        spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
+                        currentPokemon1.selectedMove = currentPokemon1.lastMove;
                     }
+                    else if (currentPokemon1.lockedMove)
+                    {
+                        currentPokemon1.selectedMove = currentPokemon1.lastMove;
+                        currentPokemon1.lockTimer++;
+                        if (currentPokemon1.lockTimer >= 3)
+                        {
+                            if (Random.Shared.Next(0, 2) == 0 && currentPokemon1.lockTimer == 3)
+                            {
+                                currentPokemon1.lockedMove = false;
+                                currentPokemon1.lockTimer = 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        currentPokemon1.selectedMove = currentPokemon1.PickMove(currentPokemon2, ai);
+                    }
+                    double para = 1;
+                    if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
+                    spe1 = currentPokemon1.CalcSpeStat() * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
                 }
             }
             if (currentPokemon2.hp > 0)
@@ -2354,112 +2443,111 @@ public static class Program
                     if (gimmick2 == false)
                     {
                         PreTurnTrainerCheck(currentPokemon2, team2, ai);
-                        if (currentPokemon2.terastallized || currentPokemon2.isDmax || currentPokemon2.species.name.Contains("-Mega"))
+                        if (currentPokemon2.terastallized || currentPokemon2.isDmax || currentPokemon2.species.name.Contains("-Mega") || currentPokemon2.usedZMove)
                         {
                             gimmick2 = true;
                         }
                     }
-                    if (currentPokemon2.DoIMove())
+
+                    if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
                     {
-                        if (currentPokemon2.chargingMove && currentPokemon2.invurnable)
-                            move2 = currentPokemon2.lastMove;
-                        else
-                            move2 = currentPokemon2.PickMove(currentPokemon1, ai);
-                        double para = 1;
-                        if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
-                        spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
+                        currentPokemon2.selectedMove = currentPokemon2.lastMove;
                     }
+                    else if (currentPokemon2.lockedMove)
+                    {
+                        currentPokemon2.selectedMove = currentPokemon2.lastMove;
+                        currentPokemon2.lockTimer++;
+                        if (currentPokemon2.lockTimer >= 3)
+                        {
+                            if (Random.Shared.Next(0, 2) == 0 && currentPokemon2.lockTimer == 3)
+                            {
+                                currentPokemon2.lockedMove = false;
+                                currentPokemon2.lockTimer = 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        currentPokemon2.selectedMove = currentPokemon2.PickMove(currentPokemon1, ai);
+                    }
+                    double para = 1;
+                    if (currentPokemon2.statusNonVol == Status.Paralysis) para = 0.5;
+                    spe2 = currentPokemon2.CalcSpeStat() * currentPokemon2.GetMod(currentPokemon2.SpeMod) * para;
                 }
             }
 
-            if(currentPokemon1.lastMove != null) Console.WriteLine($"last move: {currentPokemon1.lastMove.moveB.name}");
+            if (currentPokemon1.lastMove != null) Console.WriteLine($"last move: {currentPokemon1.lastMove.moveB.name}");
+            else Console.WriteLine("last move: none");
+            if (currentPokemon2.lastMove != null) Console.WriteLine($"last move: {currentPokemon2.lastMove.moveB.name}");
             else Console.WriteLine("last move: none");
             int priority1 = 0;
             int priority2 = 0;
-            if (move1 != null) priority1 = move1.moveB.priority;
-            if (move2 != null) priority2 = move2.moveB.priority;
-            if (priority1 > priority2 && move1 != null)
+            if (currentPokemon1.selectedMove != null) priority1 = currentPokemon1.selectedMove.moveB.priority;
+            if (currentPokemon2.selectedMove != null) priority2 = currentPokemon2.selectedMove.moveB.priority;
+
+            if (priority1 > priority2)
             {
-                ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                if (move2 != null && currentPokemon2.hp > 0)
-                {
-                    if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                    {
-                        Console.WriteLine($"{move2.moveB.name} failed");
-                    }
-                    else
-                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                }
+                currentPokemon1.moveFirst = true;
             }
-            else if (priority1 < priority2 && move2 != null)
+            else if (priority1 < priority2)
             {
-                ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                if (move1 != null && currentPokemon1.hp > 0)
-                {
-                    if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                    {
-                        Console.WriteLine($"{move1.moveB.name} failed");
-                    }
-                    else
-                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                }
+                currentPokemon2.moveFirst = true;
             }
             else
             {
-                if (spe1 > spe2 && move1 != null)
+                if (spe1 > spe2)
                 {
-                    ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                    if (move2 != null && currentPokemon2.hp > 0)
-                    {
-                        if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                        {
-                            Console.WriteLine($"{move2.moveB.name} failed");
-                        }
-                        else
-                            ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                    }
+                    currentPokemon1.moveFirst = true;
                 }
-                else if (spe1 < spe2 && move2 != null)
+                else if (spe1 < spe2)
                 {
-                    ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                    if (move1 != null && currentPokemon1.hp > 0)
-                    {
-                        if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                        {
-                            Console.WriteLine($"{move1.moveB.name} failed");
-                        }
-                        else
-                            ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                    }
+                    currentPokemon2.moveFirst = true;
                 }
                 else
                 {
                     int tie = Random.Shared.Next(0, 2);
-                    if (tie == 0 && move1 != null)
+                    if (tie == 0)
                     {
-                        ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                        if (move2 != null && currentPokemon2.hp > 0)
-                        {
-                            if (currentPokemon1.hp <= 0 && move2.moveB.split != Split.Status)
-                            {
-                                Console.WriteLine($"{move2.moveB.name} failed");
-                            }
-                            else
-                                ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                        }
+                        currentPokemon1.moveFirst = true;
                     }
-                    else if (tie == 1 && move2 != null)
+                    else
                     {
-                        ExecuteMove(currentPokemon2, currentPokemon1, move2);
-                        if (move1 != null && currentPokemon1.hp > 0)
-                        {
-                            if (currentPokemon2.hp <= 0 && move1.moveB.split != Split.Status)
-                            {
-                                Console.WriteLine($"{move1.moveB.name} failed");
-                            }
-                            else
-                                ExecuteMove(currentPokemon1, currentPokemon2, move1);
-                        }
+                        currentPokemon2.moveFirst = true;
+                    }
+                }
+            }
+
+            if (currentPokemon1.moveFirst)
+            {
+                if (currentPokemon1.selectedMove != null && currentPokemon1.DoIMove())
+                {
+                    ExecuteMove(currentPokemon1, currentPokemon2, currentPokemon1.selectedMove);
+                }
+                if (currentPokemon2.selectedMove != null && currentPokemon2.hp > 0)
+                {
+                    if (currentPokemon2.DoIMove())
+                    {
+                        if (currentPokemon1.hp <= 0 && currentPokemon2.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{currentPokemon2.selectedMove.moveB.name} failed");
+                        else
+                            ExecuteMove(currentPokemon2, currentPokemon1, currentPokemon2.selectedMove);
+                    }
+                }
+            }
+            else
+            {
+                if (currentPokemon2.selectedMove != null && currentPokemon2.DoIMove())
+                {
+                    ExecuteMove(currentPokemon2, currentPokemon1, currentPokemon2.selectedMove);
+                }
+                if (currentPokemon1.selectedMove != null && currentPokemon1.hp > 0)
+                {
+                    if (currentPokemon1.DoIMove())
+                    {
+                        if (currentPokemon2.hp <= 0 && currentPokemon1.selectedMove.moveB.split != Split.Status)
+                            Console.WriteLine($"{currentPokemon1.selectedMove.moveB.name} failed");
+                        else
+                            ExecuteMove(currentPokemon1, currentPokemon2, currentPokemon1.selectedMove);
                     }
                 }
             }
@@ -2482,20 +2570,21 @@ public static class Program
         if (team1.AbleToBattle())
         {
             Console.WriteLine($"{team1.name} wins the battle!");
-            team1.wins++;
-        }
-        else
-        {
-            Console.WriteLine($"{team2.name} wins the battle!");
-            team2.wins++;
-        }
-        team1.HealTeam();
-        team2.HealTeam();
-    }
+            team1.wins++;                                                                                                                                             
+        }                                                                                                                                                             
+        else                                                                                                                                                          
+        {                                                                                                                                                             
+            Console.WriteLine($"{team2.name} wins the battle!");                                                                                                      
+            team2.wins++;                                                                                                                                             
+        }                                                                                                                                                             
+        team1.HealTeam();                                                                                                                                             
+        team2.HealTeam();                                                                                                                                             
+    }                                                                                                                                                                 
     public static void ExecuteMove(Pokemon atk, Pokemon def, Move move)
     {
         Console.WriteLine($"{atk.name} used {move.moveB.name} against {def.name}");
         Move(atk, def, move);
+
         Console.WriteLine(def.hp);
         if (def.hp <= 0)
         {
@@ -2513,7 +2602,6 @@ public static class Program
             atk.UnTerastallize();
             atk.dMaxTimer = 0;
         }
-
     }
     public static void PreTurnTrainerCheck(Pokemon pk, Trainer tr, int ai)
     {
@@ -2540,21 +2628,37 @@ public static class Program
             pk.MegaEvo();
             return;
         }
+        bool canZmove = false;
+        foreach (Move move in pk.moveSet)
+        {
+            if (move != null && pk.heldItem != null && move.moveB.type == pk.heldItem.ZCrystalType)
+            {
+                canZmove = true;
+                break;
+            }
+        }
+
+        if (pk.heldItem != null && pk.heldItem.Zcrystal && canZmove)
+        {
+            pk.usedZMove = true;
+            return;
+        }
 
         if (pk.gmax && pk.species.gmax)
         {
             pk.Dmax();
             return;
         }
+
         else
         {
             int check = Random.Shared.Next(0, 100);
-            if (check < 50)
+            if (check < 33)
             {
                 pk.Dmax();
                 return;
             }
-            else
+            else if (check < 66)
             {
                 pk.Terastallize();
                 return;
@@ -3432,7 +3536,7 @@ public static class Program
                 pk = new Pokemon(AllPokemon[445], 50);
                 pk.AddMove(new Move(FetchMove("Dragon Claw")));
                 pk.AddMove(new Move(FetchMove("Earthquake")));
-                pk.heldItem = new Item("Garchompite", "01&01&30", true);
+                pk.heldItem = new Item("Garchompite", "01&01&30", true, false, Type.None);
                 trainer1.AddPokemon(pk);
                 pk.PokeInfo();
 

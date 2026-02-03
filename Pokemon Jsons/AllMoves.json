@@ -8120,7 +8120,16 @@
     "priority": 0,
     "contact": false,
     "protect": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 0,
+        "effectPower": 1,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "Grassy Glide",
@@ -8860,7 +8869,24 @@
     "priority": 0,
     "contact": false,
     "protect": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "Tera Blast",
@@ -9069,7 +9095,16 @@
     "priority": 0,
     "contact": true,
     "protect": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "Fillet Away",

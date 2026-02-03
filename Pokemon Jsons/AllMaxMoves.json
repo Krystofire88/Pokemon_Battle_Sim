@@ -1,0 +1,779 @@
+[
+  {
+    "name": "Max Strike",
+    "type": 1,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Flare",
+    "type": 2,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Geyser",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Lightning",
+    "type": 4,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Overgrowth",
+    "type": 5,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Hailstorm",
+    "type": 6,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Knuckle",
+    "type": 7,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Ooze",
+    "type": 8,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Quake",
+    "type": 9,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Airstream",
+    "type": 10,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Mindstorm",
+    "type": 11,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Flutterby",
+    "type": 12,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 3,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Rockfall",
+    "type": 13,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Phantasm",
+    "type": 14,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Wyrmwind",
+    "type": 15,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 1,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Darkness",
+    "type": 16,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 4,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Steelspike",
+    "type": 17,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 2,
+        "effectChance": 100,
+        "effectPower": 1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Max Starfall",
+    "type": 18,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "Max Guard",
+    "type": 1,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Vine Lash",
+    "type": 5,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Wildfire",
+    "type": 2,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Cannonade",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Befuddle",
+    "type": 12,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Volt Crash",
+    "type": 4,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 3,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Gold Rush",
+    "type": 1,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Chi Strike",
+    "type": 7,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Terror",
+    "type": 14,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Foam Burst",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 5,
+        "effectChance": 100,
+        "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Resonance",
+    "type": 6,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Cuddle",
+    "type": 1,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 8,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Replenish",
+    "type": 1,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Malodor",
+    "type": 8,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 4,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Meltdown",
+    "type": 17,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Drum Solo",
+    "type": 5,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Fireball",
+    "type": 2,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Hydrosnipe",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Wind Rage",
+    "type": 10,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Gravitas",
+    "type": 11,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Stonesurge",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Volcalith",
+    "type": 13,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Tartness",
+    "type": 5,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 7,
+        "effectChance": 100,
+        "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Sweetness",
+    "type": 5,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Sandblast",
+    "type": 9,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Stun Shock",
+    "type": 4,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Centiferno",
+    "type": 2,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Smite",
+    "type": 18,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": [
+      {
+        "effectStatus": 7,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "G-Max Snooze",
+    "type": 16,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Finale",
+    "type": 18,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Steelsurge",
+    "type": 17,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Depletion",
+    "type": 15,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max One Blow",
+    "type": 16,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  },
+  {
+    "name": "G-Max Rapid Flow",
+    "type": 3,
+    "split": 1,
+    "power": 0,
+    "acc": 101,
+    "maxPP": 100,
+    "priority": 0,
+    "protect": false,
+    "contact": false,
+    "effectList": []
+  }
+]

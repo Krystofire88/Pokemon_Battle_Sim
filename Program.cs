@@ -54,9 +54,10 @@ public enum Weather
     Sun = 1,
     Rain = 2,
     Sandstorm = 3,
-    Hail = 4,
+    Snow = 4,
     HarshSun = 5,
-    HeavyRain = 6
+    HeavyRain = 6,
+    StrongWinds = 7
 }
 public enum Terrain
 {
@@ -284,6 +285,7 @@ public class Pokemon
     public bool chargingMove { get; set; } = false;
     public bool reCharge { get; set; } = false;
     public bool invurnable { get; set; } = false;
+    public bool maxInvurnable { get; set; }
     public int protectTimes { get; set; } = 0;
     public Move lastMove { get; set; } = null;
     public Move selectedMove { get; set; } = null;
@@ -1106,6 +1108,31 @@ public class Item
         ZCrystalType = zCrystalType;
     }
 }
+public class Field
+{
+    public Weather weather { get; set; } = Weather.None;
+    public Terrain terrain { get; set; } = Terrain.None;
+    public int weatherTimer { get; set; } = 0;
+    public int terrainTimer { get; set; } = 0;
+    public bool reflect { get; set; } = false;
+    public int reflectTimer { get; set; } = 0;
+    public bool lightScreen { get; set; } = false;
+    public int lightScreenTimer { get; set; } = 0;
+    public bool gravity { get; set; } = false;
+    public int gravityTimer { get; set; } = 0;
+    public bool trickRoom { get; set; } = false;
+    public int trickRoomTimer { get; set; } = 0;
+    public bool wonderRoom { get; set; } = false;
+    public int wonderRoomTimer { get; set; } = 0;
+    public bool magicRoom { get; set; } = false;
+    public int magicRoomTimer { get; set; } = 0;
+    public bool stealthRock { get; set; } = false;
+    public int spikes { get; set; } = 0;
+    public int spikesToxic { get; set; } = 0;
+    public Field()
+    {
+    }
+}
 public static class Program
 {
     static readonly JsonSerializerOptions JsonOptions = new()
@@ -1114,7 +1141,9 @@ public static class Program
         PropertyNameCaseInsensitive = true
     };
     public static List<Species> AllPokemon { get; } = JsonSerializer.Deserialize<List<Species>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path")?? throw new InvalidOperationException("Pokemon_Json_Path is not set."), "AllPokemon.json")));
-    public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path")?? throw new InvalidOperationException("Pokemon_Json_Path is not set."),"AllMoves.json")),JsonOptions)!;
+    public static List<MoveB> AllMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path") ?? throw new InvalidOperationException("Pokemon_Json_Path is not set."), "AllMoves.json")), JsonOptions)!;
+    public static List<MoveB> AllZMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path") ?? throw new InvalidOperationException("Pokemon_Json_Path is not set."), "AllZMoves.json")), JsonOptions)!;
+    public static List<MoveB> AllMaxMoves { get; } = JsonSerializer.Deserialize<List<MoveB>>(File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("Pokemon_Json_Path") ?? throw new InvalidOperationException("Pokemon_Json_Path is not set."), "AllMaxMoves.json")), JsonOptions)!;
     public static Type GetTypeId(string typeName)
     {
         return typeName.ToLower() switch
@@ -1272,9 +1301,9 @@ public static class Program
         int HighestEffect = 0;
         for (int i = 0; i < atk.moveNum; i++)
         {
-            if (HighestEffect < Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 25, true))
+            if (HighestEffect < Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), true))
             {
-                HighestEffect = Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), 25, true);
+                HighestEffect = Damage(atk, opp, atk.moveSet[i], atk.moveSet[i].moveB.power, atk.CalcAtkStat(), opp.CalcDefStat() * opp.GetMod(opp.DefMod), true);
             }
         }
         return HighestEffect;
@@ -1293,21 +1322,13 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move)
     {
-        //Fickle Beam
-        //Burning Bulwark
-        //Thunder Clap(sucker punch)
-        //Mighty cleave
-        //Hard Press
-        //Supercell Slam
-        //Psychic Noise
-        //Nihil Light
         if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
             MoveB struggle = new MoveB("Struggle", 0, 50, Split.Physical, 100, 101, 0, true, false, new List<MoveEffect>());
             move = new Move(struggle);
             Console.WriteLine($"{pokemonA.species.name} used Struggle!");
-            pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), 25, false);
+            pokemonD.hp -= Damage(pokemonA, pokemonD, move, 50, (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod)), (pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod)), false);
             if (pokemonD.hp < 0) pokemonD.hp = 0;
             pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 4.0));
             if (pokemonA.hp < 0) pokemonA.hp = 0;
@@ -1316,6 +1337,7 @@ public static class Program
             return;
         }
         move.PP--;
+        double pt = 1.00;
         if (move.moveB.protect)
         {
             pokemonA.protectTimes++;
@@ -1325,12 +1347,14 @@ public static class Program
                 double protectChance = 1.0 / Math.Pow(3, pokemonA.protectTimes - 1);
                 if (check > protectChance * 100)
                 {
+                    if (move.moveB.name == "Max Guard") pokemonA.maxInvurnable = false;
                     pokemonA.invurnable = false;
                     Console.WriteLine($"{pokemonA.name} tried to use Protect but failed!");
                     pokemonA.lastMove = move;
                     return;
                 }
             }
+            if (move.moveB.name == "Max Guard") pokemonA.maxInvurnable = true;
             pokemonA.invurnable = true;
             Console.WriteLine($"{pokemonA.name} used {move.moveB.name}!");
             if (move.moveB.name == "Kings Shield")
@@ -1347,6 +1371,7 @@ public static class Program
         else if(pokemonA.lastMove != null && pokemonA.lastMove.moveB.protect)
         {
             pokemonA.invurnable = false;
+            pokemonA.maxInvurnable = false;
             pokemonA.protectTimes = 0;
         }
         if (move.moveB.name == "Endure")
@@ -1368,30 +1393,45 @@ public static class Program
             pokemonA.lastMove = move;
             return;
         }
-        if (pokemonD.invurnable && (move.moveB.name != "Feint" && move.moveB.name != "Hyperspace Hole" && move.moveB.name != "Hyperspace Fury" && move.moveB.name != "Hyper Drill"))
+        if (pokemonD.invurnable && (move.moveB.name != "Feint" && move.moveB.name != "Hyperspace Hole" && move.moveB.name != "Hyperspace Fury" && move.moveB.name != "Hyper Drill" && move.moveB.name != "Mighty Cleave"))
         {
-            Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
-            pokemonA.lastMove = move;
-            if (move.moveB.name == "Spiky Shield" && move.moveB.contact)
+            if (!pokemonD.maxInvurnable || (move.moveB.name == "G-Max One Blow" || move.moveB.name == "G-Max Rapid Flow"))
             {
-                pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 8.0));
-                if (pokemonA.hp < 0) pokemonD.hp = 0;
-            }
-            else if (move.moveB.name == "Kings Shield" && move.moveB.contact)
-            {
-                InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Atk, 100, -1, false, 1));
-            }
-            else if (move.moveB.name == "Baneful Bunker" && move.moveB.contact)
-            {
-                InflictStatus(pokemonA, new MoveEffect(Status.Poison, Stat.None, 100, 0, false, 1));
-            }
-            else if (move.moveB.name == "Obstruct" && move.moveB.contact)
-            {
-                InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Def, 100, -2, false, 1));
-            }
-            else if (move.moveB.name == "Silk Trap")
-            {
-                InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Spe, 100, -1, false, 1));
+                if (AllZMoves.Contains(move.moveB) || AllMaxMoves.Contains(move.moveB))
+                {
+                    pt = 0.25;
+                    Console.WriteLine($"{move.moveB.name} hits through protect");
+                }
+                else
+                {
+                    Console.WriteLine($"{pokemonD.name} protected/is invurnable this turn!");
+                    pokemonA.lastMove = move;
+                }
+                if (move.moveB.name == "Spiky Shield" && move.moveB.contact)
+                {
+                    pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 8.0));
+                    if (pokemonA.hp < 0) pokemonD.hp = 0;
+                }
+                else if (move.moveB.name == "Kings Shield" && move.moveB.contact)
+                {
+                    InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Atk, 100, -1, false, 1));
+                }
+                else if (move.moveB.name == "Baneful Bunker" && move.moveB.contact)
+                {
+                    InflictStatus(pokemonA, new MoveEffect(Status.Poison, Stat.None, 100, 0, false, 1));
+                }
+                else if (move.moveB.name == "Obstruct" && move.moveB.contact)
+                {
+                    InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Def, 100, -2, false, 1));
+                }
+                else if (move.moveB.name == "Silk Trap" && move.moveB.contact)
+                {
+                    InflictStatus(pokemonA, new MoveEffect(Status.None, Stat.Spe, 100, -1, false, 1));
+                }
+                else if (move.moveB.name == "Burning Bulwark" && move.moveB.contact)
+                {
+                    InflictStatus(pokemonA, new MoveEffect(Status.Burn, Stat.None, 100, 0, false, 1));
+                }
             }
             return;
         }
@@ -1437,7 +1477,7 @@ public static class Program
                     Console.WriteLine("Ghost Curse not implemented");
                     return;
                 }
-                if (move.moveB.name == "Attract")
+                if (move.moveB.name == "Attract" || move.moveB.name == "G-Max Cuddle")
                 {
                     if ((!pokemonD.species.noRatio) || (!pokemonA.species.noRatio))
                     {
@@ -1535,9 +1575,9 @@ public static class Program
             {
                 double attack = 0.0;
                 double defense = 0.0;
-                int rcrit = 25;
+                pokemonA.critRatio = 0;
                 int power = move.moveB.power;
-                if (move.moveB.name == "Photon Geyser" || move.moveB.name == "Shell side Arm" || move.moveB.name == "Tera Blast" || move.moveB.name == "Tera Starstorm")
+                if (move.moveB.name == "Photon Geyser" || move.moveB.name == "Light That Burns the Sky" || move.moveB.name == "Shell side Arm" || move.moveB.name == "Tera Blast" || move.moveB.name == "Tera Starstorm")
                 {
                     if (pokemonA.CalcAtkStat() * pokemonA.GetMod(pokemonA.AtkMod) > pokemonA.CalcSpaStat() * pokemonA.GetMod(pokemonA.SpaMod))
                     {
@@ -1561,12 +1601,16 @@ public static class Program
                 List<string> critMoves = new List<string> { "Aeroblast", "Air Cutter", "Aqua Cutter", "Attack Order", "Blaze Kick", "Crabhammer", "Cross Chop", "Cross Poison", "Drill Run", "Esper Wing", "Ivy Cudgel", "Karate Chop", "Leaf Blade", "Night Slash", "Plasma Fists", "Poison Tail", "Psycho Cut", "Razor Leaf", "Razor Wind", "Shadow Blast", "Shadow Claw", "Sky Attack", "Slash", "Snipe Shot", "Spacial Rend", "Stone Edge", "Triple Arrows" };
                 if (critMoves.Contains(move.moveB.name))
                 {
-                    rcrit = 8;
+                    pokemonA.critRatio++;
+                }
+                if (move.moveB.name == "10,000,000 Volt Thunderbolt")
+                {
+                    pokemonA.critRatio += 2;
                 }
                 List<string> garCritMoves = new List<string> { "Flower Trick", "Frost Breath", "Storm Throw", "Surging Strikes", "Wicked Blow" };
                 if (garCritMoves.Contains(move.moveB.name))
                 {
-                    rcrit = 0;
+                    pokemonA.critRatio = 3;
                 } 
                 if (move.moveB.name == "Psyshock" || move.moveB.name == "Psystrike")
                 {
@@ -1579,6 +1623,10 @@ public static class Program
                 if (move.moveB.name == "Sacred Sword" || move.moveB.name == "Darkest Lariat")
                 {
                     defense = pokemonD.CalcDefStat();
+                }
+                if (move.moveB.name == "Nihil Light")
+                {
+                    defense = pokemonD.CalcSpdStat();
                 }
                 if (move.moveB.name == "Body Press")
                 {
@@ -1670,6 +1718,10 @@ public static class Program
                 {
                     power = Convert.ToInt32(Math.Floor((double)(150 * pokemonA.hp) / pokemonA.maxHP));
                 }
+                if (move.moveB.name == "Hard Press")
+                {
+                    power = 100 * Convert.ToInt32(Math.Floor((double)(pokemonD.hp) / pokemonD.maxHP));
+                }
                 if (move.moveB.name == "Gyro Ball")
                 {
                     double spe1;
@@ -1753,9 +1805,21 @@ public static class Program
                         power *= 2;
                     }
                 }
+                if (move.moveB.name == "Psychic Noise")
+                {
+                    Console.WriteLine("Heal Block not implemented");
+                }
                 if (move.moveB.name == "Natures Madness" || move.moveB.name == "Ruination")
                 {
                     pokemonD.hp -= Math.Max(1, Convert.ToInt32(Math.Floor((double)pokemonD.hp / 2)));
+                    if (pokemonD.hp < 0) pokemonD.hp = 0;
+                    return;
+                }
+                if (move.moveB.name == "Guardian of Alola")
+                {
+                    pokemonD.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / (double)(4/3)));
+                    if (pokemonD.hp < 0) pokemonD.hp = 0;
+                    return;
                 }
                 if (move.moveB.name == "Eerie Spell")
                 {
@@ -1880,6 +1944,10 @@ public static class Program
                 {
                     Console.WriteLine("Hazards not implemented");
                 }
+                if (move.moveB.name == "Genesis Supernova")
+                {
+                    Console.WriteLine("Terrain not implemented");
+                }
                 if (move.moveB.name == "Expanding Force")
                 {
                     Console.WriteLine("Terrain not implemented");
@@ -1893,6 +1961,10 @@ public static class Program
                 {
                     Console.WriteLine("Terrain not implemented");
                 }
+                if (move.moveB.name == "Splintered Stormshards")
+                {
+                    Console.WriteLine("Terrain not implemented");
+                }
                 if (move.moveB.name == "Grassy Glide")
                 {
                     Console.WriteLine("Terrain not implemented");
@@ -1901,7 +1973,8 @@ public static class Program
                 {
                     Console.WriteLine("Terrain not implemented");
                 }
-                if (move.moveB.name == "Moongeist Beam" || move.moveB.name == "Sunsteel Strike")
+                List<string> ignoreAbilities = new List<string> { "Moongeist Beam", "Sunsteel Strike", "Searing Sunraze Smash", "Menacing Moonraze Maelstrom", "G-Max Drum Solo", "G-Max Fireball", "G-Max Hydrosnipe" };
+                if (ignoreAbilities.Contains(move.moveB.name))
                 {
                     Console.WriteLine("Ignore ability not implemented");
                 }
@@ -2025,7 +2098,7 @@ public static class Program
                         power *= 2;
                     }
                 }
-                if (move.moveB.name == "Sucker Punch")
+                if (move.moveB.name == "Sucker Punch" || move.moveB.name == "Thunderclap")
                 {
                     if (pokemonD.moveFirst) return;
                     if (pokemonD.selectedMove.moveB.split == Split.Status) return;
@@ -2072,7 +2145,7 @@ public static class Program
                 if (move.moveB.effectList != null && move.moveB.effectList.Count > 0) numHits = move.moveB.effectList[0].multiHit;
                 for (int i = 0; i < numHits; i++)
                 {
-                    pokemonD.hp -= Damage(pokemonA, pokemonD, move, power, attack, defense, rcrit, false);
+                    pokemonD.hp -= Convert.ToInt32(pt * Damage(pokemonA, pokemonD, move, power, attack, defense, false));
                     if (pokemonD.hp < 0) pokemonD.hp = 0;
                     if (pokemonD.hp == 0 && move.moveB.name == "Fell Stinger")
                     {
@@ -2116,20 +2189,22 @@ public static class Program
                     InflictStatus(pokemonA, new MoveEffect(Status.Burn, Stat.None, 100, 0, false, 1));
                 }
 
-                pokemonA.critRatio = 25;
+                pokemonA.critRatio = 0;
             }
         }
         else
         {
             Console.WriteLine("haha you missed");
-            if (move.moveB.name == "Axe Kick")
+            if (move.moveB.name == "Axe Kick" || move.moveB.name == "Supercell Slam")
             {
                 pokemonA.hp -= Convert.ToInt32(Math.Floor(pokemonA.maxHP / 2.0));
             }
-            pokemonA.lastMove = null;
+            MoveB mis = new MoveB("Miss", Type.Normal, 0, Split.Status, 0, 0, 0, false, false, null);
+            Move miss = new Move(mis);
+            pokemonA.lastMove = miss;
         }
     }
-    public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, int rcrit, bool test)
+    public static int Damage(Pokemon pokemonA, Pokemon pokemonD, Move move, int power, double atk, double def, bool test)
     {
         Type pkAtype1 = pokemonA.species.type1;
         Type pkAtype2 = pokemonA.species.type2;
@@ -2191,11 +2266,34 @@ public static class Program
                 if (eff1 >= 2.0) eff1 *= 5461 / 4096;
                 if (eff2 >= 2.0) eff2 *= 5461 / 4096;
             }
+            if (pokemonA.selectedMove.moveB.name == "Nihil Light")
+            {
+                eff1 = MatchUp(Type.Dragon, pkDtype1);
+                eff2 = MatchUp(Type.Dragon, pkDtype2);
+                if (pkDtype1 == Type.Fairy) eff1 = 1.0;
+                if (pkDtype2 == Type.Fairy) eff2 = 1.0;
+            }
         }
 
 
         double crit = 1;
-        if (Random.Shared.Next(0, pokemonA.critRatio + 1) == 0 && !test)
+        int rcrit = 24;
+        switch (pokemonA.critRatio)
+        {
+            case 0:
+                rcrit = 24;
+                break;
+            case 1:
+                rcrit = 8;
+                break;
+            case 2:
+                rcrit = 2;
+                break;
+            default:
+                rcrit = 1;
+                break;
+        }
+        if (Random.Shared.Next(0, rcrit) == 0 && !test)
         {
             crit = 1.5;
             Console.Write("Critical hit!");
@@ -3415,10 +3513,6 @@ public static class Program
     }
     public static void Main()
     {
-        foreach(MoveB mv in AllMoves)
-        {
-            Console.WriteLine(mv.name);
-        }
         List<Item> AllItems = new List<Item>();
         Console.WriteLine("Trainer or pokemon");
         Console.WriteLine("[1] Pokemon");

@@ -1350,6 +1350,8 @@ public class FieldSide
         lightScreen = false;
         reflectTimer = 0;
         lightScreenTimer = 0;
+        auroraVeil = false;
+        auroraVeilTimer = 0;
     }
     public void PostTurnCheck()
     {
@@ -1662,17 +1664,7 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move, Field field)
     {
-
-        //G - Max Vine Lash
-        //G - Max Wildfire
-        //G - Max Cannonade
-
-        //G - Max Volcalith
-        //G - Max Sandblast
-        //G - Max Centiferno
-
-        //G - Max Replenish
-
+        //Gmax replenish
         if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
@@ -2542,6 +2534,10 @@ public static class Program
                 {
                     field.ChangeTerrain(Terrain.Psychic);
                 }
+                if (move.moveB.name == "Brick Break")
+                {
+                    field.sideB.ClearScreens();
+                }
                 if (move.moveB.name == "Steel Roller")
                 {
                     if (field.terrain == Terrain.None) return;
@@ -3031,10 +3027,22 @@ public static class Program
             Console.Write("Critical hit!");
         }
 
+        double reflect = 1.00;
+        if((field.sideB.reflect || field.sideA.auroraVeil) && move.moveB.split == Split.Physical)
+        {
+            reflect = 2732 / 4096;
+        }
+        double screen = 1.00;
+        if ((field.sideB.lightScreen || field.sideA.auroraVeil) && move.moveB.split == Split.Special)
+        {
+            screen = 2732 / 4096;
+        }
+
+
         double item = 1.00;
         double ran = Random.Shared.Next(85, 101) / 100.0;
         if (test) ran = 9.2;
-        int dmg = Convert.ToInt32(Math.Round(((((((((2 * pokemonA.level) / 5) + 2) * power * ((double)atk / def)) / 50) * crit) + 2) * stab * eff1 * eff2 * ran * status * item), 0));// too complicated check https:bulbapedia.bulbagarden.net / wiki / Damage
+        int dmg = Convert.ToInt32(Math.Round(((((((((2 * pokemonA.level) / 5) + 2) * power * ((double)atk / def)) / 50) * crit) + 2) * stab * eff1 * eff2 * ran * status * reflect * screen * item), 0));// too complicated check https:bulbapedia.bulbagarden.net / wiki / Damage
         if (pokemonD.hp < dmg && !test)
         {
             Console.WriteLine($" It did {pokemonD.hp} damage!");

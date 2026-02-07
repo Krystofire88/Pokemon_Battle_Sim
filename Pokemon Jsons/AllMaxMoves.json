@@ -308,12 +308,12 @@
   {
     "name": "Max Guard",
     "type": 1,
-    "split": 1,
+    "split": 3,
     "power": 0,
     "acc": 101,
     "maxPP": 100,
-    "priority": 0,
-    "protect": false,
+    "priority": 4,
+    "protect": true,
     "contact": false,
     "effectList": []
   },
@@ -327,7 +327,24 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 22,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 18,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Wildfire",
@@ -339,7 +356,24 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 23,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 14,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Cannonade",
@@ -351,7 +385,24 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 24,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 20,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Befuddle",
@@ -429,7 +480,16 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Foam Burst",
@@ -528,7 +588,16 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 10,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Drum Solo",
@@ -657,7 +726,24 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 17,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Stun Shock",
@@ -681,7 +767,24 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 14,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Smite",
@@ -714,7 +817,16 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 11,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Finale",
@@ -726,7 +838,16 @@
     "priority": 0,
     "protect": false,
     "contact": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 0,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": -6,
+        "recoil": true,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "G-Max Steelsurge",

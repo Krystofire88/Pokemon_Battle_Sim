@@ -2457,6 +2457,18 @@
     "effectList": []
   },
   {
+    "name": "Sandstorm",
+    "type": 13,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Giga Drain",
     "type": 5,
     "power": 75,
@@ -2832,6 +2844,30 @@
     ]
   },
   {
+    "name": "Rain Dance",
+    "type": 3,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Sunny Day",
+    "type": 2,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Crunch",
     "type": 16,
     "power": 80,
@@ -2970,7 +3006,16 @@
     "priority": 0,
     "contact": false,
     "protect": false,
-    "effectList": []
+    "effectList": [
+      {
+        "effectStatus": 10,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "Flatter",
@@ -3128,6 +3173,27 @@
     "contact": true,
     "protect": false,
     "effectList": []
+  },
+  {
+    "name": "Yawn",
+    "type": 1,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 11,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
   },
   {
     "name": "Knock Off",
@@ -9338,6 +9404,18 @@
         "multiHit": 1
       }
     ]
+  },
+  {
+    "name": "Snowscape",
+    "type": 6,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
   },
   {
     "name": "Pounce",

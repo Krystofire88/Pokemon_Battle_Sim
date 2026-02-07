@@ -5,7 +5,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Net.Mime.MediaTypeNames;
+using System.Security.Cryptography;
 public enum Status
 {
     None = 0,
@@ -17,7 +17,14 @@ public enum Status
     Sleep = 6,
     Confusion = 7,
     Infatuation = 8,
-    Flinch = 9
+    Flinch = 9,
+    Torment = 10,
+    Drowsy = 11,
+    EscapePrevent = 12,
+    Bound = 13,
+    Vinelash = 22,
+    Wildfire = 23,
+    Cannonade = 24,
 }
 public enum Stat
 {
@@ -116,7 +123,11 @@ public class Trainer
     }
     public Pokemon ShouldSwitch(Pokemon active, Pokemon opp, int ai)
     {
-        if (ai == 1) return active;
+        if (active.hp <= 0)
+        { 
+            if (ai == 1) return active;
+            if (active.statusNonVol == Status.EscapePrevent) return active;
+        }
         int switchTo = 0;
         if ((0.25 >= (double)(active.hp / active.maxHP)) && active.hp > 0)
         {
@@ -261,8 +272,11 @@ public class Pokemon
     public bool terastallized { get; set; } = false;
     public int dMaxTimer { get; set; } = 0;
     public int sleepTimer { get; set; } = 0;
+    public bool yawn { get; set; } = false;
     public int confusionTimer { get; set; } = 0;
     public int toxicCounter { get; set; } = 0;
+    public int tormentCounter { get; set; } = 0;
+    public int boundCounter { get; set; } = 0;
     public int critRatio { get; set; } = 24;
     public bool chargingMove { get; set; } = false;
     public bool reCharge { get; set; } = false;
@@ -449,6 +463,9 @@ public class Pokemon
         invurnable = false;
         chargingMove = false;
         reCharge = false;
+        usedZMove = false;
+        ZMove = false;
+        moveFirst = false;
     }
     public void HealConditions()
     {
@@ -457,6 +474,7 @@ public class Pokemon
         sleepTimer = 0;
         confusionTimer = 0;
         toxicCounter = 0;
+        tormentCounter = 0;
     }
     public void PokeInfo()
     {
@@ -1201,10 +1219,6 @@ public class Field
     public Terrain terrain { get; set; } = Terrain.None;
     public int weatherTimer { get; set; } = 0;
     public int terrainTimer { get; set; } = 0;
-    public bool reflect { get; set; } = false;
-    public int reflectTimer { get; set; } = 0;
-    public bool lightScreen { get; set; } = false;
-    public int lightScreenTimer { get; set; } = 0;
     public bool gravity { get; set; } = false;
     public int gravityTimer { get; set; } = 0;
     public bool trickRoom { get; set; } = false;
@@ -1223,10 +1237,91 @@ public class Field
         sideA.ClearHazards();
         sideB.ClearHazards();
     }
+    public void ClearScreens()
+    {
+        sideA.ClearScreens();
+        sideB.ClearScreens();
+    }
+    public void ChangeWeather(Weather newWeather)
+    {
+        if (weather != newWeather)
+        {
+            if (weather == Weather.HarshSun || weather == Weather.HeavyRain || weather == Weather.StrongWinds)
+            { }
+            else
+            {
+                weather = newWeather;
+                weatherTimer = 5;
+                Console.WriteLine($"The weather changed to {weather}!");
+            }
+        }
+        else return;
+    }
+    public void ChangeTerrain(Terrain newTerrain)
+    {
+        if (terrain != newTerrain)
+        {
+            terrain = newTerrain;
+            terrainTimer = 5;
+            Console.WriteLine($"The terrain changed to {terrain}!");
+        }
+        else return;
+    }
+    public void PostTurnCheck()
+    {
+        sideA.PostTurnCheck();
+        sideB.PostTurnCheck();
+        if (weather != Weather.None)
+        {
+            weatherTimer--;
+            if (weatherTimer == 0)
+            {
+                Console.WriteLine($"The {weather} weather wore off!");
+                weather = Weather.None;
+            }
+        }
+        if (terrain != Terrain.None)
+        {
+            terrainTimer--;
+            if (terrainTimer == 0)
+            {
+                Console.WriteLine($"The {terrain} terrain wore off!");
+                terrain = Terrain.None;
+            }
+        }
+        if (gravity)
+        {
+            gravityTimer--;
+            if (gravityTimer == 0)
+            {
+                Console.WriteLine("The gravity wore off!");
+                gravity = false;
+            }
+        }
+        if (trickRoom)
+        {
+            trickRoomTimer--;
+            if (trickRoomTimer == 0)
+            {
+                Console.WriteLine("The Trick Room wore off!");
+                trickRoom = false;
+            }
+        }
+        if (wonderRoom)
+        {
+            wonderRoomTimer--;
+            if (wonderRoomTimer == 0)
+            {
+                Console.WriteLine("The Wonder Room wore off!");
+                wonderRoom = false;
+            }
+        }
+    }
 }
 public class FieldSide
 {
     public bool stealthRock { get; set; } = false;
+    public bool sharpSteel { get; set; } = false;
     public int spikes { get; set; } = 0;
     public int spikesToxic { get; set; } = 0;
     public bool stickyWeb { get; set; } = false;
@@ -1236,14 +1331,64 @@ public class FieldSide
     public int lightScreenTimer { get; set; } = 0;
     public bool auroraVeil { get; set; } = false;
     public int auroraVeilTimer { get; set; } = 0;
+    public bool tailwind { get; set; } = false;
+    public int tailwindTimer { get; set; } = 0;
     public FieldSide()
     {
     }
     public void ClearHazards()
     {
         stealthRock = false;
+        sharpSteel = false;
         spikes = 0;
         spikesToxic = 0;
+        stickyWeb = false;
+    }
+    public void ClearScreens()
+    {
+        reflect = false;
+        lightScreen = false;
+        reflectTimer = 0;
+        lightScreenTimer = 0;
+    }
+    public void PostTurnCheck()
+    {
+        if(reflect)
+        {
+            reflectTimer--;
+            if (reflectTimer == 0)
+            {
+                Console.WriteLine("The Reflect wore off!");
+                reflect = false;
+            }
+        }
+        if (lightScreen)
+        {
+            lightScreenTimer--;
+            if (lightScreenTimer == 0)
+            {
+                Console.WriteLine("The Light Screen wore off!");
+                lightScreen = false;
+            }
+        }
+        if (auroraVeil)
+        {
+            auroraVeilTimer--;
+            if (auroraVeilTimer == 0)
+            {
+                Console.WriteLine("The Aurora Veil wore off!");
+                auroraVeil = false;
+            }
+        }
+        if (tailwind)
+        {
+            tailwindTimer--;
+            if (tailwindTimer == 0)
+            {
+                Console.WriteLine("The Tailwind wore off!");
+                tailwind = false;
+            }
+        }
     }
     public void Entry(Pokemon pk)
     {
@@ -1259,6 +1404,21 @@ public class FieldSide
                 int damage = Convert.ToInt32(Math.Floor((double)(pk.maxHP / 8) * totalEff));
                 pk.hp -= damage;
                 Console.WriteLine($"{pk.name} took {damage} damage from Stealth Rock!");
+                if (pk.hp < 0) pk.hp = 0;
+            }
+        }
+        if (sharpSteel)
+        {
+            double rockEff1 = 1.00;
+            double rockEff2 = 1.00;
+            rockEff1 = Program.MatchUp(Type.Steel, pk.species.type1);
+            rockEff2 = Program.MatchUp(Type.Steel, pk.species.type2);
+            double totalEff = rockEff1 * rockEff2;
+            if (totalEff > 0)
+            {
+                int damage = Convert.ToInt32(Math.Floor((double)(pk.maxHP / 8) * totalEff));
+                pk.hp -= damage;
+                Console.WriteLine($"{pk.name} took {damage} damage from Sharp Steel!");
                 if (pk.hp < 0) pk.hp = 0;
             }
         }
@@ -1502,35 +1662,16 @@ public static class Program
     }
     public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move, Field field)
     {
-        //Max Geyser
-        //Max Lightning
-        //Max Overgrowth
-        //Max Hailstorm
-        //Max Mindstorm
-        //Max Rockfall
-        //Max Starfall
-        //Max Guard In file
+
         //G - Max Vine Lash
         //G - Max Wildfire
         //G - Max Cannonade
-        //G - Max Befuddle
-        //G - Max Chi Strike    
-        //G - Max Terror
-        //G - Max Resonance
-        //G - Max Replenish
-        //G - Max Meltdown
-        //G - Max Wind Rage
-        //G - Max Gravitas
-        //G - Max Stonesurge
+
         //G - Max Volcalith
-        //G - Max Sweetness
         //G - Max Sandblast
-        //G - Max Stun Shock
         //G - Max Centiferno
-        //G - Max Snooze
-        //G - Max Finale
-        //G - Max Steelsurge
-        //G - Max Depletion
+
+        //G - Max Replenish
 
         if (move.PP <= 0)
         {
@@ -1671,6 +1812,10 @@ public static class Program
         {
             return;
         }
+        if (pokemonA.lastMove != null && move.moveB.name == pokemonA.lastMove.moveB.name && pokemonA.statusVol.Contains(Status.Torment))
+        {
+            return;
+        }
 
         if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.chargingMove)
         {
@@ -1678,6 +1823,7 @@ public static class Program
             {
                 if (move.moveB.name == "Spite")
                 {
+                    if (pokemonD.lastMove == null) return;
                     pokemonD.lastMove.PP -= 4;
                     if (pokemonD.lastMove.PP < 0) pokemonD.lastMove.PP = 0;
                     return;
@@ -1741,6 +1887,146 @@ public static class Program
                     pokemonD.SpeMod *= -1;
                     pokemonD.AccMod *= -1;
                     pokemonD.EvaMod *= -1;
+                    return;
+                }
+                if (move.moveB.name == "Sunny Day")
+                {
+                    field.ChangeWeather(Weather.Sun);
+                    return;
+                }
+                if (move.moveB.name == "Rain Dance")
+                {
+                    field.ChangeWeather(Weather.Rain);
+                    return;
+                }
+                if (move.moveB.name == "Sandstorm")
+                {
+                    field.ChangeWeather(Weather.Sandstorm);
+                    return;
+                }
+                if (move.moveB.name == "Snowscape")
+                {
+                    field.ChangeWeather(Weather.Snow);
+                    return;
+                }
+                if ((move.moveB.name == "Aurora Veil" && field.weather == Weather.Snow) || move.moveB.name == "G-Max Resonance")
+                {
+                    if (field.sideA.auroraVeil) return;
+                    field.sideA.auroraVeil = true;
+                    field.sideA.auroraVeilTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Reflect")
+                {
+                    if (field.sideA.reflect) return;
+                    field.sideA.reflect = true;
+                    field.sideA.reflectTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Light Screen")
+                {
+                    if (field.sideA.lightScreen) return;
+                    field.sideA.lightScreen = true;
+                    field.sideA.lightScreenTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Stealth Rock")
+                {
+                    field.sideB.stealthRock = true;
+                    return;
+                }
+                if (move.moveB.name == "Spikes")
+                {
+                    if (field.sideB.spikes < 3)
+                    {
+                        field.sideB.spikes++;
+                    }
+                    return;
+                }
+                if (move.moveB.name == "Sticky Web")
+                {
+                    field.sideB.stickyWeb = true;
+                    return;
+                }
+                if (move.moveB.name == "Tailwind")
+                {
+                    if (field.sideA.tailwind) return;
+                    field.sideA.tailwind = true;
+                    field.sideA.tailwindTimer = 4;
+                    return;
+                }
+                if (move.moveB.name == "Defog")
+                {
+                    bool auroraVeil = false;
+                    int auroraVeilTimer = 0;
+                    field.ClearHazards();
+                    if(field.sideA.auroraVeil)
+                    {
+                        auroraVeil = true;
+                        auroraVeilTimer = field.sideA.auroraVeilTimer;
+                    }
+                    field.ClearScreens();
+                    if (auroraVeil)
+                    {
+                        field.sideA.auroraVeil = true;
+                        field.sideA.auroraVeilTimer = auroraVeilTimer;
+                    }
+                }
+                if (move.moveB.name == "Court Change")
+                {
+                    FieldSide temp = field.sideA;
+                    field.sideA = field.sideB;
+                    field.sideB = temp;
+                    return;
+                }
+                if (move.moveB.name == "Magic Room")
+                {
+                    field.magicRoom = true;
+                    field.magicRoomTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Wonder Room")
+                {
+                    field.wonderRoom = true;
+                    field.wonderRoomTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Trick Room")
+                {
+                    field.trickRoom = true;
+                    field.trickRoomTimer = 5;
+                    return;
+                }
+                if (move.moveB.name == "Gravity")
+                {
+                    field.gravity = true;
+                    field.gravityTimer = 5;
+                    return;
+                }
+                if (move.moveB.name.Contains(" Terrain"))
+                {
+                    switch(move.moveB.name)
+                    {
+                        case "Electric Terrain":
+                            field.ChangeTerrain(Terrain.Electric);
+                            break;
+                        case "Grassy Terrain":
+                            field.ChangeTerrain(Terrain.Grassy);
+                            break;
+                        case "Misty Terrain":
+                            field.ChangeTerrain(Terrain.Misty);
+                            break;
+                        case "Psychic Terrain":
+                            field.ChangeTerrain(Terrain.Psychic);
+                            break;
+                    }
+                }
+                if (move.moveB.name == "Toxic Spikes")
+                {
+                    if (field.sideB.spikesToxic < 2)
+                    {
+                        field.sideB.spikesToxic++;
+                    }
                     return;
                 }
                 if (move.moveB.name == "Geomancy" && !pokemonA.chargingMove)
@@ -1836,7 +2122,7 @@ public static class Program
                         defense = (pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod));
                     }
                 }
-                List<string> critMoves = new List<string> { "Aeroblast", "Air Cutter", "Aqua Cutter", "Attack Order", "Blaze Kick", "Crabhammer", "Cross Chop", "Cross Poison", "Drill Run", "Esper Wing", "Ivy Cudgel", "Karate Chop", "Leaf Blade", "Night Slash", "Plasma Fists", "Poison Tail", "Psycho Cut", "Razor Leaf", "Razor Wind", "Shadow Blast", "Shadow Claw", "Sky Attack", "Slash", "Snipe Shot", "Spacial Rend", "Stone Edge", "Triple Arrows" };
+                List<string> critMoves = new List<string> { "Aeroblast", "Air Cutter", "Aqua Cutter", "Attack Order", "Blaze Kick", "Crabhammer", "Cross Chop", "Cross Poison", "Drill Run", "Esper Wing", "Ivy Cudgel", "Karate Chop", "Leaf Blade", "Night Slash", "Plasma Fists", "Poison Tail", "Psycho Cut", "Razor Leaf", "Razor Wind", "Shadow Blast", "Shadow Claw", "Sky Attack", "Slash", "Snipe Shot", "Spacial Rend", "Stone Edge", "Triple Arrows", "G-Max Chi Strike" };
                 if (critMoves.Contains(move.moveB.name))
                 {
                     pokemonA.critRatio++;
@@ -2074,6 +2360,33 @@ public static class Program
                         }
                     }
                 }
+                if (move.moveB.name == "G-Max Befuddle")
+                {
+                    int check = Random.Shared.Next(0, 100);
+                    if (check < 33)
+                    {
+                        InflictStatus(pokemonD, new MoveEffect(Status.Poison, Stat.None, 100, 0, false, 1), field);
+                    }
+                    else if (check < 66)
+                    {
+                        InflictStatus(pokemonD, new MoveEffect(Status.Paralysis, Stat.None, 100, 0, false, 1), field);
+                    }
+                    else
+                    {
+                        InflictStatus(pokemonD, new MoveEffect(Status.Sleep, Stat.None, 100, 0, false, 1), field);
+                    }
+                }
+                if (move.moveB.name == "G-Max Stun Shock")
+                {
+                    if (Random.Shared.Next(0, 2) == 0)
+                    {
+                        InflictStatus(pokemonD, new MoveEffect(Status.Poison, Stat.None, 100, 0, false, 1), field);
+                    }
+                    else
+                    {
+                        InflictStatus(pokemonD, new MoveEffect(Status.Paralysis, Stat.None, 100, 0, false, 1), field);
+                    }
+                }
                 if (move.moveB.name == "Facade")
                 {
                     if (pokemonA.statusNonVol == Status.Burn || pokemonA.statusNonVol == Status.Paralysis || pokemonA.statusNonVol == Status.Poison || pokemonA.statusNonVol == Status.Toxic)
@@ -2217,7 +2530,7 @@ public static class Program
                     field.sideB.spikes++;
                     if (field.sideB.spikes > 3) field.sideB.spikes = 3;
                 }
-                if (move.moveB.name == "Stone Axe")
+                if (move.moveB.name == "Stone Axe" || move.moveB.name == "G-Max Stonesurge")
                 {
                     field.sideB.stealthRock = true;
                 }
@@ -2227,20 +2540,40 @@ public static class Program
                 }
                 if (move.moveB.name == "Genesis Supernova")
                 {
-                    field.terrain = Terrain.Psychic;
+                    field.ChangeTerrain(Terrain.Psychic);
                 }
                 if (move.moveB.name == "Steel Roller")
                 {
-                    if (field.terrain == Terrain.None )return;
-                    else field.terrain = Terrain.None;
+                    if (field.terrain == Terrain.None) return;
+                    else
+                    {
+                        field.terrain = Terrain.None; 
+                        field.terrainTimer = 0;
+                    }
                 }
-                if (move.moveB.name == "Ice Spinner")
+                if (move.moveB.name == "Ice Spinner" || move.moveB.name == "Splintered Stormshards")
                 {
                     field.terrain = Terrain.None;
+                    field.terrainTimer = 0;
                 }
-                if (move.moveB.name == "Splintered Stormshards")
+                if (move.moveB.name == "G-Max Wind Rage")
                 {
+                    bool auroraVeil = false;
+                    int auroraVeilTimer = 0;
+                    field.ClearHazards();
+                    if (field.sideA.auroraVeil)
+                    {
+                        auroraVeil = true;
+                        auroraVeilTimer = field.sideA.auroraVeilTimer;
+                    }
+                    field.ClearScreens();
+                    if (auroraVeil)
+                    {
+                        field.sideA.auroraVeil = true;
+                        field.sideA.auroraVeilTimer = auroraVeilTimer;
+                    }
                     field.terrain = Terrain.None;
+                    field.terrainTimer = 0;
                 }
                 if (field.terrain == Terrain.Psychic)
                 {
@@ -2283,6 +2616,59 @@ public static class Program
                         power /= 2;
                     }
                 }
+                if (move.moveB.name == "Max Mindstorm")
+                {
+                    field.ChangeTerrain(Terrain.Psychic);
+                }
+                if (move.moveB.name == "Max Lightning")
+                {
+                    field.ChangeTerrain(Terrain.Electric);
+                }
+                if (move.moveB.name == "Max Overgrowth")
+                {
+                    field.ChangeTerrain(Terrain.Grassy);
+                }
+                if (move.moveB.name == "Max Starfall")
+                {
+                    field.ChangeTerrain(Terrain.Misty);
+                }
+                if (move.moveB.name == "Max Flare")
+                {
+                    field.ChangeWeather(Weather.Sun);
+                }
+                if (move.moveB.name == "Max Geyser")
+                {
+                    field.ChangeWeather(Weather.Rain);
+                }
+                if (move.moveB.name == "Max Rockfall")
+                {
+                    field.ChangeWeather(Weather.Sandstorm);
+                }
+                if (move.moveB.name == "Max Hailstorm")
+                {
+                    field.ChangeWeather(Weather.Snow);
+                }        
+                if (move.moveB.name == "G-Max Gravitas")
+                {
+                    field.gravity = true;
+                    field.gravityTimer = 5;
+                }
+                if (move.moveB.name == "G-Max Sweetness")
+                {
+                    pokemonA.HealConditions();
+                }
+                if (move.moveB.name == "G - Max Steelsurge")
+                {
+                    field.sideB.sharpSteel = true;
+                }
+                if (move.moveB.name == "G-Max Depletion")
+                {
+                    if (pokemonD.lastMove == null) return;
+                    pokemonD.lastMove.PP -= 2;
+                    if (pokemonD.lastMove.PP < 0) pokemonD.lastMove.PP = 0;
+                    return;
+                }
+
                 List<string> ignoreAbilities = new List<string> { "Moongeist Beam", "Sunsteel Strike", "Searing Sunraze Smash", "Menacing Moonraze Maelstrom", "G-Max Drum Solo", "G-Max Fireball", "G-Max Hydrosnipe" };
                 if (ignoreAbilities.Contains(move.moveB.name))
                 {
@@ -2760,15 +3146,32 @@ public static class Program
                             break;
                     }
                 }
-                List<Status> nonVolitile = new List<Status> {Status.Confusion, Status.Infatuation, Status.Flinch }; 
+                List<Status> nonVolitile = new List<Status> {Status.Confusion, Status.Infatuation, Status.Flinch, Status.Torment }; 
                 if (effect.effectStatus != Status.None)
                 {
                     if (field != null && field.terrain != Terrain.Misty && pk.statusNonVol == Status.None && !nonVolitile.Contains(effect.effectStatus) && !pk.IsImmune(effect.effectStatus))
                     {
+                        if(field.terrain == Terrain.Electric && effect.effectStatus == Status.Sleep)
+                        {
+                            return;
+                        }
                         pk.statusNonVol = effect.effectStatus;
                     }
                     else if (!pk.statusVol.Contains(effect.effectStatus) && effect.effectStatus != Status.Flinch && !pk.IsImmune(effect.effectStatus))
                     {
+                        if (field != null && field.terrain == Terrain.Electric && effect.effectStatus == Status.Drowsy)
+                        {
+                            return;
+                        }
+                        if (effect.effectStatus == Status.EscapePrevent && (pk.species.type1 == Type.Ghost || pk.species.type2 == Type.Ghost))
+                        {
+                            return;
+                        }
+                        List<Status> trap = new List<Status> { Status.Bound, Status.Vinelash, Status.Wildfire, Status.Cannonade};
+                        if (pk.statusVol.Any(s => trap.Contains(s)))
+                        {
+                            return;
+                        }
                         pk.statusVol.Add(effect.effectStatus);
                     }
                 }
@@ -3268,6 +3671,7 @@ public static class Program
 
             PostTurnPokemonCheck(currentPokemon1, field);
             PostTurnPokemonCheck(currentPokemon2, field);
+            field.PostTurnCheck();
 
             currentPokemon1.dMaxTimer--;
             currentPokemon2.dMaxTimer--;
@@ -3406,7 +3810,53 @@ public static class Program
                 if (pk.hp < 0) pk.hp = 0;
                 break;
         }
-        if(field.weather == Weather.Sandstorm)
+        if (pk.statusVol.Contains(Status.Torment))
+        {
+            if (pk.tormentCounter == 0) pk.tormentCounter = 1;
+            else pk.tormentCounter++;
+
+            if(pk.tormentCounter == 2)
+            {
+                pk.statusVol.Remove(Status.Torment);
+            }
+        }
+        if (pk.statusVol.Contains(Status.Drowsy))
+        {
+            if(!pk.yawn) pk.yawn = true;
+            else
+            {
+                pk.statusVol.Remove(Status.Drowsy);
+                InflictStatus(pk, new MoveEffect(Status.Sleep, Stat.None, 100, 0, false, 1), field);
+                Console.WriteLine($"{pk.name} fell asleep due to being Drowsy!");
+                pk.yawn = false;
+            }
+        }
+        if(pk.statusVol.Contains(Status.Bound) || pk.statusVol.Contains(Status.Vinelash) || pk.statusVol.Contains(Status.Wildfire) || pk.statusVol.Contains(Status.Cannonade))
+        {
+            double chip = 8.0;
+            if (pk.boundCounter == 0) pk.boundCounter = 1;
+            if (pk.boundCounter == 4)
+            {
+                pk.statusVol.Remove(Status.Bound);
+                pk.statusVol.Remove(Status.Vinelash);
+                pk.statusVol.Remove(Status.Wildfire);
+                pk.statusVol.Remove(Status.Cannonade);
+                pk.statusVol.Remove(Status.EscapePrevent);
+                Console.WriteLine($"{pk.name} is no longer bound!");
+                return;
+            }
+            if (pk.statusVol.Contains(Status.Vinelash) && (pk.species.type1 == Type.Grass || pk.species.type1 == Type.Grass)) return;
+            if (pk.statusVol.Contains(Status.Wildfire) && (pk.species.type1 == Type.Fire || pk.species.type1 == Type.Fire)) return;
+            if (pk.statusVol.Contains(Status.Cannonade) && (pk.species.type1 == Type.Water || pk.species.type1 == Type.Water)) return;
+            if(pk.statusVol.Contains(Status.Vinelash) || pk.statusVol.Contains(Status.Wildfire) || pk.statusVol.Contains(Status.Cannonade)) chip = 6.0;
+
+            int dmg = Convert.ToInt32(Math.Round(pk.maxHP / chip, 0));
+            pk.hp -= dmg;
+            Console.WriteLine($"{pk.name} is hurt by poison and lost {dmg} HP!");
+            pk.boundCounter++;
+            if (pk.hp < 0) pk.hp = 0;
+        }
+        if (field.weather == Weather.Sandstorm)
         {
             if (pk.species.type1 != Type.Rock && pk.species.type2 != Type.Rock && pk.species.type1 != Type.Ground && pk.species.type2 != Type.Ground && pk.species.type1 != Type.Steel && pk.species.type2 != Type.Steel)
             {
@@ -4073,7 +4523,7 @@ public static class Program
                 foreach (Species s in AllPokemon)
                 {
                     g++;
-                    if ((!invalidMon.Contains(g)) && g < 1158)
+                    if ((!invalidMon.Contains(g)) && g < 1195)
                     {
                         Pokemon temp = new Pokemon(AllPokemon[g], 50);
                         if (s.Atk > s.Spa)

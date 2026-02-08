@@ -22,9 +22,10 @@ public enum Status
     Drowsy = 11,
     EscapePrevent = 12,
     Bound = 13,
-    Vinelash = 22,
-    Wildfire = 23,
-    Cannonade = 24,
+    Vinelash = 14,
+    Wildfire = 15,
+    Cannonade = 16,
+    Octolock = 17,
 }
 public enum Stat
 {
@@ -230,7 +231,8 @@ public class Species
     public int ratio { get; }
     public bool mega { get; }
     public bool gmax { get; }
-    public Species(string name, Type type1, Type type2, int Hp, int Atk, int Def, int Spa, int Spd, int Spe, string ability1, string ability2, string abilityH, bool noRatio, int ratio, bool mega, bool gmax)
+    public double weight { get; }
+    public Species(string name, Type type1, Type type2, int Hp, int Atk, int Def, int Spa, int Spd, int Spe, string ability1, string ability2, string abilityH, bool noRatio, int ratio, bool mega, bool gmax, double weight)
     {
         this.name = name;
         this.type1 = type1;
@@ -248,6 +250,7 @@ public class Species
         this.ratio = ratio;
         this.mega = mega;
         this.gmax = gmax;
+        this.weight = weight;
     }
 }
 public class Pokemon
@@ -283,6 +286,7 @@ public class Pokemon
     public bool invurnable { get; set; } = false;
     public bool maxInvurnable { get; set; }
     public int protectTimes { get; set; } = 0;
+    public bool grounded { get; set; } = false;
     public Move lastMove { get; set; } = null;
     public Move selectedMove { get; set; } = null;
     public bool usedZMove { get; set; } = false;
@@ -296,7 +300,7 @@ public class Pokemon
     public Move[] moveSetBase = new Move[4];
     public Move[] moveSet = new Move[4];
     public int moveNum { get; private set; } = 0;
-    public int wins { get; set; }
+    public int wins { get; set; } = 0;
     public Pokemon(Species species, string name, bool gender, int level, int ability, int HpIV, int HpEV, int AtkIV, int AtkEV, int DefIV, int DefEV, int SpaIV, int SpaEV, int SpdIV, int SpdEV, int SpeIV, int SpeEV, string nature, Item heldItem, bool gmax, int dMaxLevel, Type tera)
     {
         this.species = species;
@@ -330,6 +334,8 @@ public class Pokemon
         this.tera = tera;
         this.maxHP = CalcHp();
         this.hp = maxHP;
+        if (species.type1 == Type.Flying || species.type2 == Type.Flying) grounded = false;
+        else grounded = true;
     }
     public Pokemon(Species species, int level)
     {
@@ -394,7 +400,8 @@ public class Pokemon
         this.tera = typ;
         this.maxHP = CalcHp();
         this.hp = maxHP;
-        this.wins = 0;
+        if (species.type1 == Type.Flying || species.type2 == Type.Flying) grounded = false;
+        else grounded = true;
     }
     public void AddMove(Move move)
     {
@@ -1333,6 +1340,8 @@ public class FieldSide
     public int auroraVeilTimer { get; set; } = 0;
     public bool tailwind { get; set; } = false;
     public int tailwindTimer { get; set; } = 0;
+    public bool mist { get; set; } = false;
+    public int mistTimer { get; set; } = 0;
     public FieldSide()
     {
     }
@@ -1352,6 +1361,8 @@ public class FieldSide
         lightScreenTimer = 0;
         auroraVeil = false;
         auroraVeilTimer = 0;
+        mist = false;
+        mistTimer = 0;
     }
     public void PostTurnCheck()
     {
@@ -1389,6 +1400,15 @@ public class FieldSide
             {
                 Console.WriteLine("The Tailwind wore off!");
                 tailwind = false;
+            }
+        }
+        if (mist)
+        {
+            mistTimer--;
+            if (mistTimer == 0)
+            {
+                Console.WriteLine("The Mist wore off!");
+                mist = false;
             }
         }
     }
@@ -1446,6 +1466,19 @@ public class FieldSide
         }
         if (spikesToxic > 0)
         {
+            if (pk.species.type1 == Type.Flying || pk.species.type2 == Type.Flying || pk.grounded == false)
+            {
+                return;
+            }
+            if (pk.species.type1 == Type.Poison || pk.species.type2 == Type.Poison)
+            {
+                spikesToxic = 0;
+                return;
+            }
+            if (pk.species.type1 == Type.Steel || pk.species.type2 == Type.Steel)
+            {
+                return;
+            }
             if (spikesToxic == 1)
             {
                 if (!pk.IsImmune(Status.Poison))
@@ -1650,21 +1683,23 @@ public static class Program
         }
         return HighestEffect;
     }
-    public static bool CheckAcc(Move move, Pokemon pokemonA, Pokemon pokemonD)
+    public static bool CheckAcc(Move move, Pokemon pokemonA, Pokemon pokemonD, Field field)
     {
         if (move.moveB.acc == 101) return true;
 
         int check = Random.Shared.Next(1, 101);
-
-        if (check <= (move.moveB.acc * pokemonA.GetMod(pokemonA.AccMod) * pokemonD.GetMod(pokemonD.EvaMod)))
+        double gravity = 1.00;
+        if (field.gravity) gravity = 6840 / 4096;
+        if (check <= (move.moveB.acc * gravity * pokemonA.GetMod(pokemonA.AccMod) * pokemonD.GetMod(pokemonD.EvaMod)))
         {
             return true;
         }
         return false;
     }
-    public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move, Field field)
+    public static void Move(Pokemon pokemonA, Pokemon pokemonD, Move move, Field field) 
     {
         //Gmax replenish
+        //metronome
         if (move.PP <= 0)
         {
             Console.WriteLine($"{pokemonA.species.name} has no PP left for {move.moveB.name}!");
@@ -1809,7 +1844,7 @@ public static class Program
             return;
         }
 
-        if (CheckAcc(move, pokemonA, pokemonD) == true || pokemonA.chargingMove)
+        if (CheckAcc(move, pokemonA, pokemonD, field) == true || pokemonA.chargingMove)
         {
             if (move.moveB.split == Split.Status)
             {
@@ -1940,6 +1975,14 @@ public static class Program
                     field.sideB.stickyWeb = true;
                     return;
                 }
+                if (move.moveB.name == "Toxic Spikes")
+                {
+                    if (field.sideB.spikesToxic < 2)
+                    {
+                        field.sideB.spikesToxic++;
+                    }
+                    return;
+                }
                 if (move.moveB.name == "Tailwind")
                 {
                     if (field.sideA.tailwind) return;
@@ -1995,6 +2038,12 @@ public static class Program
                     field.gravityTimer = 5;
                     return;
                 }
+                if (move.moveB.name == "Mist")
+                {
+                    field.sideA.mist = true;
+                    field.sideA.mistTimer = 5;
+                    return;
+                }
                 if (move.moveB.name.Contains(" Terrain"))
                 {
                     switch(move.moveB.name)
@@ -2012,14 +2061,6 @@ public static class Program
                             field.ChangeTerrain(Terrain.Psychic);
                             break;
                     }
-                }
-                if (move.moveB.name == "Toxic Spikes")
-                {
-                    if (field.sideB.spikesToxic < 2)
-                    {
-                        field.sideB.spikesToxic++;
-                    }
-                    return;
                 }
                 if (move.moveB.name == "Geomancy" && !pokemonA.chargingMove)
                 {
@@ -2530,6 +2571,21 @@ public static class Program
                 {
                     field.sideA.ClearHazards();
                 }
+                if (move.moveB.name == "Grav Apple" && field.gravity)
+                {
+                    power = Convert.ToInt32(Math.Floor(power * 1.5));
+                }
+                if (field.wonderRoom)
+                {
+                  if (move.moveB.split == Split.Physical)
+                    {
+                        defense = pokemonD.CalcSpdStat() * pokemonD.GetMod(pokemonD.SpdMod);
+                    }
+                    else if (move.moveB.split == Split.Special)
+                    {
+                        defense = pokemonD.CalcDefStat() * pokemonD.GetMod(pokemonD.DefMod);
+                    }
+                }
                 if (move.moveB.name == "Genesis Supernova")
                 {
                     field.ChangeTerrain(Terrain.Psychic);
@@ -2664,7 +2720,6 @@ public static class Program
                     if (pokemonD.lastMove.PP < 0) pokemonD.lastMove.PP = 0;
                     return;
                 }
-
                 List<string> ignoreAbilities = new List<string> { "Moongeist Beam", "Sunsteel Strike", "Searing Sunraze Smash", "Menacing Moonraze Maelstrom", "G-Max Drum Solo", "G-Max Fireball", "G-Max Hydrosnipe" };
                 if (ignoreAbilities.Contains(move.moveB.name))
                 {
@@ -3061,8 +3116,8 @@ public static class Program
             int check = Random.Shared.Next(1, 101);
 
             if (check <= effect.effectChance)
-            {
-                if (effect.effectStat != Stat.None)
+            {                         
+                if (effect.effectStat != Stat.None &&!(effect.effectPower < 0 && field.sideB.mist))
                 {
                     switch (effect.effectStat)
                     {
@@ -4601,7 +4656,7 @@ public static class Program
             else if (presetName == "Lion")
             {
                 // Species species = new Species("Lion", 1, 0, 86, 109, 72, 68, 66, 106, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
-                Species species = new Species("Lion", Type.Normal, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false);
+                Species species = new Species("Lion", Type.Normal, 0, 62, 73, 58, 50, 54, 72, "Rivalry", "Unnerve", "Moxie", false, 50, false, false, 180);
                 Pokemon Lion = new Pokemon(species, 50);
                 MoveB physical = new MoveB("Physical", 0, 60, Split.Physical, 100, 100, 0, true, false, null);
                 Move physMove = new Move(physical);

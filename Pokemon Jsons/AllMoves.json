@@ -228,6 +228,35 @@
     "effectList": []
   },
   {
+    "name": "Bind",
+    "type": 1,
+    "power": 15,
+    "split": 1,
+    "acc": 85,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Slam",
     "type": 1,
     "power": 80,
@@ -405,6 +434,35 @@
     ]
   },
   {
+    "name": "Wrap",
+    "type": 1,
+    "power": 15,
+    "split": 1,
+    "acc": 90,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Take Down",
     "type": 1,
     "power": 90,
@@ -424,6 +482,18 @@
         "multiHit": 1
       }
     ]
+  },
+  {
+    "name": "Thrash",
+    "type": 1,
+    "power": 120,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
   },
   {
     "name": "Double-Edge",
@@ -667,6 +737,18 @@
         "multiHit": 1
       }
     ]
+  },
+  {
+    "name": "Mist",
+    "type": 6,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 30,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
   },
   {
     "name": "Water Gun",
@@ -1028,6 +1110,18 @@
     ]
   },
   {
+    "name": "Petal Dance",
+    "type": 5,
+    "power": 120,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "String Shot",
     "type": 12,
     "power": 0,
@@ -1043,6 +1137,35 @@
         "effectStat": 5,
         "effectChance": 100,
         "effectPower": -2,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Fire Spin",
+    "type": 2,
+    "power": 35,
+    "split": 2,
+    "acc": 85,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
         "recoil": false,
         "multiHit": 1
       }
@@ -2415,6 +2538,18 @@
     ]
   },
   {
+    "name": "Spikes",
+    "type": 9,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Zap Cannon",
     "type": 4,
     "power": 120,
@@ -2973,6 +3108,35 @@
         "effectStat": 2,
         "effectChance": 50,
         "effectPower": -1,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
+    "name": "Whirlpool",
+    "type": 3,
+    "power": 35,
+    "split": 2,
+    "acc": 85,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
         "recoil": false,
         "multiHit": 1
       }
@@ -3713,6 +3877,35 @@
     ]
   },
   {
+    "name": "Sand Tomb",
+    "type": 9,
+    "power": 35,
+    "split": 1,
+    "acc": 85,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Sheer Cold",
     "type": 6,
     "power": -1,
@@ -4097,6 +4290,18 @@
     ]
   },
   {
+    "name": "Gravity",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Hammer Arm",
     "type": 7,
     "power": 100,
@@ -4149,6 +4354,18 @@
     "acc": 100,
     "maxPP": 10,
     "priority": 2,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Tailwind",
+    "type": 10,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 15,
+    "priority": 0,
     "contact": false,
     "protect": false,
     "effectList": []
@@ -4240,6 +4457,18 @@
     "maxPP": 5,
     "priority": 1,
     "contact": true,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Toxic Spikes",
+    "type": 8,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": false,
     "protect": false,
     "effectList": []
   },
@@ -4844,6 +5073,18 @@
     ]
   },
   {
+    "name": "Trick Room",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Draco Meteor",
     "type": 15,
     "power": 130,
@@ -5021,6 +5262,18 @@
     "split": 1,
     "acc": 80,
     "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Stealth Rock",
+    "type": 13,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 20,
     "priority": 0,
     "contact": false,
     "protect": false,
@@ -5212,6 +5465,35 @@
     "effectList": []
   },
   {
+    "name": "Magma Storm",
+    "type": 2,
+    "power": 100,
+    "split": 2,
+    "acc": 75,
+    "maxPP": 5,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Dark Void",
     "type": 16,
     "power": 0,
@@ -5295,6 +5577,18 @@
     ]
   },
   {
+    "name": "Wonder Room",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
     "name": "Psyshock",
     "type": 11,
     "power": 80,
@@ -5312,6 +5606,18 @@
     "power": 65,
     "split": 2,
     "acc": 100,
+    "maxPP": 10,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": []
+  },
+  {
+    "name": "Magic Room",
+    "type": 11,
+    "power": 0,
+    "split": 3,
+    "acc": 101,
     "maxPP": 10,
     "priority": 0,
     "contact": false,
@@ -6796,6 +7102,35 @@
     ]
   },
   {
+    "name": "Infestation",
+    "type": 12,
+    "power": 20,
+    "split": 2,
+    "acc": 100,
+    "maxPP": 20,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Power-Up Punch",
     "type": 7,
     "power": 40,
@@ -7859,6 +8194,35 @@
     ]
   },
   {
+    "name": "Snap Trap",
+    "type": 5,
+    "power": 35,
+    "split": 1,
+    "acc": 100,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": true,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      }
+    ]
+  },
+  {
     "name": "Pyro Ball",
     "type": 2,
     "power": 120,
@@ -8386,6 +8750,35 @@
         "effectPower": 0,
         "recoil": false,
         "multiHit": 3
+      }
+    ]
+  },
+  {
+    "name": "Thunder Cage",
+    "type": 4,
+    "power": 80,
+    "split": 2,
+    "acc": 90,
+    "maxPP": 15,
+    "priority": 0,
+    "contact": false,
+    "protect": false,
+    "effectList": [
+      {
+        "effectStatus": 12,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
+      },
+      {
+        "effectStatus": 13,
+        "effectStat": 0,
+        "effectChance": 100,
+        "effectPower": 0,
+        "recoil": false,
+        "multiHit": 1
       }
     ]
   },

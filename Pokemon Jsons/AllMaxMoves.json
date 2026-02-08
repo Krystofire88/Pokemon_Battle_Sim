@@ -329,7 +329,7 @@
     "contact": false,
     "effectList": [
       {
-        "effectStatus": 22,
+        "effectStatus": 12,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -337,7 +337,7 @@
         "multiHit": 1
       },
       {
-        "effectStatus": 18,
+        "effectStatus": 14,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -358,7 +358,7 @@
     "contact": false,
     "effectList": [
       {
-        "effectStatus": 23,
+        "effectStatus": 12,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -366,7 +366,7 @@
         "multiHit": 1
       },
       {
-        "effectStatus": 14,
+        "effectStatus": 15,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -387,7 +387,7 @@
     "contact": false,
     "effectList": [
       {
-        "effectStatus": 24,
+        "effectStatus": 12,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -395,7 +395,7 @@
         "multiHit": 1
       },
       {
-        "effectStatus": 20,
+        "effectStatus": 16,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -736,7 +736,7 @@
         "multiHit": 1
       },
       {
-        "effectStatus": 17,
+        "effectStatus": 13,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
@@ -777,7 +777,7 @@
         "multiHit": 1
       },
       {
-        "effectStatus": 14,
+        "effectStatus": 13,
         "effectStat": 0,
         "effectChance": 100,
         "effectPower": 0,
